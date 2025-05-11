@@ -1,0 +1,43 @@
+div.columndropdown {
+  position: relative;
+  border: 1rem groove var(--color3);
+  box-shadow: inset 0 0 5rem var(--color3);
+  height: inherit;
+  width: inherit;
+  font-size: 2rem;
+}
+
+div.columndropdown div,
+select.columndropdown {
+  width: inherit;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+select.columndropdown {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  text-align: center;
+  background-color: black;
+}
+
+div.columndropdown > div.columnText > div {
+  overflow: hidden;
+  white-space: nowrap;
+
+  text-overflow: ellipsis;
+}
+
+div.columndropdown:hover > div.columnText > div {
+  overflow: visible;
+}
+
+th:last-of-type div.columndropdown:hover > div.columnText {
+  position: relative;
+}

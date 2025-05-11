@@ -1,0 +1,20 @@
+div.avatar {
+  width: fit-content;
+  font-weight: 400;
+  margin: auto;
+  color: inherit;
+  text-align: left;
+  font-family: var(--fontMetal);
+  font-size: 2rem;
+}
+img.avatar {
+  height: 5rem;
+  width: auto;
+  display: inline;
+  margin-right: 1rem;
+}
+
+table.half img.avatar {
+  height: 2.5rem;
+  margin-right: 0.5rem;
+}

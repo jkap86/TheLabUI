@@ -1,0 +1,45 @@
+div.heading {
+  margin: 3rem;
+}
+
+div.heading a.home {
+  font-size: 2rem;
+}
+
+div.heading div.avatar {
+  margin: auto;
+  width: fit-content;
+  position: relative;
+  height: 20rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  font-size: 7rem;
+  color: var(--color1);
+  font-family: var(--fontPulang);
+  letter-spacing: 0.5rem;
+  text-shadow: 0 0 1rem black;
+}
+
+div.heading div.avatar > img.avatar {
+  position: absolute;
+  height: 15rem;
+  width: 15rem;
+  z-index: -1;
+  box-shadow: 0 0 3rem white;
+}
+
+div.heading h2 > select {
+  font-size: 3rem;
+  color: var(--color1);
+  text-align: center;
+  background-color: transparent;
+  width: fit-content;
+  margin: auto;
+  font-family: var(--fontMetal);
+}
+
+div.heading h2 > select option {
+  background-color: black;
+}

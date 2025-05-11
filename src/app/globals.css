@@ -1,26 +1,91 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --backgroundcolor: rgb(0, 0, 25);
+  --color1: #00ceb8;
+  --color2: rgb(0, 0, 100);
+  --color3: #4169e1;
+  --color4: #1a1c20;
+  --color5: rgb(50, 50, 50);
+  --color6: rgb(100, 20, 100);
+  --color7: rgb(218, 165, 32);
+  --color8: #ffff0040;
+  --color9: rgba(218, 165, 32, 0.5);
+  --fontPulang: "Pulang", sans-serif;
+  --fontChill: "Chillit", sans-serif;
+  --fontMetal: "d Dredex", sans-serif;
+  --fontHugmate: "Hugmate", sans-serif;
+  --fontScore: "Maria", monospace;
+
+  font-size: 1vmin;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  padding: 0;
+  margin: 0;
+  border: none;
+  scrollbar-width: none;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--backgroundcolor);
+  color: white;
+  width: 100%;
+}
+
+img {
+  border-radius: 50%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-align: center;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+table {
+  width: 100%;
+  table-layout: fixed;
+  box-sizing: border-box;
+}
+
+option {
+  background-color: black;
+  color: white;
+}
+
+div.nav-buttons {
+  width: 50%;
+  margin: auto;
+  display: flex;
+  justify-content: space-evenly;
+  font-size: 3rem;
+}
+
+div.nav button.active {
+  color: var(--color1);
+}
+
+.green {
+  color: rgb(0, 255, 0);
+}
+
+.red {
+  color: rgb(255, 0, 0);
+}
+
+input[type="date"] {
+  font-size: 3rem;
+  text-align: center;
+  background-color: lightslategray;
+  color: gold;
+  font-weight: 900;
+  letter-spacing: 0.25rem;
 }

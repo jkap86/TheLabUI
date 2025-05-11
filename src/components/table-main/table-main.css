@@ -1,0 +1,288 @@
+ol.page_numbers {
+  max-width: 80%;
+  width: fit-content;
+  margin: auto;
+  font-size: 4rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  overflow: auto;
+  color: white;
+  list-style: none;
+  background-color: var(--color4);
+  max-width: 100vmin;
+}
+
+ol.page_numbers > li {
+  box-shadow: inset 0 0 5rem silver;
+  padding: 2rem;
+  line-height: 100%;
+  text-shadow: var(--text-shadow1);
+  border: 0.5rem ridge transparent;
+  font-family: var(--fontPulang);
+}
+
+ol.page_numbers > li.active {
+  color: var(--color1);
+  box-shadow: inset 0 0 3rem var(--color1);
+  border: 0.5rem double var(--color1);
+}
+
+table {
+  box-sizing: border-box;
+  border-collapse: separate;
+  border-spacing: 0.25rem 0;
+}
+
+th {
+  background-image: radial-gradient(#fff -250%, #000 100%);
+}
+
+table.main {
+  margin: auto;
+  background-color: black;
+  border-collapse: separate;
+  border-spacing: 0.25rem;
+  font-size: 3rem;
+  font-family: var(--fontChill);
+  max-width: 100vmin;
+}
+
+th.sort_header {
+  height: fit-content;
+}
+
+th.sort_header.active {
+  border-left: 0.5rem double var(--color7);
+  border-right: 0.5rem double var(--color7);
+}
+
+th.sort,
+td.sort.content {
+  border-left: 0.5rem double var(--color7);
+  border-right: 0.5rem double var(--color7);
+  box-shadow: inset 0 0 2.5rem var(--color7);
+}
+
+th,
+td.content {
+  text-align: center;
+  height: 7rem;
+  border-left: 0.5rem double transparent;
+  border-right: 0.5rem double transparent;
+}
+
+table tr.active > td.content {
+  background-image: radial-gradient(var(--color4) -50%, var(--color1) 100%);
+}
+
+td.content > div > div.avatar,
+td.content > div {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+td.content:hover > div > div.avatar,
+td.content:hover > div {
+  overflow: visible;
+  min-width: 100%;
+  width: fit-content;
+  background-color: black;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 2.5rem white;
+}
+
+td.content:hover > div > div.avatar {
+  padding-right: 6rem;
+}
+
+td.content.rank,
+td.content.ktc,
+td.content.age {
+  font-family: var(--fontHugmate);
+  font-weight: 100;
+  letter-spacing: 0.5rem;
+  font-size: 2.5rem;
+}
+
+td.content.ktc.total {
+  letter-spacing: 0;
+}
+
+td.content.fp {
+  font-family: var(--fontScore);
+  font-size: 125%;
+}
+
+td.content.record1 {
+  letter-spacing: 0.25rem;
+  font-weight: 900;
+}
+td.content.pregame {
+  color: gray;
+}
+td.content.inprogress {
+  color: var(--color7);
+  font-style: italic;
+}
+td.content.complete {
+  font-weight: 900;
+}
+
+td.content.setting {
+  font-family: var(--fontScore);
+  font-size: 4rem;
+}
+
+td.content.setting i {
+  font-size: 75%;
+  vertical-align: middle;
+}
+td.content.infinity > div {
+}
+td.content.playoffs {
+  box-shadow: inset 0 0 5rem rgb(0, 255, 0);
+}
+
+td.content.slot {
+  font-size: 80%;
+}
+
+td.content.date {
+  font-family: var(--fontScore);
+  font-size: 90%;
+}
+
+td.content.percentage {
+  font-size: 120%;
+}
+
+table.one td.content {
+  background-image: radial-gradient(var(--color3) -300%, var(--color4) 100%);
+}
+
+table.two td.content {
+  background-image: radial-gradient(rgb(80, 0, 0) -100%, var(--color4) 100%);
+}
+
+table.three td.content {
+  background-image: radial-gradient(var(--color6) 0%, var(--color4) 100%);
+}
+
+table.half:last-of-type td.content {
+  background-image: radial-gradient(rgb(20, 52, 12) 0%, black 150%);
+}
+
+td.secondaryComponent {
+  position: relative;
+}
+div.table-container {
+  max-height: 75vh;
+  overflow: auto;
+}
+
+table.half {
+  width: 50%;
+  display: inline-table;
+  vertical-align: top;
+}
+
+table.half:first-of-type td.content.ktc {
+  font-size: 85%;
+}
+
+div.nav {
+  height: 7rem;
+  background-image: radial-gradient(#fff -250%, #000 100%);
+  filter: drop-shadow(0 0 1rem var(--color1));
+  display: flex;
+  justify-content: space-evenly;
+}
+
+div.nav div.sync {
+  color: yellow;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+}
+
+div.nav div.sync i.fa-arrows-rotate {
+  font-size: 5rem;
+}
+
+div.nav select {
+  color: black;
+}
+
+.rotate {
+  animation: rotate 4s linear infinite;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+    /* Start with no rotation (0 degrees) */
+  }
+
+  100% {
+    transform: rotate(360deg);
+    /* Rotate the element 360 degrees for a full rotation */
+  }
+}
+
+thead > tr {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  filter: drop-shadow(0 0 1rem white);
+}
+
+table.one tr.active {
+  position: sticky;
+  top: 7rem;
+  z-index: 9;
+  box-shadow: 0 0 1.5rem var(--color1);
+}
+
+table.one div.nav {
+  position: sticky;
+  top: 14rem;
+  z-index: 8;
+}
+table.main.half.two,
+table.two thead > tr {
+  position: sticky;
+  top: 21rem;
+  z-index: 7;
+  filter: drop-shadow(0 0 1rem white);
+}
+table.main.half.two tr.active-container,
+table.two tr.active {
+  position: sticky;
+  top: 28rem;
+  z-index: 6;
+  box-shadow: 0 0 1.5rem var(--color1);
+}
+
+table.two div.nav {
+  position: sticky;
+  top: 35rem;
+  z-index: 5;
+}
+
+table.main.half.three,
+table.three thead > tr {
+  position: sticky;
+  top: 42rem;
+  z-index: 4;
+  filter: drop-shadow(0 0 1rem white);
+}
+
+table.main.half.three tr.active-container,
+table.three tr.active {
+  position: sticky;
+  top: 49rem;
+  z-index: 3;
+}

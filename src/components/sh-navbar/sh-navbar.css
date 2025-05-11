@@ -1,0 +1,18 @@
+div.sh_nav {
+  display: flex;
+  justify-content: space-evenly;
+  font-size: 2.5rem;
+  max-width: 100%;
+  flex-wrap: wrap;
+  background-color: black;
+  box-shadow: 0 0 2.5rem white;
+}
+
+div.sh_nav > a {
+  margin: 1.5rem 3rem;
+}
+
+div.sh_nav > a:hover,
+a.home:hover {
+  color: var(--color3);
+}

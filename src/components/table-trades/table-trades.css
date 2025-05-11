@@ -1,0 +1,143 @@
+h2 {
+  font-size: 3rem;
+}
+div.trade-nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  width: 40%;
+  margin: auto;
+  font-size: 3rem;
+  color: gray;
+}
+
+div.trade-nav-buttons > div.active {
+  color: var(--color1);
+}
+
+table.trades {
+  table-layout: fixed;
+  margin: auto;
+  background-color: black;
+  width: 100%;
+  border-spacing: 0;
+  font-size: 3rem;
+  font-family: var(--fontChill);
+  max-width: 100vmin;
+}
+
+table.trades table.trade {
+  outline: 1rem ridge silver;
+}
+
+table.trades table.trade > tbody:first-child > tr td {
+  font-size: 3rem;
+  background-image: radial-gradient(var(--color3) -300%, var(--color4) 100%);
+  box-shadow: inset 0 0 2rem black;
+  text-align: center;
+  padding: 1rem;
+}
+
+table.trades table td.timestamp {
+  padding: 0;
+}
+
+table.trades table td.timestamp > div {
+  font-size: 50%;
+}
+
+table.trades table tr:first-of-type td div.avatar {
+  text-align: center;
+}
+
+table.trades table td.adds > div,
+table.trades table td.drops > div {
+  display: flex;
+  flex-direction: column;
+  padding-left: 2rem;
+}
+
+table.trades table td.adds > div > div,
+table.trades table td.drops > div > div {
+  text-align: left;
+}
+
+table.trades td.redb > div {
+  box-shadow: inset 0 0 5rem red;
+}
+
+table.trades td.greenb > div {
+  box-shadow: inset 0 0 5rem rgb(0, 255, 0);
+}
+
+table.trades table.trade > tbody.active tr td {
+  background-image: radial-gradient(var(--color4) -50%, var(--color1) 100%);
+}
+
+div.trades_nav {
+  padding: inherit;
+  background-image: radial-gradient(white -250%, black 100%);
+  display: flex;
+  justify-content: space-evenly;
+  height: 7rem;
+  align-items: center;
+  position: sticky;
+  top: 14rem;
+  z-index: 8;
+}
+
+div.trades_nav div.button {
+  font-size: 3rem;
+  border: 1rem groove black;
+  padding: 1rem;
+  box-shadow: 0 0 0.25rem white;
+}
+
+div.trades_nav div.button.active {
+  color: var(--color1);
+  border: 1rem groove black;
+}
+
+table.trade > tbody > tr:first-of-type > td {
+  height: 7rem;
+}
+
+table.trade > tbody > tr:nth-child(2) {
+  height: 7rem;
+}
+
+table.trade > tbody.active > tr:first-of-type {
+  position: sticky;
+  top: 0rem;
+  z-index: 10;
+}
+
+table.trade > tbody.active > tr:nth-child(2) {
+  position: sticky;
+  top: 7rem;
+  z-index: 9;
+}
+
+table.trades div.nav {
+  height: 7rem;
+  background-image: radial-gradient(#fff -250%, #000 100%);
+  filter: drop-shadow(0 0 1rem var(--color1));
+  display: flex;
+  justify-content: space-evenly;
+  position: sticky;
+  top: 14rem;
+  z-index: 8;
+}
+
+table.trades div.nav button {
+  font-size: 3rem;
+  color: gray;
+  font-weight: 700;
+}
+
+table.trades div.nav button.active {
+  color: var(--color1);
+}
+
+table.trades table.trade td.content.ktc {
+  font-size: 85%;
+}
