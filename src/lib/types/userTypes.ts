@@ -93,7 +93,8 @@ export type Matchup = {
   players_points?: { [player_id: string]: number };
   week?: number;
   updatedat?: Date;
-  playoffs_alive?: number[];
+  roster_id_user: number;
+  roster_id_opp: number;
 };
 
 export type Trade = {

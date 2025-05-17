@@ -9,6 +9,7 @@ import TableTrades from "@/components/table-trades/table-trades";
 import Search from "@/components/search/search";
 import { updatedLmtradesState } from "@/redux/lmtrades/lmtradesSlice";
 import Avatar from "@/components/avatar/avatar";
+import { fetchLmTrades } from "@/redux/manager/managerActions";
 
 const LeaguemateTrades = ({
   params,
@@ -107,7 +108,19 @@ const LeaguemateTrades = ({
   const component = (
     <>
       {searches}
-      <TableTrades trades={tradesDisplay} tradeCount={tradeCount} />
+      <TableTrades
+        trades={tradesDisplay}
+        tradeCount={tradeCount}
+        fetchMore={() =>
+          dispatch(
+            fetchLmTrades({
+              manager: searched_manager,
+              player: searched_player,
+              offset: tradesDisplay.length,
+            })
+          )
+        }
+      />
     </>
   );
 

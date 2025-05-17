@@ -1,5 +1,20 @@
+"use client";
+
+import Homepage from "@/components/home/home";
+import { useState } from "react";
+
 const Picktracker = () => {
-  return <>Picktracker</>;
+  const [league_id_searched, setLeague_id_searched] = useState("");
+
+  return (
+    <Homepage
+      title="Picktracker"
+      linkTo={`/picktracker/${league_id_searched}`}
+      id_searched={league_id_searched}
+      setId_searched={setLeague_id_searched}
+      placeholder="League ID"
+    />
+  );
 };
 
 export default Picktracker;

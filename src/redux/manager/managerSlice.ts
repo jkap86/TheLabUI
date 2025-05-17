@@ -174,6 +174,13 @@ const managerSlice = createSlice({
       .addCase(fetchLmTrades.fulfilled, (state, action) => {
         state.isLoadingLmTrades = false;
 
+        const existing =
+          state.lmTradeSearches.find(
+            (s) =>
+              s.manager === action.payload.manager &&
+              s.player === action.payload.player
+          )?.trades || [];
+
         if (action.payload.manager || action.payload.player) {
           state.lmTradeSearches = [
             ...state.lmTradeSearches.filter(
@@ -187,12 +194,11 @@ const managerSlice = createSlice({
               manager: action.payload.manager,
               player: action.payload.player,
               trades: [
-                ...(state.lmTradeSearches.find(
-                  (s) =>
-                    s.manager === action.payload.manager &&
-                    s.player === action.payload.player
-                )?.trades || []),
-                ...action.payload.trades,
+                ...existing,
+                ...action.payload.trades.filter(
+                  (t: Trade) =>
+                    !existing.some((e) => e.transaction_id === t.transaction_id)
+                ),
               ],
               count: action.payload.count,
             },

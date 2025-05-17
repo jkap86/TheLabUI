@@ -5,11 +5,19 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import LeagueTypeSwitch from "../leagueTypeSwitch/leagueTypeSwitch";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const Heading = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.manager);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "tab",
+      pathname.split("/")[3].replace("-", " ").toUpperCase()
+    );
+  }, [pathname]);
 
   return (
     <div className="heading">

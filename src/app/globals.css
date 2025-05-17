@@ -33,6 +33,11 @@ body {
   width: 100%;
 }
 
+a.home {
+  font-size: 2rem;
+  padding: 2rem;
+}
+
 img {
   border-radius: 50%;
 }

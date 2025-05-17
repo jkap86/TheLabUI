@@ -37,3 +37,16 @@ export type DraftDb = {
   type: string;
   league_id: string;
 };
+
+export type MatchupDb = {
+  week: number;
+  matchup_id: number;
+  roster_id: number;
+  players: string[];
+  starters: string[];
+  league_id: string;
+  updated_at: Date;
+  rosters?: Roster[];
+  roster_id_user: number;
+  roster_id_opp: number;
+};

@@ -7,7 +7,7 @@ import { League, Roster } from "@/lib/types/userTypes";
 import axiosInstance from "@/lib/axiosInstance";
 
 export async function GET(req: NextRequest) {
-  const league_update_cutoff: Date = new Date(Date.now() - 3);
+  const league_update_cutoff: Date = new Date(Date.now() - 3 * 60 * 60 * 1000);
 
   const { searchParams } = new URL(req.url);
 

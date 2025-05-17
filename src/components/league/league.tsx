@@ -45,7 +45,7 @@ const League = ({ league, type }: LeagueProps) => {
       desc: "Average KTC Dynasty Value of Optimal Starters. Optimal starters are determined by KTC dynasty values",
     },
     {
-      abbrev: "D B 5",
+      abbrev: "D B T5",
       text: "KTC Dynasty Average of Top 5 Bench Players Value",
       desc: `Average KTC Dynasty Value of top 5 bench players when optimal starters are set. 
             Optimal starters and top bench players are determined by KTC dynasty values.`,

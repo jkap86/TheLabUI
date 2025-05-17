@@ -334,9 +334,11 @@ const TradeDetail = ({ trade }: { trade: TradeType }) => {
 const TableTrades = ({
   trades,
   tradeCount,
+  fetchMore,
 }: {
   trades: TradeType[];
   tradeCount: number;
+  fetchMore: () => void;
 }) => {
   const dispatch: AppDispatch = useDispatch();
   const { allplayers } = useSelector((state: RootState) => state.common);
@@ -370,19 +372,7 @@ const TableTrades = ({
           }
         )}
         {(trades?.length || 0) < tradeCount ? (
-          <li
-            onClick={() =>
-              dispatch(
-                fetchLmTrades({
-                  manager: searched_manager,
-                  player: searched_player,
-                  offset: trades.length,
-                })
-              )
-            }
-          >
-            ...
-          </li>
+          <li onClick={fetchMore}>...</li>
         ) : null}
       </ol>
     </div>

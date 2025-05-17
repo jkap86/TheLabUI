@@ -138,6 +138,7 @@ export const updateLeagues = async (
     try {
       await pool.query("BEGIN");
 
+      await upsertUsers(usersDb);
       await upsertLeagues(updatedLeagues);
       await upsertTrades(tradesBatch);
 
@@ -485,6 +486,42 @@ export const upsertTrades = async (trades: Trade[]) => {
       console.log(err.message);
     } else {
       console.log({ err });
+    }
+  }
+};
+
+export const upsertUsers = async (users: UserDb[]) => {
+  console.log(`Upserting ${users.length} users...`);
+
+  const upsertUsersQuery = `
+    INSERT INTO users (user_id, username, avatar, type, updated_at, created_at)
+    VALUES ($1, $2, $3, $4, $5, $6)
+    ON CONFLICT (user_id) DO UPDATE SET
+      username = EXCLUDED.username,
+      avatar = EXCLUDED.avatar,
+      type = CASE
+        WHEN users.type = 'S' THEN users.type
+        ELSE EXCLUDED.type
+      END,
+      updated_at = EXCLUDED.updated_at;
+  `;
+
+  for (const user of users) {
+    try {
+      await pool.query(upsertUsersQuery, [
+        user.user_id,
+        user.username,
+        user.avatar,
+        user.type,
+        user.updated_at,
+        user.created_at,
+      ]);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.log(err.message);
+      } else {
+        console.log({ err });
+      }
     }
   }
 };

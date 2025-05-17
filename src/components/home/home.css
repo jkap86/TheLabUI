@@ -1,0 +1,97 @@
+div#homepage {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: contrast(2);
+}
+
+div#homepage > a {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 2rem;
+  font-size: 3rem;
+  color: gold;
+  font-weight: 600;
+  z-index: 1000;
+}
+
+div#homepage div.logo-container {
+  width: 100vmin;
+  height: 100vmin;
+  position: relative;
+}
+
+div#homepage h1,
+div#homepage h2 {
+  color: var(--color1);
+  font-family: var(--fontPulang);
+  text-shadow: 0 0 10rem black;
+}
+
+div#homepage h1 {
+  font-size: 20rem;
+}
+
+div#homepage h2 {
+  font-size: 15rem;
+}
+
+div#homepage .home-logo {
+  border-radius: 50%;
+  padding: 1rem;
+  opacity: 0.5;
+  filter: hue-rotate(50deg) drop-shadow(0 0 2rem white);
+}
+
+div#homepage .home-title {
+  position: absolute;
+  width: inherit;
+  height: inherit;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+div#homepage select {
+  width: fit-content;
+  text-align: center;
+  font-size: 5rem;
+  opacity: 0.8;
+  color: var(--color1);
+  background-color: maroon;
+  text-shadow: 0 0 1rem black;
+  border: 1rem ridge var(--color1);
+}
+
+div#homepage .user-input {
+  text-align: center;
+  margin: 5rem;
+  font-size: 5rem;
+  border: 1rem ridge var(--color1);
+  box-shadow: 0 0 5rem black;
+}
+
+div#homepage input {
+  opacity: 0.8;
+  background-color: var(--color1);
+  box-shadow: inset 0 0 10rem black;
+  padding: 1rem;
+  filter: contrast(2);
+  text-align: center;
+  border: 1rem ridge var(--color1);
+  color: yellow;
+  font-weight: 600;
+  text-shadow: 0 0 1rem black;
+}
+
+div#homepage button {
+  color: var(--color1);
+  background-color: black;
+  padding: 1rem;
+  border: 1rem ridge var(--color1);
+  opacity: 0.8;
+}
