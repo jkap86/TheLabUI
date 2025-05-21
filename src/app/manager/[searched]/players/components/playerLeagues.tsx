@@ -5,26 +5,30 @@ import { League as LeagueType, Playershare, User } from "@/lib/types/userTypes";
 import { updatePlayersState } from "@/redux/players/playersSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { filterLeagueIds } from "@/utils/filterLeagues";
-import { getLeaguesObj } from "@/utils/getLeaguesObj";
+import {
+  getLeaguesLeaguemateObj,
+  getLeaguesObj,
+  leagueHeaders,
+  leagueLeaguemateHeaders,
+} from "@/utils/getLeaguesObj";
 import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 const OwnedAvailableLeagues = ({ league_ids }: { league_ids: string[] }) => {
   const dispatch: AppDispatch = useDispatch();
-  const { leagues } = useSelector((state: RootState) => state.manager);
+  const { leagues, leaguesValuesObj } = useSelector(
+    (state: RootState) => state.manager
+  );
   const { OAColumn1, OAColumn2, OAColumn3, OAColumn4 } = useSelector(
     (state: RootState) => state.players
   );
 
-  const leaguesObj = useMemo(() => {
-    return getLeaguesObj(
-      league_ids.map((league_id) => (leagues || {})[league_id])
-    );
-  }, [leagues, league_ids]);
+  const leaguesObj = leaguesValuesObj;
 
   return (
     <TableMain
       type={2}
+      headers_options={leagueHeaders}
       headers={[
         {
           text: "League",
@@ -92,7 +96,8 @@ const OwnedAvailableLeagues = ({ league_ids }: { league_ids: string[] }) => {
                 text: leaguesObj?.[league_id]?.[column]?.text,
                 sort: leaguesObj?.[league_id]?.[column]?.sort,
                 colspan: 1,
-                classname: "",
+                classname: leaguesObj?.[league_id]?.[column]?.classname,
+                style: leaguesObj?.[league_id]?.[column]?.trendColor,
               };
             }),
           ],
@@ -116,25 +121,39 @@ const TakenLeagues = ({
   }[];
 }) => {
   const dispatch: AppDispatch = useDispatch();
-  const { leagues } = useSelector((state: RootState) => state.manager);
+  const { leagues, leaguesValuesObj } = useSelector(
+    (state: RootState) => state.manager
+  );
   const { TColumn1, TColumn2 } = useSelector(
     (state: RootState) => state.players
   );
 
-  const leaguesObj = useMemo(() => {
-    return getLeaguesObj(
-      leaguesTaken.map((lt) => {
-        return {
-          ...(leagues?.[lt.league_id] as LeagueType),
-          lm_roster_id: lt.lm_roster_id,
-        };
-      })
-    );
-  }, [leagues, leaguesTaken]);
+  const lmObj = getLeaguesLeaguemateObj(
+    leaguesTaken.map((l) => {
+      return {
+        ...(leagues?.[l.league_id] as LeagueType),
+        lm_roster_id: l.lm_roster_id,
+      };
+    })
+  );
+
+  const leaguesObj = Object.fromEntries(
+    Object.keys(leaguesValuesObj).map((league_id) => {
+      return [
+        league_id,
+        {
+          ...leaguesValuesObj[league_id],
+          ...lmObj[league_id],
+        },
+      ];
+    })
+  );
 
   return (
     <TableMain
       type={2}
+      headers_sort={[0, 1, 2, 3]}
+      headers_options={[...leagueHeaders, ...leagueLeaguemateHeaders]}
       headers={[
         {
           text: "League",
@@ -194,6 +213,7 @@ const TakenLeagues = ({
                 ),
                 colspan: 2,
                 classname: "",
+                sort: -(leagues?.[league_id]?.index || 0),
               },
               {
                 text: (
@@ -205,15 +225,21 @@ const TakenLeagues = ({
                 ),
                 colspan: 2,
                 classname: "",
+                sort: lmRoster?.username || "Orphan",
               },
               ...[TColumn1, TColumn2].map((column) => {
                 return {
                   text: leaguesObj[league_id][column]?.text || "-",
                   colspan: 1,
-                  classname: "",
+                  classname: leaguesObj[league_id][column]?.classname,
+                  style: leaguesObj[league_id][column]?.trendColor,
+                  sort: leaguesObj[league_id][column]?.sort || "-",
                 };
               }),
             ],
+            secondary: (
+              <League type={3} league={leagues?.[league_id] as LeagueType} />
+            ),
           };
         }
       )}

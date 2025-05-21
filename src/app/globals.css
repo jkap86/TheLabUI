@@ -74,6 +74,24 @@ div.nav-buttons {
   font-size: 3rem;
 }
 
+div.nav-buttons > div {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color3);
+  align-items: center;
+  width: 20rem;
+  box-shadow: inset 0 0 2rem black;
+}
+
+div.nav-buttons > div > label {
+  color: var(--color7);
+}
+
+div.nav-buttons > div > select {
+  width: 100%;
+  text-align: center;
+}
+
 div.nav button.active {
   color: var(--color1);
 }
@@ -93,4 +111,52 @@ input[type="date"] {
   color: gold;
   font-weight: 900;
   letter-spacing: 0.25rem;
+}
+
+div.load-container {
+  width: 50vmin;
+  height: 50vmin;
+  margin: auto;
+  position: relative;
+}
+
+div.load-messages {
+  position: absolute;
+}
+
+div.load-messages > h1.loading {
+  font-size: 10rem;
+}
+
+h2.load-message {
+  font-size: 7rem;
+}
+
+img.bubble1,
+img.bubble2 {
+  position: absolute;
+  bottom: 25%;
+  left: 5%;
+  right: 0;
+  margin: auto;
+  opacity: 0.75;
+}
+
+img.bubble1 {
+  width: 3vmin;
+  animation: bubble 5s ease-in-out infinite;
+}
+
+img.bubble2 {
+  width: 5vmin;
+  animation: bubble 5s ease-in-out infinite;
+}
+
+@keyframes bubble {
+  0% {
+    transform: initial;
+  }
+  50% {
+    transform: translate(3rem, 2rem);
+  }
 }

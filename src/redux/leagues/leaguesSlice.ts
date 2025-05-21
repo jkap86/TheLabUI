@@ -10,8 +10,8 @@ export interface LeaguesState {
 const initialState: LeaguesState = {
   column1: "D S Rk",
   column2: "D B T5 Rk",
-  column3: "R S Rk",
-  column4: "R B T5 Rk",
+  column3: "P S Rk",
+  column4: "P B T5 Rk",
 };
 
 const leaguesSlice = createSlice({

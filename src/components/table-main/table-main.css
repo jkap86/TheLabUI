@@ -48,6 +48,10 @@ table.main {
   max-width: 100vmin;
 }
 
+table.main.half {
+  font-size: 2.5rem;
+}
+
 th.sort_header {
   height: fit-content;
 }
@@ -105,6 +109,11 @@ td.content.age {
   font-weight: 100;
   letter-spacing: 0.5rem;
   font-size: 2.5rem;
+}
+
+table.half td.content.ktc,
+table.half td.content.rank {
+  font-size: 2rem;
 }
 
 td.content.ktc.total {

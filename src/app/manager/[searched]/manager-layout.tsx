@@ -10,6 +10,7 @@ import useFetchKtcCurrent from "@/hooks/useFetchKtcCurrent";
 import { useFetchUserAndLeagues } from "@/hooks/manager/useFetchUserAndLeagues";
 import Heading from "@/components/heading/heading";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
+import useFetchRosProj from "@/hooks/useFetchRosProj";
 
 interface LoadCommonDataProps {
   searched: string;
@@ -32,6 +33,7 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
   useFetchNflState();
   useFetchAllplayers();
   useFetchKtcCurrent();
+  useFetchRosProj();
 
   useFetchUserAndLeagues(searched);
 

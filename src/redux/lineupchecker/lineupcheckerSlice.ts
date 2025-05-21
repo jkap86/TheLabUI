@@ -6,17 +6,22 @@ export interface LineupcheckerState {
   isLoadingMatchups: boolean;
   matchups: {
     [league_id: string]: {
-      user: Matchup;
-      opp: Matchup;
-      league: Matchup[];
+      user_matchup: Matchup;
+      opp_matchup: Matchup;
+      league_matchups: Matchup[];
+      league_index: number;
+      league_name: string;
+      league_avatar: string | null;
     };
   };
+  schedule: { [team: string]: { kickoff: number; opp: string } };
   errorMatchups: string | null;
 }
 
 const initialState: LineupcheckerState = {
   isLoadingMatchups: false,
   matchups: {},
+  schedule: {},
   errorMatchups: null,
 };
 
@@ -38,14 +43,8 @@ const lineupcheckerSlice = createSlice({
       })
       .addCase(fetchMatchups.fulfilled, (state, action) => {
         state.isLoadingMatchups = false;
-
-        const matchups_obj: {
-          [league_id: string]: {
-            user: Matchup;
-            opp: Matchup;
-            league: Matchup[];
-          };
-        } = {};
+        state.matchups = action.payload.matchups;
+        state.schedule = action.payload.schedule;
       })
       .addCase(fetchMatchups.rejected, (state, action) => {
         state.isLoadingMatchups = false;

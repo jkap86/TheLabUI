@@ -45,14 +45,22 @@ const TableHeader = ({
         }}
       >
         <div>
-          <Search
-            searched={col}
-            setSearched={setCol}
-            options={search_options}
-            placeholder="Select Column"
-          />
-
-          <h3>{active?.text}</h3>
+          <div className="column-options">
+            <ul>
+              {options.map((o) => {
+                return (
+                  <li
+                    key={o.abbrev}
+                    className={o.abbrev === active?.abbrev ? "active" : ""}
+                    onClick={() => setCol(o.abbrev)}
+                  >
+                    {o.text}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <h3>{active?.abbrev}</h3>
           <h5>{active?.desc}</h5>
         </div>
       </Modal>

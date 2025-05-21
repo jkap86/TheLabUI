@@ -31,3 +31,18 @@ export const fetchKtc = createAsyncThunk("fetchKtc", async () => {
     return "Error fetching KTC current Values";
   }
 });
+
+export const fetchProjections = createAsyncThunk(
+  "fetchProjections",
+  async () => {
+    const projections: {
+      data: { player_id: string; stats: { [cat: string]: number } }[];
+    } = await axios.get("/api/common/rosprojections");
+
+    const projections_obj = Object.fromEntries(
+      projections.data.map((p) => [p.player_id, p.stats])
+    );
+
+    return projections_obj;
+  }
+);

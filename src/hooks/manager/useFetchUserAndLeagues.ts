@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 export const useFetchUserAndLeagues = (searched: string) => {
   const dispatch: AppDispatch = useDispatch();
-  const { nflState, ktcCurrent } = useSelector(
+  const { nflState, ktcCurrent, projections } = useSelector(
     (state: RootState) => state.common
   );
   const {
@@ -27,7 +27,8 @@ export const useFetchUserAndLeagues = (searched: string) => {
       !isLoadingUser &&
       !errorUser &&
       nflState &&
-      ktcCurrent
+      ktcCurrent &&
+      projections
     ) {
       console.log("FETCH USER");
 
@@ -35,13 +36,14 @@ export const useFetchUserAndLeagues = (searched: string) => {
     } else if (
       nflState &&
       ktcCurrent &&
+      projections &&
       user &&
       !leagues &&
       !isLoadingLeagues &&
       !errorLeagues
     ) {
       console.log("FETCH LEAGUES");
-      dispatch(fetchLeagues({ user, nflState, ktcCurrent }));
+      dispatch(fetchLeagues({ user, nflState, ktcCurrent, projections }));
     }
   }, [
     dispatch,
@@ -50,6 +52,7 @@ export const useFetchUserAndLeagues = (searched: string) => {
     errorUser,
     nflState,
     ktcCurrent,
+    projections,
     leagues,
     isLoadingLeagues,
     errorLeagues,

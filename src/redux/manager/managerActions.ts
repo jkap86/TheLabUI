@@ -1,9 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { League, Roster, User } from "@/lib/types/userTypes";
-import { getOptimalStarters } from "@/utils/getOptimalStarters";
+import { getOptimalStarters, getPlayerTotal } from "@/utils/getOptimalStarters";
 import { getPlayerShares } from "@/utils/getPlayerShares";
 import { RootState } from "../store";
+import { getLeaguesObj } from "@/utils/getLeaguesObj";
 
 export const fetchUser = createAsyncThunk(
   "fetchUser",
@@ -23,12 +24,18 @@ export const fetchLeagues = createAsyncThunk(
       user,
       nflState,
       ktcCurrent,
+      projections,
     }: {
       user: User;
       nflState: { [key: string]: string | number };
       ktcCurrent: {
         redraft: { [player_id: string]: number };
         dynasty: { [player_id: string]: number };
+      };
+      projections: {
+        [player_id: string]: {
+          [cat: string]: number;
+        };
       };
     },
     { dispatch }
@@ -76,42 +83,9 @@ export const fetchLeagues = createAsyncThunk(
         }
       });
 
-    const leagues_obj = Object.fromEntries(
+    const leaguesState = Object.fromEntries(
       parsedLeaguesArray.map((league: League) => {
-        return [
-          league["league_id"],
-          {
-            ...league,
-            rosters: league.rosters.map((r) => {
-              return {
-                ...r,
-                starters_optimal_redraft: getOptimalStarters(
-                  league.roster_positions,
-                  r?.players || [],
-                  ktcCurrent.redraft
-                ),
-                starters_optimal_dynasty: getOptimalStarters(
-                  league.roster_positions,
-                  r?.players || [],
-                  ktcCurrent.dynasty
-                ),
-              };
-            }),
-            user_roster: {
-              ...league.user_roster,
-              starters_optimal_redraft: getOptimalStarters(
-                league.roster_positions,
-                league.user_roster?.players || [],
-                ktcCurrent.redraft
-              ),
-              starters_optimal_dynasty: getOptimalStarters(
-                league.roster_positions,
-                league.user_roster?.players || [],
-                ktcCurrent.dynasty
-              ),
-            },
-          },
-        ];
+        return [league["league_id"], league];
       })
     );
 
@@ -120,7 +94,15 @@ export const fetchLeagues = createAsyncThunk(
       user
     );
 
-    return { leagues_obj, playershares, pickshares, leaguemates };
+    const leaguesValuesObj = getLeaguesObj(Object.values(leaguesState));
+
+    return {
+      leaguesState,
+      playershares,
+      pickshares,
+      leaguemates,
+      leaguesValuesObj,
+    };
   }
 );
 
@@ -139,7 +121,7 @@ export const syncLeague = createAsyncThunk(
     { getState }
   ) => {
     const state = getState() as RootState;
-    const { ktcCurrent } = state.common;
+    const { ktcCurrent, projections } = state.common;
     const { leagues } = state.manager;
 
     const response = await axios.get("/api/manager/leagues/sync", {
@@ -153,34 +135,6 @@ export const syncLeague = createAsyncThunk(
     return {
       ...(leagues?.[league_id] || {}),
       ...response.data,
-      rosters: response.data.rosters.map((roster: Roster) => {
-        return {
-          ...roster,
-          starters_optimal_redraft: getOptimalStarters(
-            leagues?.[league_id]?.roster_positions || [],
-            roster?.players || [],
-            ktcCurrent?.redraft || {}
-          ),
-          starters_optimal_dynasty: getOptimalStarters(
-            leagues?.[league_id]?.roster_positions || [],
-            roster?.players || [],
-            ktcCurrent?.dynasty || {}
-          ),
-        };
-      }),
-      user_roster: {
-        ...response.data.user_roster,
-        starters_optimal_redraft: getOptimalStarters(
-          leagues?.[league_id]?.roster_positions || [],
-          response.data.user_roster?.players || [],
-          ktcCurrent?.redraft || {}
-        ),
-        starters_optimal_dynasty: getOptimalStarters(
-          leagues?.[league_id]?.roster_positions || [],
-          response.data.user_roster?.players || [],
-          ktcCurrent?.dynasty || {}
-        ),
-      },
     };
   }
 );

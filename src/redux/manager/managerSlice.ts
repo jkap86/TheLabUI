@@ -12,6 +12,7 @@ import {
   syncLeague,
   fetchLmTrades,
 } from "./managerActions";
+import { colObj } from "@/lib/types/commonTypes";
 
 export interface ManagerState {
   user: User | null;
@@ -35,7 +36,11 @@ export interface ManagerState {
   leaguemates: {
     [lm_user_id: string]: Leaguemate;
   };
-
+  leaguesValuesObj: {
+    [league_id: string]: {
+      [col_abbrev: string]: colObj;
+    };
+  };
   isLoadingLmTrades: boolean;
   lmTrades: {
     count: number;
@@ -69,6 +74,8 @@ const initialState: ManagerState = {
   playershares: {},
   pickshares: {},
   leaguemates: {},
+
+  leaguesValuesObj: {},
 
   isLoadingLmTrades: false,
   lmTrades: {
@@ -137,13 +144,19 @@ const managerSlice = createSlice({
       .addCase(fetchLeagues.fulfilled, (state, action) => {
         state.isLoadingLeagues = false;
 
-        const { leagues_obj, playershares, pickshares, leaguemates } =
-          action.payload;
+        const {
+          leaguesState,
+          playershares,
+          pickshares,
+          leaguemates,
+          leaguesValuesObj,
+        } = action.payload;
 
-        state.leagues = leagues_obj;
+        state.leagues = leaguesState;
         state.playershares = playershares;
         state.pickshares = pickshares;
         state.leaguemates = leaguemates;
+        state.leaguesValuesObj = leaguesValuesObj;
       })
       .addCase(fetchLeagues.rejected, (state, action) => {
         state.isLoadingLeagues = false;

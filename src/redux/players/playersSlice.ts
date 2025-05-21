@@ -26,12 +26,12 @@ const initialState: PlayersState = {
   filterTeam: "All",
   filterDraftClass: "All",
   playerLeaguesTab: "O",
-  OAColumn1: "KTC D S Rk",
-  OAColumn2: "KTC D B 5 Rk",
-  OAColumn3: "KTC R S Rk",
-  OAColumn4: "KTC R B 5 Rk",
-  TColumn1: "KTC R S Rk",
-  TColumn2: "KTC R S Rk L",
+  OAColumn1: "D S Rk",
+  OAColumn2: "D B T5 Rk",
+  OAColumn3: "R S Rk",
+  OAColumn4: "R B T5 Rk",
+  TColumn1: "P S Rk",
+  TColumn2: "P S Rk Lm",
 };
 
 const playersSlice = createSlice({

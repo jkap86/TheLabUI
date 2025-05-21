@@ -10,6 +10,7 @@ import { updatePlayersState } from "@/redux/players/playersSlice";
 import { filterLeagueIds } from "@/utils/filterLeagues";
 import PlayerLeagues from "./components/playerLeagues";
 import { colObj } from "@/lib/types/commonTypes";
+import { getTrendColor_Range } from "@/utils/getTrendColor";
 
 interface PlayersProps {
   params: Promise<{ searched: string }>;
@@ -49,25 +50,33 @@ const Players = ({ params }: PlayersProps) => {
         "# Own": {
           sort: num_owned,
           text: num_owned.toString(),
-          trendColor: {},
+          trendColor: getTrendColor_Range(percent_owned, 0, 0.25),
           classname: "",
         },
         "% Own": {
           sort: percent_owned,
           text: Math.round(percent_owned * 1000) / 10 + "%",
-          trendColor: {},
+          trendColor: getTrendColor_Range(percent_owned, 0, 0.25),
           classname: "",
         },
         "KTC D": {
           sort: ktcCurrent?.dynasty[player_id] || 0,
           text: (ktcCurrent?.dynasty[player_id] || 0).toString(),
-          trendColor: {},
+          trendColor: getTrendColor_Range(
+            ktcCurrent?.dynasty[player_id] || 0,
+            1000,
+            6500
+          ),
           classname: "ktc",
         },
         "KTC R": {
           sort: ktcCurrent?.redraft[player_id] || 0,
           text: (ktcCurrent?.redraft[player_id] || 0).toString(),
-          trendColor: {},
+          trendColor: getTrendColor_Range(
+            ktcCurrent?.redraft[player_id] || 0,
+            2000,
+            6000
+          ),
           classname: "ktc",
         },
       };
@@ -102,8 +111,9 @@ const Players = ({ params }: PlayersProps) => {
 
   const component = (
     <>
-      <div>
+      <div className="nav-buttons">
         <div>
+          <label>Draft Class</label>
           <select
             value={filterDraftClass}
             onChange={(e) =>
@@ -126,6 +136,7 @@ const Players = ({ params }: PlayersProps) => {
           </select>
         </div>
         <div>
+          <label>Team</label>
           <select
             value={filterTeam}
             onChange={(e) =>
@@ -144,6 +155,7 @@ const Players = ({ params }: PlayersProps) => {
           </select>
         </div>
         <div>
+          <label>Position</label>
           <select
             value={filterPosition}
             onChange={(e) =>
@@ -237,10 +249,12 @@ const Players = ({ params }: PlayersProps) => {
                     ),
                     colspan: 2,
                     classname: "",
+                    sort: allplayers?.[player_id]?.full_name || player_id,
                   },
                   {
                     text: playersObj?.[player_id]?.[column1]?.text || "-",
                     sort: playersObj?.[player_id]?.[column1]?.sort || 0,
+                    style: playersObj?.[player_id]?.[column1]?.trendColor,
                     colspan: 1,
                     classname: playersObj?.[player_id]?.[column1]?.classname,
                   },
@@ -249,18 +263,21 @@ const Players = ({ params }: PlayersProps) => {
                     sort: playersObj?.[player_id]?.[column2]?.sort || 0,
                     colspan: 1,
                     classname: playersObj?.[player_id]?.[column2]?.classname,
+                    style: playersObj?.[player_id]?.[column2]?.trendColor,
                   },
                   {
                     text: playersObj?.[player_id]?.[column3]?.text || "-",
                     sort: playersObj?.[player_id]?.[column3]?.sort || 0,
                     colspan: 1,
                     classname: playersObj?.[player_id]?.[column3]?.classname,
+                    style: playersObj?.[player_id]?.[column3]?.trendColor,
                   },
                   {
                     text: playersObj?.[player_id]?.[column4]?.text || "-",
                     sort: playersObj?.[player_id]?.[column4]?.sort || 0,
                     colspan: 1,
                     classname: playersObj?.[player_id]?.[column4]?.classname,
+                    style: playersObj?.[player_id]?.[column4]?.trendColor,
                   },
                 ],
                 secondary: (

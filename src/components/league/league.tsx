@@ -1,15 +1,16 @@
 import { League as LeagueType } from "@/lib/types/userTypes";
 import { usePathname } from "next/navigation";
 import TableMain from "../table-main/table-main";
-import { JSX, useMemo, useState } from "react";
+import { JSX, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
-import { getKtcAvgValue } from "@/utils/getKtcRanks";
+import { getKtcAvgValue, getTotalProj } from "@/utils/getKtcRanks";
 import Avatar from "../avatar/avatar";
-import { getSlotAbbrev } from "@/utils/getOptimalStarters";
+import { getPlayerTotal, getSlotAbbrev } from "@/utils/getOptimalStarters";
 import { getDraftPickId } from "@/utils/getPickId";
 import { updateStandingsState } from "@/redux/standings/standingsSlice";
 import { syncLeague } from "@/redux/manager/managerActions";
+import { getTrendColor_Range } from "@/utils/getTrendColor";
 
 type LeagueProps = {
   type: number;
@@ -26,7 +27,7 @@ type colObj = {
 const League = ({ league, type }: LeagueProps) => {
   const pathname = usePathname();
   const dispatch: AppDispatch = useDispatch();
-  const { nflState, allplayers, ktcCurrent } = useSelector(
+  const { nflState, allplayers, ktcCurrent, projections } = useSelector(
     (state: RootState) => state.common
   );
   const { isSyncingLeague } = useSelector((state: RootState) => state.manager);
@@ -38,7 +39,50 @@ const League = ({ league, type }: LeagueProps) => {
     (r) => r.roster_id.toString() === activeRosterId
   );
 
+  const projectionsObj = useMemo(() => {
+    const players: { [player_id: string]: number } = {};
+    const teams: { [roster_id: number]: { p_s: number; p_b_5: number } } = {};
+
+    const player_ids = league.rosters.flatMap((r) => r.players || []);
+
+    player_ids.forEach((player_id) => {
+      players[player_id] = getPlayerTotal(
+        league.scoring_settings,
+        projections?.[player_id] || {}
+      );
+    });
+
+    league.rosters.forEach((r) => {
+      const p_s = r.starters_optimal_ppg.reduce(
+        (acc, cur) => acc + players[cur],
+        0
+      );
+      const p_b_5 = (r.players || [])
+        .filter((player_id) => !r.starters_optimal_ppg.includes(player_id))
+        .sort((a, b) => players[b] - players[a])
+        .slice(0, 5)
+        .reduce((acc, cur) => acc + players[cur], 0);
+
+      teams[r.roster_id] = {
+        p_s,
+        p_b_5,
+      };
+    });
+
+    return { players, teams };
+  }, [league]);
+
   const teamsHeaders = [
+    {
+      abbrev: "P S",
+      text: "P S",
+      desc: "P S",
+    },
+    {
+      abbrev: "P B T5",
+      text: "P B T5",
+      desc: "P B T5",
+    },
     {
       abbrev: "D S",
       text: "KTC Dynasty Average Starter Value",
@@ -142,6 +186,20 @@ const League = ({ league, type }: LeagueProps) => {
         )
         .reduce((acc, cur) => acc + (ktcCurrent?.dynasty?.[cur] || 0), 0);
 
+      const P_s = getTotalProj(r.starters_optimal_ppg, league.scoring_settings);
+
+      const p_b_5 = getTotalProj(
+        (r.players || [])
+          .filter((player_id) => !r.starters_optimal_ppg.includes(player_id))
+          .sort(
+            (a, b) =>
+              getPlayerTotal(league.scoring_settings, projections?.[b] || {}) -
+              getPlayerTotal(league.scoring_settings, projections?.[a] || {})
+          )
+          .slice(0, 5),
+        league.scoring_settings
+      );
+
       obj[r.roster_id] = {
         "D S": {
           sort: ktc_d_s,
@@ -192,6 +250,34 @@ const League = ({ league, type }: LeagueProps) => {
           trendColor: {},
           classname: "",
         },
+        "P S": {
+          sort: P_s,
+          text: P_s.toLocaleString("en-US", { maximumFractionDigits: 0 }),
+          trendColor: getTrendColor_Range(
+            P_s,
+            Math.min(
+              ...Object.values(projectionsObj.teams).map((obj) => obj.p_s)
+            ),
+            Math.max(
+              ...Object.values(projectionsObj.teams).map((obj) => obj.p_s)
+            )
+          ),
+          classname: "",
+        },
+        "P B T5": {
+          sort: p_b_5,
+          text: p_b_5.toLocaleString("en-US", { maximumFractionDigits: 0 }),
+          trendColor: getTrendColor_Range(
+            p_b_5,
+            Math.min(
+              ...Object.values(projectionsObj.teams).map((obj) => obj.p_b_5)
+            ),
+            Math.max(
+              ...Object.values(projectionsObj.teams).map((obj) => obj.p_b_5)
+            )
+          ),
+          classname: "",
+        },
       };
     });
 
@@ -209,6 +295,11 @@ const League = ({ league, type }: LeagueProps) => {
       text: "KTC Redraft Value",
       desc: "",
     },
+    {
+      abbrev: "ROS P",
+      text: "Rest of Season Projected Points",
+      desc: "",
+    },
   ];
 
   const playersObj = useMemo(() => {
@@ -218,9 +309,18 @@ const League = ({ league, type }: LeagueProps) => {
       };
     } = {};
 
+    const players_proj = Object.fromEntries(
+      (activeRoster?.players || []).map((player_id) => [
+        player_id,
+        getPlayerTotal(league.scoring_settings, projections?.[player_id] || {}),
+      ])
+    );
+
     (activeRoster?.players || []).forEach((player_id) => {
       const ktc_d = ktcCurrent?.dynasty?.[player_id] || 0;
       const ktc_r = ktcCurrent?.redraft?.[player_id] || 0;
+
+      const proj = players_proj[player_id];
 
       obj[player_id] = {
         "KTC D": {
@@ -234,6 +334,16 @@ const League = ({ league, type }: LeagueProps) => {
           text: ktc_r.toString(),
           trendColor: {},
           classname: "rank",
+        },
+        "ROS P": {
+          sort: proj,
+          text: proj.toLocaleString("en-US", { maximumFractionDigits: 0 }),
+          trendColor: getTrendColor_Range(
+            proj,
+            Math.min(...Object.values(projectionsObj.players)),
+            Math.max(...Object.values(projectionsObj.players))
+          ),
+          classname: "stat",
         },
       };
     });
@@ -276,7 +386,7 @@ const League = ({ league, type }: LeagueProps) => {
           },
           {
             text: "Manager",
-            colspan: 3,
+            colspan: 4,
           },
           {
             text: teamsColumn1,
@@ -326,7 +436,7 @@ const League = ({ league, type }: LeagueProps) => {
                 text: (
                   <Avatar id={roster.avatar} text={roster.username} type="U" />
                 ),
-                colspan: 3,
+                colspan: 4,
                 classname: "",
               },
 
@@ -335,6 +445,7 @@ const League = ({ league, type }: LeagueProps) => {
                 sort: sort1,
                 colspan: 2,
                 classname: classname1,
+                style: trendColor1,
               },
 
               {
@@ -342,6 +453,7 @@ const League = ({ league, type }: LeagueProps) => {
                 sort: sort2,
                 colspan: 2,
                 classname: classname2,
+                style: trendColor2,
               },
             ],
           };
@@ -361,7 +473,7 @@ const League = ({ league, type }: LeagueProps) => {
             },
             {
               text: "Player",
-              colspan: 3,
+              colspan: 4,
               classname: "",
             },
             {
@@ -395,7 +507,7 @@ const League = ({ league, type }: LeagueProps) => {
                 };
 
                 const player_id =
-                  activeRoster?.starters_optimal_redraft?.[index] || "0";
+                  activeRoster?.starters_optimal_ppg?.[index] || "0";
 
                 const {
                   text: text1,
@@ -427,7 +539,7 @@ const League = ({ league, type }: LeagueProps) => {
                           />
                         )) ||
                         "-",
-                      colspan: 3,
+                      colspan: 4,
                       classname: "",
                     },
                     {
@@ -448,7 +560,7 @@ const League = ({ league, type }: LeagueProps) => {
             ...(activeRoster?.players
               ?.filter(
                 (player_id) =>
-                  !activeRoster.starters_optimal_redraft?.includes(player_id)
+                  !activeRoster.starters_optimal_ppg?.includes(player_id)
               )
               ?.sort((a, b) => {
                 const getPositionValue = (player_id: string) => {
@@ -473,8 +585,14 @@ const League = ({ league, type }: LeagueProps) => {
 
                 return (
                   getPositionValue(a) - getPositionValue(b) ||
-                  (ktcCurrent?.dynasty?.[b] || 0) -
-                    (ktcCurrent?.dynasty?.[a] || 0)
+                  (getPlayerTotal(
+                    league.scoring_settings,
+                    projections?.[b] || {}
+                  ) || 0) -
+                    (getPlayerTotal(
+                      league.scoring_settings,
+                      projections?.[a] || {}
+                    ) || 0)
                 );
               })
               ?.map((player_id) => {

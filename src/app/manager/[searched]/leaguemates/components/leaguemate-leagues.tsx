@@ -4,7 +4,7 @@ import TableMain from "@/components/table-main/table-main";
 import { League as LeagueType } from "@/lib/types/userTypes";
 import { updateLeaguematesState } from "@/redux/leaguemates/leaguematesSlice";
 import { AppDispatch, RootState } from "@/redux/store";
-import { getLeaguesObj } from "@/utils/getLeaguesObj";
+import { getLeaguesLeaguemateObj, getLeaguesObj } from "@/utils/getLeaguesObj";
 import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -16,7 +16,9 @@ const LeaguemateLeagues = ({
   lm_user_id: string;
 }) => {
   const dispatch: AppDispatch = useDispatch();
-  const { leagues } = useSelector((state: RootState) => state.manager);
+  const { leagues, leaguesValuesObj } = useSelector(
+    (state: RootState) => state.manager
+  );
   const { leaguesColumn1, leaguesColumn2, leaguesColumn3, leaguesColumn4 } =
     useSelector((state: RootState) => state.leaguemates);
 
@@ -63,19 +65,27 @@ const LeaguemateLeagues = ({
     },
   ];
 
-  const leaguesObj = useMemo(
-    () =>
-      getLeaguesObj(
-        league_ids.map((league_id) => {
-          const league = (leagues || {})[league_id];
-          return {
-            ...league,
-            lm_roster_id: league.rosters.find((r) => r.user_id === lm_user_id)
-              ?.roster_id,
-          };
-        })
-      ),
-    [league_ids, leagues]
+  const lmObj = getLeaguesLeaguemateObj(
+    league_ids.map((league_id) => {
+      return {
+        ...(leagues?.[league_id] as LeagueType),
+        lm_roster_id: leagues?.[league_id]?.rosters?.find(
+          (r) => r.user_id === lm_user_id
+        )?.roster_id,
+      };
+    })
+  );
+
+  const leaguesObj = Object.fromEntries(
+    Object.keys(leaguesValuesObj).map((league_id) => {
+      return [
+        league_id,
+        {
+          ...leaguesValuesObj[league_id],
+          ...lmObj[league_id],
+        },
+      ];
+    })
   );
 
   return (
@@ -84,6 +94,7 @@ const LeaguemateLeagues = ({
       <TableMain
         type={2}
         headers_options={leaguemateLeaguesHeaders}
+        headers_sort={[0, 1, 2, 3, 4]}
         headers={[
           {
             text: "League",
@@ -141,6 +152,7 @@ const LeaguemateLeagues = ({
                 ),
                 colspan: 2,
                 classname: "",
+                sort: -(leagues?.[league_id].index || 0),
               },
               ...[
                 leaguesColumn1,

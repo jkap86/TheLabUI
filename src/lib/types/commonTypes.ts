@@ -18,4 +18,5 @@ export type colObj = {
   text: string | JSX.Element;
   trendColor: { [key: string]: string };
   classname: string;
+  rankings?: string[];
 };

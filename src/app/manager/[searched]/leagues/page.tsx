@@ -20,14 +20,14 @@ interface LeaguesProps {
 const Leagues = ({ params }: LeaguesProps) => {
   const dispatch: AppDispatch = useDispatch();
   const { searched } = use(params);
-  const { leagues } = useSelector((state: RootState) => state.manager);
+  const { leagues, leaguesValuesObj } = useSelector(
+    (state: RootState) => state.manager
+  );
   const { column1, column2, column3, column4 } = useSelector(
     (state: RootState) => state.leagues
   );
 
-  const leaguesObj = useMemo(() => {
-    return getLeaguesObj(Object.values(leagues || {}));
-  }, [leagues, getKtcAvgValue]);
+  const leaguesObj = leaguesValuesObj;
 
   const component = (
     <>

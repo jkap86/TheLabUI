@@ -52,6 +52,9 @@ export type Roster = {
   fpa: number;
   starters_optimal_dynasty: string[];
   starters_optimal_redraft: string[];
+  starters_optimal_ppg: string[];
+  starter_proj?: number;
+  bench_top5_proj?: number;
 };
 
 export type Draftpick = {
@@ -90,11 +93,22 @@ export type Matchup = {
   players: string[];
   starters: string[];
   starters_optimal?: string[];
-  players_points?: { [player_id: string]: number };
   week?: number;
-  updatedat?: Date;
+  updated_at?: Date;
   roster_id_user: number;
-  roster_id_opp: number;
+  roster_id_opp: number | undefined;
+  username: string;
+  avatar: string | null;
+  league: {
+    index: number;
+    name: string;
+    avatar: string | null;
+    scoring_settings: { [key: string]: number };
+    settings: LeagueSettings;
+    roster_positions: string[];
+  };
+  projection_current: number;
+  projection_optimal: number;
 };
 
 export type Trade = {

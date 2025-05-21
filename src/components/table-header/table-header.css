@@ -41,3 +41,16 @@ div.columndropdown:hover > div.columnText > div {
 th:last-of-type div.columndropdown:hover > div.columnText {
   position: relative;
 }
+
+div.modal-content div.column-options {
+  height: 15rem;
+  overflow: auto;
+  font-size: 2.5rem;
+  position: relative;
+}
+
+div.modal-content div.column-options li.active {
+  background-color: var(--color1);
+  position: sticky;
+  top: 0;
+}

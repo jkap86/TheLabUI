@@ -5,7 +5,7 @@ div.avatar {
   color: inherit;
   text-align: left;
   font-family: var(--fontMetal);
-  font-size: 2rem;
+  font-size: 2.5rem;
 }
 img.avatar {
   height: 5rem;

@@ -17,9 +17,9 @@ const initialState: LeaguematesState = {
   column3: "S QB D Rk Lm",
   column4: "S QB D Diff",
   leaguesColumn1: "D S QB Rk",
-  leaguesColumn2: "D S QB Rk L",
+  leaguesColumn2: "P S Rk Lm",
   leaguesColumn3: "D S RB Rk",
-  leaguesColumn4: "D S RB Rk L",
+  leaguesColumn4: "D S RB Rk Lm",
 };
 
 const leaguematesSlice = createSlice({

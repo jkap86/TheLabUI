@@ -7,6 +7,7 @@ import standingsSlice from "./standings/standingsSlice";
 import lmtradesSlice from "./lmtrades/lmtradesSlice";
 import leaguematesSlice from "./leaguemates/leaguematesSlice";
 import tradesSlice from "./trades/tradesSlice";
+import lineupcheckerSlice from "./lineupchecker/lineupcheckerSlice";
 
 const rootReducer = combineReducers({
   common: commonSlice,
@@ -17,6 +18,7 @@ const rootReducer = combineReducers({
   lmtrades: lmtradesSlice,
   leaguemates: leaguematesSlice,
   trades: tradesSlice,
+  lineupchecker: lineupcheckerSlice,
 });
 
 export default rootReducer;

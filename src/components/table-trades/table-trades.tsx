@@ -10,10 +10,7 @@ import { AppDispatch, RootState } from "@/redux/store";
 import { getDraftPickId } from "@/utils/getPickId";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
 import League from "../league/league";
-import { getOptimalStarters } from "@/utils/getOptimalStarters";
-import Search from "../search/search";
-import { updatedLmtradesState } from "@/redux/lmtrades/lmtradesSlice";
-import { fetchLmTrades } from "@/redux/manager/managerActions";
+import { getOptimalStarters, getPlayerTotal } from "@/utils/getOptimalStarters";
 
 const Trade = ({
   trade,
@@ -282,7 +279,9 @@ const Trade = ({
 };
 
 const TradeDetail = ({ trade }: { trade: TradeType }) => {
-  const { ktcCurrent } = useSelector((state: RootState) => state.common);
+  const { ktcCurrent, projections } = useSelector(
+    (state: RootState) => state.common
+  );
   const { detail_tab } = useSelector((state: RootState) => state.lmtrades);
 
   const tradeLeague: LeagueType = {
@@ -296,6 +295,15 @@ const TradeDetail = ({ trade }: { trade: TradeType }) => {
     scoring_settings: trade.scoring_settings,
     roster_positions: trade.roster_positions,
     rosters: trade.rosters.map((r) => {
+      const values = Object.fromEntries(
+        (r.players || []).map((player_id) => [
+          player_id,
+          getPlayerTotal(
+            trade.scoring_settings,
+            projections?.[player_id] || {}
+          ),
+        ])
+      );
       return {
         ...r,
         starters_optimal_dynasty: getOptimalStarters(
@@ -307,6 +315,11 @@ const TradeDetail = ({ trade }: { trade: TradeType }) => {
           trade.roster_positions,
           r.players || [],
           ktcCurrent?.redraft || {}
+        ),
+        starters_optimal_ppg: getOptimalStarters(
+          trade.roster_positions,
+          r.players || [],
+          values
         ),
       };
     }),

@@ -10,6 +10,7 @@ import Search from "@/components/search/search";
 import { updatedLmtradesState } from "@/redux/lmtrades/lmtradesSlice";
 import Avatar from "@/components/avatar/avatar";
 import { fetchLmTrades } from "@/redux/manager/managerActions";
+import LoadingIcon from "@/components/loading-icon/loading-icon";
 
 const LeaguemateTrades = ({
   params,
@@ -19,8 +20,14 @@ const LeaguemateTrades = ({
   const dispatch: AppDispatch = useDispatch();
   const { searched } = use(params);
   const { allplayers } = useSelector((state: RootState) => state.common);
-  const { lmTrades, lmTradeSearches, playershares, leaguemates, pickshares } =
-    useSelector((state: RootState) => state.manager);
+  const {
+    lmTrades,
+    isLoadingLmTrades,
+    lmTradeSearches,
+    playershares,
+    leaguemates,
+    pickshares,
+  } = useSelector((state: RootState) => state.manager);
   const { searched_player, searched_manager } = useSelector(
     (state: RootState) => state.lmtrades
   );
@@ -108,19 +115,23 @@ const LeaguemateTrades = ({
   const component = (
     <>
       {searches}
-      <TableTrades
-        trades={tradesDisplay}
-        tradeCount={tradeCount}
-        fetchMore={() =>
-          dispatch(
-            fetchLmTrades({
-              manager: searched_manager,
-              player: searched_player,
-              offset: tradesDisplay.length,
-            })
-          )
-        }
-      />
+      {isLoadingLmTrades ? (
+        <LoadingIcon messages={[]} />
+      ) : (
+        <TableTrades
+          trades={tradesDisplay}
+          tradeCount={tradeCount}
+          fetchMore={() =>
+            dispatch(
+              fetchLmTrades({
+                manager: searched_manager,
+                player: searched_player,
+                offset: tradesDisplay.length,
+              })
+            )
+          }
+        />
+      )}
     </>
   );
 

@@ -20,6 +20,16 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
     elRef.current = document.createElement("div");
   }
 
+  // Lock body scroll when open
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen]);
+
   // mount/unmount to modal-root
   useEffect(() => {
     if (isOpen && modalRoot && elRef.current) {
