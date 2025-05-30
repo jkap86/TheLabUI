@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { updateLeagues } from "../helpers/updateLeagues";
 import axiosInstance from "@/lib/axiosInstance";
 import { Roster } from "@/lib/types/userTypes";
+import pool from "@/lib/pool";
+import { getOptimalStarters, getPlayerTotal } from "@/utils/getOptimalStarters";
+import { Allplayer } from "@/lib/types/commonTypes";
+import { getRosterStats } from "../helpers/getRosterStats";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -11,15 +15,67 @@ export async function GET(req: NextRequest) {
   const week = searchParams.get("week");
 
   try {
+    const projections_db: {
+      player_id: string;
+      stats: { [cat: string]: number };
+    }[] = await (
+      await pool.query("SELECT * FROM common WHERE name = 'projections_ros'")
+    ).rows[0].data;
+
+    const projections = Object.fromEntries(
+      projections_db.map((p) => [p.player_id, p.stats])
+    );
+
+    const allplayers_db = await (
+      await pool.query("SELECT * FROM common WHERE name = 'allplayers'")
+    ).rows[0].data;
+
+    const allplayers = Object.fromEntries(
+      allplayers_db.map((p: Allplayer) => [p.player_id, p])
+    );
+
+    const ktc_dynasty = await (
+      await pool.query("SELECT * FROM common WHERE name = 'ktc_dates_dynasty'")
+    ).rows[0].data;
+
+    const ktc_redraft = await (
+      await pool.query("SELECT * FROM common WHERE name = 'ktc_dates_fantasy'")
+    ).rows[0].data;
+
+    const ktcCurrent = {
+      dynasty:
+        ktc_dynasty[
+          Object.keys(ktc_dynasty).sort(
+            (a, b) => new Date(b).getTime() - new Date(a).getTime()
+          )[0]
+        ],
+      redraft:
+        ktc_redraft[
+          Object.keys(ktc_redraft).sort(
+            (a, b) => new Date(b).getTime() - new Date(a).getTime()
+          )[0]
+        ],
+    };
+
     const updatedLeague = await updateLeagues([league_id], [league_id], week);
 
-    const user_roster = updatedLeague[0].rosters.find(
+    const league = updatedLeague[0];
+
+    const rosters_stats = getRosterStats(
+      league,
+      projections,
+      allplayers,
+      ktcCurrent
+    );
+
+    const user_roster = rosters_stats.find(
       (roster: Roster) =>
         roster.roster_id === userRoster_id && (roster.players || []).length > 0
     );
 
     const league_to_send = {
       ...updatedLeague[0],
+      rosters: rosters_stats,
       user_roster,
     };
 

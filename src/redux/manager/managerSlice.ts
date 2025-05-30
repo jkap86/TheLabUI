@@ -170,6 +170,7 @@ const managerSlice = createSlice({
       })
       .addCase(syncLeague.fulfilled, (state, action) => {
         state.isSyncingLeague = false;
+
         state.leagues = {
           ...state.leagues,
           [action.payload.league_id]: action.payload,
@@ -221,7 +222,12 @@ const managerSlice = createSlice({
             count: action.payload.count,
             trades: [
               ...(state.lmTrades.trades || []),
-              ...action.payload.trades,
+              ...action.payload.trades.filter(
+                (t: Trade) =>
+                  !state.lmTrades.trades?.some(
+                    (t2) => t.transaction_id === t2.transaction_id
+                  )
+              ),
             ],
           };
         }

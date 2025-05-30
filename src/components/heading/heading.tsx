@@ -13,10 +13,7 @@ const Heading = () => {
   const { user } = useSelector((state: RootState) => state.manager);
 
   useEffect(() => {
-    localStorage.setItem(
-      "tab",
-      pathname.split("/")[3].replace("-", " ").toUpperCase()
-    );
+    localStorage.setItem("tab", pathname.split("/")[3]);
   }, [pathname]);
 
   return (

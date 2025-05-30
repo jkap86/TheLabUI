@@ -203,6 +203,7 @@ export async function GET(req: NextRequest) {
                   roster_id_opp,
                   username: user?.display_name || "Orphan",
                   avatar: user?.avatar || null,
+                  user_id: user?.user_id || "0",
                   league: {
                     index: leagues.data.findIndex(
                       (l) => l.league_id === league_id
@@ -233,7 +234,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-const upsertMatchups = async (matchups: Matchup[]) => {
+export const upsertMatchups = async (matchups: Matchup[]) => {
   const upsertMatchupsQuery = `
     INSERT INTO matchups (week, matchup_id, roster_id, players, starters, league_id, updated_at)
     VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -265,7 +266,7 @@ const upsertMatchups = async (matchups: Matchup[]) => {
   }
 };
 
-const getSchedule = async (week: string) => {
+export const getSchedule = async (week: string) => {
   const graphqlQuery = {
     query: `
             query batch_scores {
@@ -311,7 +312,7 @@ const getSchedule = async (week: string) => {
   return schedule_obj;
 };
 
-const getProjections = async (week: string) => {
+export const getProjections = async (week: string) => {
   const projections: {
     data: { player_id: string; stats: { [cat: string]: number } }[];
   } = await axiosInstance.get(
@@ -330,7 +331,7 @@ const getProjections = async (week: string) => {
   return projections_obj;
 };
 
-const getAllplayers = async () => {
+export const getAllplayers = async () => {
   const data = await pool.query(
     "SELECT * FROM common WHERE name = 'allplayers'"
   );

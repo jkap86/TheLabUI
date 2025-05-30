@@ -49,34 +49,41 @@ const Trade = ({
             </div>
           </td>
           <td colSpan={12}>
-            <Avatar id={trade.avatar} text={trade.name} type="L" />
+            <Avatar
+              id={trade.league.avatar}
+              text={trade.league.name}
+              type="L"
+            />
           </td>
         </tr>
         <tr>
           <td colSpan={3}>
             <div>
-              {trade.settings.type === 2
+              {trade.league.settings.type === 2
                 ? "Dynasty"
-                : trade.settings.type === 1
+                : trade.league.settings.type === 1
                 ? "Keeper"
                 : "Redraft"}
             </div>
           </td>
           <td colSpan={3}>
-            <div>{trade.settings.best_ball === 1 ? "Bestball" : "Lineup"}</div>
+            <div>
+              {trade.league.settings.best_ball === 1 ? "Bestball" : "Lineup"}
+            </div>
           </td>
           <td colSpan={3}>
             <div>
-              Start {trade.roster_positions.filter((rp) => rp !== "BN").length}
+              Start{" "}
+              {trade.league.roster_positions.filter((rp) => rp !== "BN").length}
             </div>
           </td>
           <td colSpan={4}>
             <div>
-              {trade.roster_positions
+              {trade.league.roster_positions
                 .filter((rp) => rp === "QB")
                 .length.toString()}{" "}
               QB{" "}
-              {trade.roster_positions
+              {trade.league.roster_positions
                 .filter((rp) => rp === "SUPER_FLEX")
                 .length.toString()}{" "}
               SF
@@ -84,10 +91,10 @@ const Trade = ({
           </td>
           <td colSpan={5}>
             <div>
-              {trade.roster_positions
+              {trade.league.roster_positions
                 .filter((rp) => rp === "TE")
                 .length.toString()}{" "}
-              TE {trade.scoring_settings.bonus_rec_te || "0"}
+              TE {trade.league.scoring_settings.bonus_rec_te || "0"}
               {"pt "}
               Prem
             </div>
@@ -98,7 +105,8 @@ const Trade = ({
             (r) => r.user_id === user_id
           );
 
-          const league_type = trade.settings.type === 2 ? "dynasty" : "redraft";
+          const league_type =
+            trade.league.settings.type === 2 ? "dynasty" : "redraft";
 
           const ktc_current = ktcCurrent?.[league_type];
 
@@ -279,7 +287,7 @@ const Trade = ({
 };
 
 const TradeDetail = ({ trade }: { trade: TradeType }) => {
-  const { ktcCurrent, projections } = useSelector(
+  const { ktcCurrent, projections, allplayers } = useSelector(
     (state: RootState) => state.common
   );
   const { detail_tab } = useSelector((state: RootState) => state.lmtrades);
@@ -287,19 +295,19 @@ const TradeDetail = ({ trade }: { trade: TradeType }) => {
   const tradeLeague: LeagueType = {
     index: 0,
     league_id: trade.league_id,
-    name: trade.name,
-    avatar: trade.avatar,
+    name: trade.league.name,
+    avatar: trade.league.avatar,
     season: new Date().getFullYear().toString(),
     status: "",
-    settings: trade.settings,
-    scoring_settings: trade.scoring_settings,
-    roster_positions: trade.roster_positions,
+    settings: trade.league.settings,
+    scoring_settings: trade.league.scoring_settings,
+    roster_positions: trade.league.roster_positions,
     rosters: trade.rosters.map((r) => {
       const values = Object.fromEntries(
         (r.players || []).map((player_id) => [
           player_id,
           getPlayerTotal(
-            trade.scoring_settings,
+            trade.league.scoring_settings,
             projections?.[player_id] || {}
           ),
         ])
@@ -307,19 +315,22 @@ const TradeDetail = ({ trade }: { trade: TradeType }) => {
       return {
         ...r,
         starters_optimal_dynasty: getOptimalStarters(
-          trade.roster_positions,
+          trade.league.roster_positions,
           r.players || [],
-          ktcCurrent?.dynasty || {}
+          ktcCurrent?.dynasty || {},
+          allplayers || {}
         ),
         starters_optimal_redraft: getOptimalStarters(
-          trade.roster_positions,
+          trade.league.roster_positions,
           r.players || [],
-          ktcCurrent?.redraft || {}
+          ktcCurrent?.redraft || {},
+          allplayers || {}
         ),
         starters_optimal_ppg: getOptimalStarters(
-          trade.roster_positions,
+          trade.league.roster_positions,
           r.players || [],
-          values
+          values,
+          allplayers || {}
         ),
       };
     }),

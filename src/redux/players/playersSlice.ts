@@ -28,8 +28,8 @@ const initialState: PlayersState = {
   playerLeaguesTab: "O",
   OAColumn1: "D S Rk",
   OAColumn2: "D B T5 Rk",
-  OAColumn3: "R S Rk",
-  OAColumn4: "R B T5 Rk",
+  OAColumn3: "P S Rk",
+  OAColumn4: "P B T5 Rk",
   TColumn1: "P S Rk",
   TColumn2: "P S Rk Lm",
 };

@@ -32,7 +32,7 @@ const LeaguemateTrades = ({
     (state: RootState) => state.lmtrades
   );
 
-  useFetchLmTrades();
+  //useFetchLmTrades();
 
   const searches = (
     <div className="searches">

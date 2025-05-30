@@ -43,14 +43,23 @@ th:last-of-type div.columndropdown:hover > div.columnText {
 }
 
 div.modal-content div.column-options {
-  height: 15rem;
+  height: 70%;
   overflow: auto;
   font-size: 2.5rem;
   position: relative;
+  background-color: gray;
+}
+
+div.modal-content div.column-options li {
+  box-shadow: inset 0 0 2rem black;
+  height: 8rem;
+  display: flex;
+  align-items: center;
 }
 
 div.modal-content div.column-options li.active {
   background-color: var(--color1);
   position: sticky;
   top: 0;
+  bottom: 0;
 }

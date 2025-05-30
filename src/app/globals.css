@@ -104,6 +104,10 @@ div.nav button.active {
   color: rgb(255, 0, 0);
 }
 
+.yellowb {
+  box-shadow: inset 0 0 5rem var(--color8);
+}
+
 input[type="date"] {
   font-size: 3rem;
   text-align: center;

@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
     }
   } else {
     const getLmTradesQuery = ` 
-        SELECT t.*, l.name, l.avatar, l.settings, l.scoring_settings, l.roster_positions
+        SELECT t.*, to_jsonb(l) AS league
         FROM trades t
         JOIN leagues l ON t.league_id = l.league_id
         WHERE t.managers && $1

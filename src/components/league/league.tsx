@@ -631,7 +631,7 @@ const League = ({ league, type }: LeagueProps) => {
                           />
                         )) ||
                         "-",
-                      colspan: 3,
+                      colspan: 4,
                       classname: "",
                     },
                     {
@@ -688,7 +688,7 @@ const League = ({ league, type }: LeagueProps) => {
                           (pick.roster_id === activeRoster?.roster_id
                             ? ""
                             : ` ${pick.original_user.username}`),
-                      colspan: 3,
+                      colspan: 4,
                       classname: "",
                     },
                     {

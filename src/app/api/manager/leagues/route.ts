@@ -8,6 +8,7 @@ import axiosInstance from "@/lib/axiosInstance";
 import { getOptimalStarters, getPlayerTotal } from "@/utils/getOptimalStarters";
 import { Allplayer } from "@/lib/types/commonTypes";
 import { getTotalProj } from "@/utils/getKtcRanks";
+import { getRosterStats } from "./helpers/getRosterStats";
 
 export async function GET(req: NextRequest) {
   const league_update_cutoff: Date = new Date(Date.now() - 3 * 60 * 60 * 1000);
@@ -46,8 +47,18 @@ export async function GET(req: NextRequest) {
     ).rows[0].data;
 
     const ktcCurrent = {
-      dynasty: ktc_dynasty,
-      redraft: ktc_redraft,
+      dynasty:
+        ktc_dynasty[
+          Object.keys(ktc_dynasty).sort(
+            (a, b) => new Date(b).getTime() - new Date(a).getTime()
+          )[0]
+        ],
+      redraft:
+        ktc_redraft[
+          Object.keys(ktc_redraft).sort(
+            (a, b) => new Date(b).getTime() - new Date(a).getTime()
+          )[0]
+        ],
     };
 
     const leagues = await axiosInstance.get(
@@ -89,67 +100,13 @@ export async function GET(req: NextRequest) {
       const leagues_to_send: League[] = [];
 
       [...upToDateLeagues, ...updatedLeagues].forEach((league) => {
-        const rosters_stats = league.rosters.map((roster: Roster) => {
-          const values = Object.fromEntries(
-            (roster.players || []).map((player_id) => {
-              const player_total = getPlayerTotal(
-                league.scoring_settings,
-                projections[player_id] || {}
-              );
-              return [player_id, player_total];
-            })
-          );
+        const rosters_stats = getRosterStats(
+          league,
+          projections,
+          allplayers,
+          ktcCurrent
+        );
 
-          const starters_optimal_ppg = getOptimalStarters(
-            league.roster_positions,
-            roster?.players || [],
-            values,
-            allplayers
-          );
-
-          return {
-            ...roster,
-            starters_optimal_ppg,
-            starters_optimal_redraft: getOptimalStarters(
-              league.roster_positions,
-              roster?.players || [],
-              ktcCurrent.redraft,
-              allplayers
-            ),
-            starters_optimal_dynasty: getOptimalStarters(
-              league.roster_positions,
-              roster?.players || [],
-              ktcCurrent.dynasty,
-              allplayers
-            ),
-            starter_proj: starters_optimal_ppg.reduce(
-              (acc, cur) =>
-                acc +
-                getPlayerTotal(league.scoring_settings, projections[cur] || {}),
-              0
-            ),
-            bench_top5_proj: (roster.players || [])
-              .filter((player_id) => !starters_optimal_ppg.includes(player_id))
-              .sort(
-                (a, b) =>
-                  getPlayerTotal(
-                    league.scoring_settings,
-                    projections[b] || {}
-                  ) -
-                  getPlayerTotal(league.scoring_settings, projections[a] || {})
-              )
-              .slice(0, 5)
-              .reduce(
-                (acc, cur) =>
-                  acc +
-                  getPlayerTotal(
-                    league.scoring_settings,
-                    projections[cur] || {}
-                  ),
-                0
-              ),
-          };
-        });
         const user_roster = rosters_stats.find(
           (roster: Roster) =>
             roster.user_id === user_id && (roster.players || []).length > 0

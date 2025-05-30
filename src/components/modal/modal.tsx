@@ -16,17 +16,31 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
       : null;
 
   // create container once
-  if (!elRef.current) {
-    elRef.current = document.createElement("div");
-  }
+  useEffect(() => {
+    if (!elRef.current) {
+      elRef.current = document.createElement("div");
+    }
+  }, []);
 
-  // Lock body scroll when open
+  // Lock background scroll (no one‑way bounce) by using position:fixed
   useEffect(() => {
     if (!isOpen) return;
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+
+    // 1️⃣ Remember where we were
+    const scrollY = window.scrollY;
+
+    // 2️⃣ Fix the body in place
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+
     return () => {
-      document.body.style.overflow = originalOverflow;
+      // 3️⃣ Unfix, restore original position
+      document.body.style.position = "";
+      document.body.style.top = "";
+      // 4️⃣ Jump back to where you were
+      window.scrollTo(0, scrollY);
     };
   }, [isOpen]);
 
@@ -40,7 +54,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
     }
   }, [isOpen, modalRoot]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !elRef.current) return null;
 
   return ReactDOM.createPortal(
     <div className="modal-overlay" onClick={onClose}>

@@ -11,6 +11,7 @@ import { filterLeagueIds } from "@/utils/filterLeagues";
 import PlayerLeagues from "./components/playerLeagues";
 import { colObj } from "@/lib/types/commonTypes";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
+import { getPositionMaxAge } from "@/utils/getPositionMaxAge";
 
 interface PlayersProps {
   params: Promise<{ searched: string }>;
@@ -19,7 +20,7 @@ interface PlayersProps {
 const Players = ({ params }: PlayersProps) => {
   const dispatch: AppDispatch = useDispatch();
   const { searched } = use(params);
-  const { allplayers, ktcCurrent, nflState } = useSelector(
+  const { allplayers, ktcCurrent, nflState, projections } = useSelector(
     (state: RootState) => state.common
   );
   const { leagues, playershares, type1, type2 } = useSelector(
@@ -35,7 +36,43 @@ const Players = ({ params }: PlayersProps) => {
     filterDraftClass,
   } = useSelector((state: RootState) => state.players);
 
-  const playersHeaders = [];
+  const playersHeaders = [
+    {
+      abbrev: "# Own",
+      text: "Number of Shares Owned",
+      desc: "Number of Shares Owned",
+    },
+    {
+      abbrev: "% Own",
+      text: "Percentage of Leagues with Player Owned",
+      desc: "Percentage of Leagues with Player Owned",
+    },
+    {
+      abbrev: "KTC D",
+      text: "Keep Trade Cut Dynasty Ranking",
+      desc: "Keep Trade Cut Dynasty Ranking",
+    },
+    {
+      abbrev: "KTC R",
+      text: "Keep Trade Cut Redraft Ranking",
+      desc: "Keep Trade Cut Redraft Ranking",
+    },
+    {
+      abbrev: "Ppr Proj",
+      text: "Ppr Projection",
+      desc: "Ppr Projection",
+    },
+    {
+      abbrev: "Age",
+      text: "Age",
+      desc: "Age",
+    },
+    {
+      abbrev: "Draft Class",
+      text: "Draft Class",
+      desc: "Draft Class",
+    },
+  ];
 
   const playersObj = useMemo(() => {
     const obj: { [player_id: string]: { [col_abbrev: string]: colObj } } = {};
@@ -45,6 +82,10 @@ const Players = ({ params }: PlayersProps) => {
 
       const percent_owned =
         num_owned / filterLeagueIds(Object.keys(leagues || {})).length || 0;
+
+      const draftClass =
+        parseInt(nflState?.season as string) -
+        (allplayers?.[player_id].years_exp || 0);
 
       obj[player_id] = {
         "# Own": {
@@ -78,6 +119,40 @@ const Players = ({ params }: PlayersProps) => {
             6000
           ),
           classname: "ktc",
+        },
+        "Ppr Proj": {
+          sort: projections?.[player_id]?.pts_ppr || 0,
+          text:
+            projections?.[player_id]?.pts_ppr?.toLocaleString("en-US", {
+              maximumFractionDigits: 1,
+            }) || "0",
+          trendColor: getTrendColor_Range(
+            projections?.[player_id]?.pts_ppr || 0,
+            0,
+            380
+          ),
+          classname: "stat",
+        },
+        Age: {
+          sort: allplayers?.[player_id]?.age || 0,
+          text: allplayers?.[player_id]?.age || "-",
+          trendColor: getTrendColor_Range(
+            parseInt(allplayers?.[player_id]?.age || "0"),
+            21,
+            getPositionMaxAge(allplayers?.[player_id]?.position),
+            true
+          ),
+          classname: "ktc",
+        },
+        "Draft Class": {
+          sort: draftClass,
+          text: draftClass.toString(),
+          trendColor: getTrendColor_Range(
+            draftClass,
+            parseInt(nflState?.season as string) - 10,
+            parseInt(nflState?.season as string)
+          ),
+          classname: "stat",
         },
       };
     });
@@ -176,6 +251,7 @@ const Players = ({ params }: PlayersProps) => {
       </div>
       <TableMain
         type={1}
+        headers_options={playersHeaders}
         headers={[
           {
             text: "Player",
@@ -185,28 +261,28 @@ const Players = ({ params }: PlayersProps) => {
             text: column1,
             colspan: 1,
             update: (value) => {
-              updatePlayersState({ key: "column1", value });
+              dispatch(updatePlayersState({ key: "column1", value }));
             },
           },
           {
             text: column2,
             colspan: 1,
             update: (value) => {
-              updatePlayersState({ key: "column2", value });
+              dispatch(updatePlayersState({ key: "column2", value }));
             },
           },
           {
             text: column3,
             colspan: 1,
             update: (value) => {
-              updatePlayersState({ key: "column3", value });
+              dispatch(updatePlayersState({ key: "column3", value }));
             },
           },
           {
             text: column4,
             colspan: 1,
             update: (value) => {
-              updatePlayersState({ key: "column4", value });
+              dispatch(updatePlayersState({ key: "column4", value }));
             },
           },
         ]}

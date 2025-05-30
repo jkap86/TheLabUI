@@ -1,22 +1,29 @@
 import { fetchLmTrades } from "@/redux/manager/managerActions";
 import { AppDispatch, RootState } from "@/redux/store";
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 export const useFetchLmTrades = () => {
+  const pathname = usePathname();
   const dispatch: AppDispatch = useDispatch();
-  const { leaguemates, lmTrades, lmTradeSearches } = useSelector(
-    (state: RootState) => state.manager
-  );
+  const { leaguemates, lmTrades, lmTradeSearches, isLoadingLmTrades } =
+    useSelector((state: RootState) => state.manager);
   const { searched_manager, searched_player } = useSelector(
     (state: RootState) => state.lmtrades
   );
 
   useEffect(() => {
-    if (!lmTrades.trades && Object.keys(leaguemates).length > 0) {
+    console.log({ isLoadingLmTrades, lmTrades, leaguemates });
+    if (
+      !lmTrades.trades &&
+      !isLoadingLmTrades &&
+      Object.keys(leaguemates).length > 0 &&
+      pathname.split("/")[3].toLowerCase().includes("trades")
+    ) {
       dispatch(fetchLmTrades({ offset: 0 }));
     }
-  }, [lmTrades, leaguemates]);
+  }, [lmTrades.trades, leaguemates, isLoadingLmTrades]);
 
   useEffect(() => {
     if (

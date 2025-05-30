@@ -1,10 +1,12 @@
 "use client";
 
 import Avatar from "@/components/avatar/avatar";
+import LeagueMatchups from "@/components/league-matchups/league-matchups";
 import LeagueTypeSwitch from "@/components/leagueTypeSwitch/leagueTypeSwitch";
 import LoadingIcon from "@/components/loading-icon/loading-icon";
 import TableMain from "@/components/table-main/table-main";
 import useFetchMatchups from "@/hooks/lineupchecker/useFetchMatchups";
+import useFetchAllplayers from "@/hooks/useFetchAllplayers";
 import useFetchNflState from "@/hooks/useFetchNflState";
 import { RootState } from "@/redux/store";
 import Link from "next/link";
@@ -15,6 +17,7 @@ const Matchups = () => {
     (state: RootState) => state.lineupchecker
   );
   useFetchNflState();
+  useFetchAllplayers();
   useFetchMatchups({ searched: "jkap86" });
 
   console.log({ matchups });
@@ -69,6 +72,7 @@ const Matchups = () => {
             classname: classname,
           },
         ],
+        secondary: <LeagueMatchups matchup={matchups[league_id]} />,
       };
     });
 

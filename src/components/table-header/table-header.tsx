@@ -44,25 +44,28 @@ const TableHeader = ({
           setIsOpen(false);
         }}
       >
-        <div>
-          <div className="column-options">
-            <ul>
-              {options.map((o) => {
-                return (
-                  <li
-                    key={o.abbrev}
-                    className={o.abbrev === active?.abbrev ? "active" : ""}
-                    onClick={() => setCol(o.abbrev)}
-                  >
-                    {o.text}
-                  </li>
-                );
-              })}
-            </ul>
+        <>
+          <h3>Select Column</h3>
+          <div>
+            <div className="column-options">
+              <ul>
+                {options.map((o) => {
+                  return (
+                    <li
+                      key={o.abbrev}
+                      className={o.abbrev === active?.abbrev ? "active" : ""}
+                      onClick={() => setCol(o.abbrev)}
+                    >
+                      {o.text}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            <h3>{active?.abbrev}</h3>
+            <h5>{active?.desc}</h5>
           </div>
-          <h3>{active?.abbrev}</h3>
-          <h5>{active?.desc}</h5>
-        </div>
+        </>
       </Modal>
     </>
   );

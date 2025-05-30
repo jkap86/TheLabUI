@@ -13,6 +13,7 @@ export const fetchMatchups = createAsyncThunk(
       data: {
         matchups: Matchup[];
         schedule_week: { [team: string]: { kickoff: number; opp: string } };
+        projections_week: { [player_id: string]: { [cat: string]: number } };
       };
     } = await axios.get("/api/lineupchecker", {
       params: {
@@ -61,6 +62,60 @@ export const fetchMatchups = createAsyncThunk(
       }
     });
 
-    return { matchups: matchups_obj, schedule: matchups.data.schedule_week };
+    return {
+      matchups: matchups_obj,
+      schedule: matchups.data.schedule_week,
+      projections: matchups.data.projections_week,
+    };
+  }
+);
+
+export const syncMatchup = createAsyncThunk(
+  "syncMatchup",
+  async (
+    {
+      league_id,
+      user_id,
+      index,
+    }: {
+      league_id: string;
+      user_id: string;
+      index: number;
+    },
+    { getState }
+  ) => {
+    const state = getState() as RootState;
+    const { nflState } = state.common;
+
+    const league_matchups: { data: Matchup[] } = await axios.get(
+      "/api/lineupchecker/sync",
+      {
+        params: {
+          league_id,
+          week: Math.max(1, nflState?.week as number),
+          user_id,
+          index,
+        },
+      }
+    );
+
+    const matchup_user = league_matchups.data.find(
+      (matchup) => matchup.roster_id === matchup.roster_id_user
+    );
+
+    const matchup_opp = league_matchups.data.find(
+      (matchup) => matchup.roster_id === matchup.roster_id_opp
+    );
+
+    if (matchup_user && matchup_opp) {
+      return {
+        user_matchup: matchup_user as Matchup,
+        opp_matchup: matchup_opp as Matchup,
+        league_matchups: league_matchups.data,
+        league_index: matchup_user?.league.index,
+        league_name: matchup_user?.league.name,
+        league_avatar: matchup_user?.league.avatar,
+      };
+    }
   }
 );

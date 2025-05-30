@@ -3,7 +3,7 @@ import store, { RootState } from "@/redux/store";
 
 export const position_map: { [key: string]: string[] } = {
   QB: ["QB"],
-  RB: ["RB", "FB"],
+  RB: ["RB"],
   WR: ["WR"],
   TE: ["TE"],
   FLEX: ["RB", "FB", "WR", "TE"],
@@ -63,7 +63,7 @@ export const getOptimalStarters = (
     value: number;
   }[] = [];
 
-  roster_positions
+  (roster_positions || [])
     .filter((slot) => position_map[slot])
     .forEach((slot, index) => {
       if (position_map[slot]) {
@@ -136,9 +136,10 @@ export const getOptimalStartersLineupCheck = (
     optimal_player_id: string;
     player_position: string;
     value: number;
+    kickoff: number;
   }[] = [];
 
-  roster_positions
+  (roster_positions || [])
     .filter((slot) => position_map[slot])
     .forEach((slot, index) => {
       if (position_map[slot]) {
@@ -158,6 +159,8 @@ export const getOptimalStartersLineupCheck = (
           optimal_player_id: optimal_player.player_id,
           player_position: optimal_player.position,
           value: optimal_player.value,
+          kickoff:
+            schedule[allplayers[optimal_player.player_id]?.team]?.kickoff || 0,
         });
       } else {
         optimal_starters.push({
@@ -166,11 +169,28 @@ export const getOptimalStartersLineupCheck = (
           optimal_player_id: starters[index],
           player_position: "-",
           value: 0,
+          kickoff: 0,
         });
       }
     });
 
-  const starters_optimal = optimal_starters.map((os) => os.optimal_player_id);
+  const starters_optimal = optimal_starters.map((so) => {
+    return {
+      ...so,
+      earlyInFlex: optimal_starters.some(
+        (os) =>
+          so.kickoff < os.kickoff &&
+          position_map[so.slot__index.split("__")[0]].length >
+            position_map[os.slot__index.split("__")[0]].length
+      ),
+      lateNotInFlex: optimal_starters.some(
+        (os) =>
+          so.kickoff > os.kickoff &&
+          position_map[so.slot__index.split("__")[0]].length <
+            position_map[os.slot__index.split("__")[0]].length
+      ),
+    };
+  });
   const projection_optimal = optimal_starters.reduce(
     (acc, cur) => acc + cur.value,
     0
@@ -187,7 +207,7 @@ export const getPlayerTotal = (
   scoring_settings: { [key: string]: number },
   stat_obj: { [key: string]: number }
 ) => {
-  const projection = Object.keys(stat_obj)
+  const projection = Object.keys(stat_obj || {})
     .filter((key) => Object.keys(scoring_settings).includes(key))
     .reduce((acc, cur) => acc + scoring_settings[cur] * stat_obj[cur], 0);
 

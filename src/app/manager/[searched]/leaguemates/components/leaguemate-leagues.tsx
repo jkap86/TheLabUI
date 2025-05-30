@@ -4,7 +4,12 @@ import TableMain from "@/components/table-main/table-main";
 import { League as LeagueType } from "@/lib/types/userTypes";
 import { updateLeaguematesState } from "@/redux/leaguemates/leaguematesSlice";
 import { AppDispatch, RootState } from "@/redux/store";
-import { getLeaguesLeaguemateObj, getLeaguesObj } from "@/utils/getLeaguesObj";
+import {
+  getLeaguesLeaguemateObj,
+  getLeaguesObj,
+  leagueHeaders,
+  leagueLeaguemateHeaders,
+} from "@/utils/getLeaguesObj";
 import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -93,7 +98,7 @@ const LeaguemateLeagues = ({
       <div className="nav"></div>
       <TableMain
         type={2}
-        headers_options={leaguemateLeaguesHeaders}
+        headers_options={[...leagueHeaders, ...leagueLeaguemateHeaders]}
         headers_sort={[0, 1, 2, 3, 4]}
         headers={[
           {

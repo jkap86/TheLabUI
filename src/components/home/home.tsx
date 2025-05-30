@@ -37,8 +37,8 @@ const Homepage = ({
         <Image src={thelablogo} alt="logo" className="home-logo" />
 
         <div className="home-title">
-          <h1>The Lab {title}</h1>
-
+          <h1>The Lab</h1>
+          <h1>{title}</h1>
           {/* <select
             className="nav-options"
             value={tab}

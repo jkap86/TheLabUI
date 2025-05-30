@@ -50,11 +50,13 @@ export type Roster = {
   ties: number;
   fp: number;
   fpa: number;
-  starters_optimal_dynasty: string[];
-  starters_optimal_redraft: string[];
-  starters_optimal_ppg: string[];
+  starters_optimal_dynasty?: string[];
+  starters_optimal_redraft?: string[];
+  starters_optimal_ppg?: string[];
   starter_proj?: number;
   bench_top5_proj?: number;
+  starters_ktc_dynasty?: number;
+  bench_top5_ktc_dynasty?: number;
 };
 
 export type Draftpick = {
@@ -92,13 +94,23 @@ export type Matchup = {
   league_id: string;
   players: string[];
   starters: string[];
-  starters_optimal?: string[];
+  starters_optimal?: {
+    index: number;
+    slot__index: string;
+    optimal_player_id: string;
+    player_position: string;
+    value: number;
+    kickoff: number;
+    earlyInFlex: boolean;
+    lateNotInFlex: boolean;
+  }[];
   week?: number;
   updated_at?: Date;
   roster_id_user: number;
   roster_id_opp: number | undefined;
   username: string;
   avatar: string | null;
+  user_id: string;
   league: {
     index: number;
     name: string;
@@ -124,11 +136,7 @@ export type Trade = {
     old: string;
     new: string;
   }[];
-  avatar: string;
-  name: string;
-  settings: LeagueSettings;
-  scoring_settings: { [key: string]: number };
-  roster_positions: string[];
+  league: League;
   managers: string[];
   rosters: Roster[];
   league_id: string;

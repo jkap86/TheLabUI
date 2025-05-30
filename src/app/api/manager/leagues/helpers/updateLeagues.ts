@@ -70,7 +70,9 @@ export const updateLeagues = async (
                 league.data,
                 rosters.data,
                 users.data,
-                upcomingDraft,
+                upcomingDraft?.status === "complete"
+                  ? undefined
+                  : upcomingDraft,
                 tradedPicks.data
               );
             } else {

@@ -11,6 +11,7 @@ import { useFetchUserAndLeagues } from "@/hooks/manager/useFetchUserAndLeagues";
 import Heading from "@/components/heading/heading";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
 import useFetchRosProj from "@/hooks/useFetchRosProj";
+import { useFetchLmTrades } from "@/hooks/manager/useFetchLmTrades";
 
 interface LoadCommonDataProps {
   searched: string;
@@ -36,7 +37,7 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
   useFetchRosProj();
 
   useFetchUserAndLeagues(searched);
-
+  useFetchLmTrades();
   return (
     <>
       <ShNavbar />
