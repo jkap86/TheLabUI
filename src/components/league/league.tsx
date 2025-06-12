@@ -53,12 +53,14 @@ const League = ({ league, type }: LeagueProps) => {
     });
 
     league.rosters.forEach((r) => {
-      const p_s = r.starters_optimal_ppg.reduce(
+      const p_s = (r.starters_optimal_ppg || []).reduce(
         (acc, cur) => acc + players[cur],
         0
       );
       const p_b_5 = (r.players || [])
-        .filter((player_id) => !r.starters_optimal_ppg.includes(player_id))
+        .filter(
+          (player_id) => !(r.starters_optimal_ppg || []).includes(player_id)
+        )
         .sort((a, b) => players[b] - players[a])
         .slice(0, 5)
         .reduce((acc, cur) => acc + players[cur], 0);
@@ -136,11 +138,12 @@ const League = ({ league, type }: LeagueProps) => {
     } = {};
 
     league.rosters.forEach((r) => {
-      const ktc_d_s = getKtcAvgValue(r.starters_optimal_dynasty, "D");
+      const ktc_d_s = getKtcAvgValue(r.starters_optimal_dynasty || [], "D");
       const ktc_d_b_5 = getKtcAvgValue(
         (r.players || [])
           .filter(
-            (player_id) => !r.starters_optimal_dynasty.includes(player_id)
+            (player_id) =>
+              !(r.starters_optimal_dynasty || []).includes(player_id)
           )
           .sort(
             (a, b) =>
@@ -149,11 +152,12 @@ const League = ({ league, type }: LeagueProps) => {
           .slice(0, 5),
         "D"
       );
-      const ktc_r_s = getKtcAvgValue(r.starters_optimal_redraft, "R");
+      const ktc_r_s = getKtcAvgValue(r.starters_optimal_redraft || [], "R");
       const ktc_r_b_5 = getKtcAvgValue(
         (r.players || [])
           .filter(
-            (player_id) => !r.starters_optimal_redraft.includes(player_id)
+            (player_id) =>
+              !(r.starters_optimal_redraft || []).includes(player_id)
           )
           .sort(
             (a, b) =>
@@ -162,7 +166,7 @@ const League = ({ league, type }: LeagueProps) => {
           .slice(0, 5),
         "R"
       );
-      const ktc_s_d_qb = r.starters_optimal_dynasty
+      const ktc_s_d_qb = (r.starters_optimal_dynasty || [])
         .filter((player_id) => allplayers?.[player_id]?.position === "QB")
         .reduce((acc, cur) => acc + (ktcCurrent?.dynasty?.[cur] || 0), 0);
 
@@ -170,11 +174,11 @@ const League = ({ league, type }: LeagueProps) => {
         .filter(
           (player_id) =>
             allplayers?.[player_id]?.position === "QB" &&
-            !r.starters_optimal_dynasty.includes(player_id)
+            !(r.starters_optimal_dynasty || []).includes(player_id)
         )
         .reduce((acc, cur) => acc + (ktcCurrent?.dynasty?.[cur] || 0), 0);
 
-      const ktc_s_d_rb = r.starters_optimal_dynasty
+      const ktc_s_d_rb = (r.starters_optimal_dynasty || [])
         .filter((player_id) => allplayers?.[player_id]?.position === "RB")
         .reduce((acc, cur) => acc + (ktcCurrent?.dynasty?.[cur] || 0), 0);
 
@@ -182,15 +186,20 @@ const League = ({ league, type }: LeagueProps) => {
         .filter(
           (player_id) =>
             allplayers?.[player_id]?.position === "RB" &&
-            !r.starters_optimal_dynasty.includes(player_id)
+            !(r.starters_optimal_dynasty || []).includes(player_id)
         )
         .reduce((acc, cur) => acc + (ktcCurrent?.dynasty?.[cur] || 0), 0);
 
-      const P_s = getTotalProj(r.starters_optimal_ppg, league.scoring_settings);
+      const P_s = getTotalProj(
+        r.starters_optimal_ppg || [],
+        league.scoring_settings
+      );
 
       const p_b_5 = getTotalProj(
         (r.players || [])
-          .filter((player_id) => !r.starters_optimal_ppg.includes(player_id))
+          .filter(
+            (player_id) => !(r.starters_optimal_ppg || []).includes(player_id)
+          )
           .sort(
             (a, b) =>
               getPlayerTotal(league.scoring_settings, projections?.[b] || {}) -
@@ -282,7 +291,7 @@ const League = ({ league, type }: LeagueProps) => {
     });
 
     return obj;
-  }, []);
+  }, [league]);
 
   const playersHeaders = [
     {

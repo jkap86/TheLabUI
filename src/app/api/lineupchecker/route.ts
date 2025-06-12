@@ -1,14 +1,13 @@
 import axiosInstance from "@/lib/axiosInstance";
 import pool from "@/lib/pool";
 import { Allplayer } from "@/lib/types/commonTypes";
-import { MatchupDb } from "@/lib/types/dbTypes";
 import {
   SleeperLeague,
   SleeperMatchup,
   SleeperRoster,
   SleeperUser,
 } from "@/lib/types/sleeperApiTypes";
-import { League, Matchup, Roster } from "@/lib/types/userTypes";
+import { Matchup, Roster } from "@/lib/types/userTypes";
 import { getOptimalStartersLineupCheck } from "@/utils/getOptimalStarters";
 import { NextRequest, NextResponse } from "next/server";
 

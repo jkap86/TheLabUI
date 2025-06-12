@@ -82,6 +82,51 @@ export const getRosterStats = (
         )
         .slice(0, 5)
         .reduce((acc, cur) => acc + (ktcCurrent.dynasty[cur] || 0), 0),
+
+      starter_qb_proj: starters_optimal_ppg
+        .filter((player_id) => allplayers[player_id]?.position === "QB")
+        .reduce(
+          (acc, cur) =>
+            acc +
+            getPlayerTotal(league.scoring_settings, projections[cur] || {}),
+          0
+        ),
+      bench_top_qb_proj: (roster.players || [])
+        .filter(
+          (player_id) =>
+            !starters_optimal_ppg.includes(player_id) &&
+            allplayers[player_id]?.position === "QB"
+        )
+        .sort(
+          (a, b) =>
+            getPlayerTotal(league.scoring_settings, projections[b] || {}) -
+            getPlayerTotal(league.scoring_settings, projections[a] || {})
+        )
+        .slice(0, 1)
+        .reduce(
+          (acc, cur) =>
+            acc +
+            getPlayerTotal(league.scoring_settings, projections[cur] || {}),
+          0
+        ),
+
+      starter_rb_proj: starters_optimal_ppg
+        .filter((player_id) => allplayers[player_id]?.position === "RB")
+        .reduce(
+          (acc, cur) =>
+            acc +
+            getPlayerTotal(league.scoring_settings, projections[cur] || {}),
+          0
+        ),
+
+      starter_wr_proj: starters_optimal_ppg
+        .filter((player_id) => allplayers[player_id]?.position === "WR")
+        .reduce(
+          (acc, cur) =>
+            acc +
+            getPlayerTotal(league.scoring_settings, projections[cur] || {}),
+          0
+        ),
     };
   });
 };

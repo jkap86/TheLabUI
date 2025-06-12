@@ -72,6 +72,11 @@ const Players = ({ params }: PlayersProps) => {
       text: "Draft Class",
       desc: "Draft Class",
     },
+    {
+      abbrev: "KTC Pts R",
+      text: "Projected Points to KTC Dynasty Value Ratio",
+      desc: "Projected Points to KTC Dynasty Value Ratio",
+    },
   ];
 
   const playersObj = useMemo(() => {
@@ -86,6 +91,10 @@ const Players = ({ params }: PlayersProps) => {
       const draftClass =
         parseInt(nflState?.season as string) -
         (allplayers?.[player_id].years_exp || 0);
+
+      const ktcDynastyPointsRatio =
+        (projections?.[player_id]?.pts_ppr || 0) /
+          (ktcCurrent?.dynasty[player_id] || 0) || 0;
 
       obj[player_id] = {
         "# Own": {
@@ -152,6 +161,12 @@ const Players = ({ params }: PlayersProps) => {
             parseInt(nflState?.season as string) - 10,
             parseInt(nflState?.season as string)
           ),
+          classname: "stat",
+        },
+        "KTC Pts R": {
+          sort: ktcDynastyPointsRatio,
+          text: Math.round(ktcDynastyPointsRatio * 10000).toString(),
+          trendColor: {},
           classname: "stat",
         },
       };

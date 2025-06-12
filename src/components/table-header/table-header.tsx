@@ -1,8 +1,6 @@
-import { JSX, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./table-header.css";
 import Modal from "../modal/modal";
-import Search from "../search/search";
-import { text } from "stream/consumers";
 
 interface TableHeaderProps {
   options: { text: string; abbrev: string; desc: string }[];
@@ -21,12 +19,6 @@ const TableHeader = ({
   useEffect(() => {
     isOpen && setCol(columnText);
   }, [columnText, isOpen]);
-
-  const search_options = options.map((o) => ({
-    id: o.abbrev,
-    text: o.text,
-    display: <>{o.abbrev}</>,
-  }));
 
   const active = options.find((so) => so.abbrev === col);
 
@@ -49,17 +41,19 @@ const TableHeader = ({
           <div>
             <div className="column-options">
               <ul>
-                {options.map((o) => {
-                  return (
-                    <li
-                      key={o.abbrev}
-                      className={o.abbrev === active?.abbrev ? "active" : ""}
-                      onClick={() => setCol(o.abbrev)}
-                    >
-                      {o.text}
-                    </li>
-                  );
-                })}
+                {options
+                  .sort((a, b) => (a.text < b.text ? -1 : 1))
+                  .map((o) => {
+                    return (
+                      <li
+                        key={o.abbrev}
+                        className={o.abbrev === active?.abbrev ? "active" : ""}
+                        onClick={() => setCol(o.abbrev)}
+                      >
+                        {o.text}
+                      </li>
+                    );
+                  })}
               </ul>
             </div>
             <h3>{active?.abbrev}</h3>

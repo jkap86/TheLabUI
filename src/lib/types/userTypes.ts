@@ -57,6 +57,10 @@ export type Roster = {
   bench_top5_proj?: number;
   starters_ktc_dynasty?: number;
   bench_top5_ktc_dynasty?: number;
+  starter_qb_proj?: number;
+  bench_top_qb_proj?: number;
+  starter_rb_proj?: number;
+  starter_wr_proj?: number;
 };
 
 export type Draftpick = {
