@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateLeagues } from "../helpers/updateLeagues";
-import axiosInstance from "@/lib/axiosInstance";
 import { Roster } from "@/lib/types/userTypes";
 import pool from "@/lib/pool";
-import { getOptimalStarters, getPlayerTotal } from "@/utils/getOptimalStarters";
 import { Allplayer } from "@/lib/types/commonTypes";
 import { getRosterStats } from "../helpers/getRosterStats";
 

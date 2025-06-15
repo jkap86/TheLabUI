@@ -3,10 +3,10 @@ import {
   Trade as TradeType,
 } from "@/lib/types/userTypes";
 import "./table-trades.css";
-import { JSX, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Avatar from "../avatar/avatar";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/redux/store";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 import { getDraftPickId } from "@/utils/getPickId";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
 import League from "../league/league";
@@ -364,14 +364,6 @@ const TableTrades = ({
   tradeCount: number;
   fetchMore: () => void;
 }) => {
-  const dispatch: AppDispatch = useDispatch();
-  const { allplayers } = useSelector((state: RootState) => state.common);
-  const { playershares, pickshares, leaguemates } = useSelector(
-    (state: RootState) => state.manager
-  );
-  const { searched_manager, searched_player } = useSelector(
-    (state: RootState) => state.lmtrades
-  );
   const [activeTrade, setActiveTrade] = useState("");
   const [page, setPage] = useState(1);
 

@@ -4,7 +4,6 @@ import { AppDispatch, RootState } from "@/redux/store";
 import { use } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ManagerLayout from "../manager-layout";
-import { useFetchLmTrades } from "@/hooks/manager/useFetchLmTrades";
 import TableTrades from "@/components/table-trades/table-trades";
 import Search from "@/components/search/search";
 import { updatedLmtradesState } from "@/redux/lmtrades/lmtradesSlice";
@@ -31,8 +30,6 @@ const LeaguemateTrades = ({
   const { searched_player, searched_manager } = useSelector(
     (state: RootState) => state.lmtrades
   );
-
-  //useFetchLmTrades();
 
   const searches = (
     <div className="searches">

@@ -4,7 +4,6 @@ import Avatar from "@/components/avatar/avatar";
 import LoadingIcon from "@/components/loading-icon/loading-icon";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
 import TableMain from "@/components/table-main/table-main";
-import useFetchPicktrackerPicks from "@/hooks/picktracker/useFetchPicktrackerPicks";
 import useFetchAllplayers from "@/hooks/useFetchAllplayers";
 import axios from "axios";
 import Link from "next/link";

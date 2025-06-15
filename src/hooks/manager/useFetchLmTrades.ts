@@ -14,7 +14,6 @@ export const useFetchLmTrades = () => {
   );
 
   useEffect(() => {
-    console.log({ isLoadingLmTrades, lmTrades, leaguemates });
     if (
       !lmTrades.trades &&
       !isLoadingLmTrades &&
@@ -23,7 +22,7 @@ export const useFetchLmTrades = () => {
     ) {
       dispatch(fetchLmTrades({ offset: 0 }));
     }
-  }, [lmTrades.trades, leaguemates, isLoadingLmTrades]);
+  }, [lmTrades.trades, leaguemates, isLoadingLmTrades, pathname, dispatch]);
 
   useEffect(() => {
     if (
@@ -40,5 +39,5 @@ export const useFetchLmTrades = () => {
         })
       );
     }
-  }, [searched_manager, searched_player]);
+  }, [searched_manager, searched_player, dispatch, lmTradeSearches]);
 };

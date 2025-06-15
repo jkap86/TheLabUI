@@ -7,13 +7,11 @@ import {
 } from "@/lib/types/sleeperApiTypes";
 import { getOptimalStartersLineupCheck } from "@/utils/getOptimalStarters";
 import { NextRequest, NextResponse } from "next/server";
-import {
-  getAllplayers,
-  getProjections,
-  getSchedule,
-  upsertMatchups,
-} from "../route";
+import { upsertMatchups } from "../helpers/upsertMatchups";
 import { Matchup } from "@/lib/types/userTypes";
+import { getSchedule } from "../helpers/getSchedule";
+import { getProjections } from "../helpers/getProjections";
+import { getAllplayers } from "../helpers/getAllplayers";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);

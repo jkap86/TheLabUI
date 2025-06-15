@@ -1,6 +1,5 @@
 import { Allplayer } from "@/lib/types/commonTypes";
 import { LeagueDb } from "@/lib/types/dbTypes";
-import { League } from "@/lib/types/userTypes";
 import { getOptimalStarters, getPlayerTotal } from "@/utils/getOptimalStarters";
 
 export const getRosterStats = (

@@ -1,6 +1,5 @@
 import axiosInstance from "@/lib/axiosInstance";
 import pool from "@/lib/pool";
-import { Allplayer } from "@/lib/types/commonTypes";
 import {
   SleeperLeague,
   SleeperMatchup,
@@ -10,6 +9,10 @@ import {
 import { Matchup, Roster } from "@/lib/types/userTypes";
 import { getOptimalStartersLineupCheck } from "@/utils/getOptimalStarters";
 import { NextRequest, NextResponse } from "next/server";
+import { upsertMatchups } from "./helpers/upsertMatchups";
+import { getSchedule } from "./helpers/getSchedule";
+import { getProjections } from "./helpers/getProjections";
+import { getAllplayers } from "./helpers/getAllplayers";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -99,7 +102,7 @@ export async function GET(req: NextRequest) {
             m.scoring_settings,
             schedule_week
           );
-        const { rosters, ...up_to_date_matchup } = {
+        const { ...up_to_date_matchup } = {
           ...m,
           roster_id_user,
           roster_id_opp,
@@ -232,116 +235,3 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ err }, { status: 500 });
   }
 }
-
-export const upsertMatchups = async (matchups: Matchup[]) => {
-  const upsertMatchupsQuery = `
-    INSERT INTO matchups (week, matchup_id, roster_id, players, starters, league_id, updated_at)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
-    ON CONFLICT (week, roster_id, league_id) DO UPDATE SET
-      matchup_id = EXCLUDED.matchup_id,
-      players = EXCLUDED.players,
-      starters = EXCLUDED.starters,
-      updated_at = EXCLUDED.updated_at;
-  `;
-
-  for (const matchup of matchups) {
-    try {
-      await pool.query(upsertMatchupsQuery, [
-        matchup.week,
-        matchup.matchup_id,
-        matchup.roster_id,
-        matchup.players,
-        matchup.starters,
-        matchup.league_id,
-        new Date(),
-      ]);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.log(err.message);
-      } else {
-        console.log({ err });
-      }
-    }
-  }
-};
-
-export const getSchedule = async (week: string) => {
-  const graphqlQuery = {
-    query: `
-            query batch_scores {
-                scores(
-                    sport: "nfl"
-                    season_type: "regular"
-                    season: "${process.env.SEASON}"
-                    week: ${week}
-                ) {
-                    
-                    game_id
-                    metadata 
-                    status
-                    start_time
-                }
-            }
-            `,
-  };
-  const schedule_week = await axiosInstance.post(
-    "https://sleeper.com/graphql",
-    graphqlQuery
-  );
-
-  const schedule_obj: { [team: string]: { kickoff: number; opp: string } } = {};
-
-  schedule_week.data.data.scores.forEach(
-    (game: {
-      start_time: number;
-      metadata: { away_team: string; home_team: string };
-    }) => {
-      schedule_obj[game.metadata.away_team] = {
-        kickoff: game.start_time,
-        opp: "@ " + game.metadata.home_team,
-      };
-
-      schedule_obj[game.metadata.home_team] = {
-        kickoff: game.start_time,
-        opp: "vs " + game.metadata.away_team,
-      };
-    }
-  );
-
-  return schedule_obj;
-};
-
-export const getProjections = async (week: string) => {
-  const projections: {
-    data: { player_id: string; stats: { [cat: string]: number } }[];
-  } = await axiosInstance.get(
-    `https://api.sleeper.com/projections/nfl/${process.env.SEASON}/${week}?season_type=regular`
-  );
-
-  const projections_obj: { [player_id: string]: { [cat: string]: number } } =
-    {};
-
-  projections.data
-    .filter((p) => p.stats.pts_ppr)
-    .forEach((p) => {
-      projections_obj[p.player_id] = p.stats;
-    });
-
-  return projections_obj;
-};
-
-export const getAllplayers = async () => {
-  const data = await pool.query(
-    "SELECT * FROM common WHERE name = 'allplayers'"
-  );
-
-  const players_obj: { [player_id: string]: Allplayer } = {};
-
-  data.rows[0].data
-    .filter((player: Allplayer) => player.active)
-    .forEach((player: Allplayer) => {
-      players_obj[player.player_id] = player;
-    });
-
-  return players_obj;
-};

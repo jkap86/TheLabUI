@@ -6,11 +6,9 @@ import { updateLeaguematesState } from "@/redux/leaguemates/leaguematesSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import {
   getLeaguesLeaguemateObj,
-  getLeaguesObj,
   leagueHeaders,
   leagueLeaguemateHeaders,
 } from "@/utils/getLeaguesObj";
-import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 const LeaguemateLeagues = ({
@@ -26,49 +24,6 @@ const LeaguemateLeagues = ({
   );
   const { leaguesColumn1, leaguesColumn2, leaguesColumn3, leaguesColumn4 } =
     useSelector((state: RootState) => state.leaguemates);
-
-  const leaguemateLeaguesHeaders = [
-    {
-      abbrev: "KTC S D QB Rk",
-      text: "KTC Starter Dynasty QB Rk",
-      desc: "KTC S D QB Rk",
-    },
-    {
-      abbrev: "KTC S D QB Rk L",
-      text: "KTC S D QB Rk L",
-      desc: "KTC S D QB Rk L",
-    },
-    {
-      abbrev: "KTC S D RB Rk",
-      text: "KTC S D RB Rk",
-      desc: "KTC S D RB Rk",
-    },
-    {
-      abbrev: "KTC S D RB Rk L",
-      text: "KTC S D RB Rk L",
-      desc: "KTC S D RB Rk L",
-    },
-    {
-      abbrev: "KTC B D QB Rk",
-      text: "KTC B D QB Rk",
-      desc: "KTC B D QB Rk",
-    },
-    {
-      abbrev: "KTC B D QB Rk L",
-      text: "KTC B D QB Rk L",
-      desc: "KTC B D QB Rk L",
-    },
-    {
-      abbrev: "KTC B D RB Rk",
-      text: "KTC B D RB Rk",
-      desc: "KTC B D RB Rk",
-    },
-    {
-      abbrev: "KTC B D RB Rk L",
-      text: "KTC B D RB Rk L",
-      desc: "KTC B D RB Rk L",
-    },
-  ];
 
   const lmObj = getLeaguesLeaguemateObj(
     league_ids.map((league_id) => {
@@ -164,7 +119,7 @@ const LeaguemateLeagues = ({
                 leaguesColumn2,
                 leaguesColumn3,
                 leaguesColumn4,
-              ].map((col, index) => {
+              ].map((col) => {
                 const { text, sort, trendColor, classname } = leaguesObj[
                   league_id
                 ]?.[col] || {

@@ -1,7 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { League, Roster, User } from "@/lib/types/userTypes";
-import { getOptimalStarters, getPlayerTotal } from "@/utils/getOptimalStarters";
+import { League, User } from "@/lib/types/userTypes";
 import { getPlayerShares } from "@/utils/getPlayerShares";
 import { RootState } from "../store";
 import { getLeaguesObj } from "@/utils/getLeaguesObj";
@@ -23,20 +22,9 @@ export const fetchLeagues = createAsyncThunk(
     {
       user,
       nflState,
-      ktcCurrent,
-      projections,
     }: {
       user: User;
       nflState: { [key: string]: string | number };
-      ktcCurrent: {
-        redraft: { [player_id: string]: number };
-        dynasty: { [player_id: string]: number };
-      };
-      projections: {
-        [player_id: string]: {
-          [cat: string]: number;
-        };
-      };
     },
     { dispatch }
   ) => {
@@ -121,7 +109,6 @@ export const syncLeague = createAsyncThunk(
     { getState }
   ) => {
     const state = getState() as RootState;
-    const { ktcCurrent, projections } = state.common;
     const { leagues } = state.manager;
 
     const response = await axios.get("/api/manager/leagues/sync", {

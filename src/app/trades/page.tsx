@@ -1,7 +1,6 @@
 "use client";
 
 import Avatar from "@/components/avatar/avatar";
-import LoadingIcon from "@/components/loading-icon/loading-icon";
 import Search from "@/components/search/search";
 import TableTrades from "@/components/table-trades/table-trades";
 import useFetchAllplayers from "@/hooks/useFetchAllplayers";

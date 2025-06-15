@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useMemo } from "react";
+import { use } from "react";
 import ManagerLayout from "../manager-layout";
 import TableMain from "@/components/table-main/table-main";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,10 +8,9 @@ import { AppDispatch, RootState } from "@/redux/store";
 import Avatar from "@/components/avatar/avatar";
 import { filterLeagueIds } from "@/utils/filterLeagues";
 import { League as LeagueType } from "@/lib/types/userTypes";
-import { getKtcAvgValue } from "@/utils/getKtcRanks";
 import League from "@/components/league/league";
 import { updateLeaguesState } from "@/redux/leagues/leaguesSlice";
-import { getLeaguesObj, leagueHeaders } from "@/utils/getLeaguesObj";
+import { leagueHeaders } from "@/utils/getLeaguesObj";
 
 interface LeaguesProps {
   params: Promise<{ searched: string }>;

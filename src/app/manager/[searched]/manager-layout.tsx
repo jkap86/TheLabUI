@@ -22,14 +22,8 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
   const { isLoadingCommon, errorCommon } = useSelector(
     (state: RootState) => state.common
   );
-  const {
-    isLoadingUser,
-    errorUser,
-    isLoadingLeagues,
-    leagues,
-    leaguesProgress,
-    errorLeagues,
-  } = useSelector((state: RootState) => state.manager);
+  const { isLoadingUser, errorUser, isLoadingLeagues, leaguesProgress } =
+    useSelector((state: RootState) => state.manager);
 
   useFetchNflState();
   useFetchAllplayers();
@@ -43,7 +37,7 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
       <ShNavbar />
       {errorCommon.length > 0 &&
         errorCommon.map((err) => {
-          return <h5>{err}</h5>;
+          return <h5 key={err}>{err}</h5>;
         })}
 
       {errorUser}

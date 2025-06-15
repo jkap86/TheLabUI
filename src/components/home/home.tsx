@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import "./home.css";
 import Image from "next/image";
 import thelablogo from "../../../public/images/thelab.png";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
 import Link from "next/link";
 
 const Homepage = ({

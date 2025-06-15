@@ -17,7 +17,7 @@ const TableHeader = ({
   const [col, setCol] = useState("");
 
   useEffect(() => {
-    isOpen && setCol(columnText);
+    if (isOpen) setCol(columnText);
   }, [columnText, isOpen]);
 
   const active = options.find((so) => so.abbrev === col);
@@ -32,7 +32,7 @@ const TableHeader = ({
       <Modal
         isOpen={isOpen}
         onClose={() => {
-          col.trim() && setColumnText(col);
+          if (col.trim()) setColumnText(col);
           setIsOpen(false);
         }}
       >

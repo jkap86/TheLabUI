@@ -5,15 +5,10 @@ import ManagerLayout from "../manager-layout";
 import TableMain from "@/components/table-main/table-main";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
-import {
-  LeaguematesState,
-  updateLeaguematesState,
-} from "@/redux/leaguemates/leaguematesSlice";
+import { updateLeaguematesState } from "@/redux/leaguemates/leaguematesSlice";
 import Avatar from "@/components/avatar/avatar";
 import { colObj } from "@/lib/types/commonTypes";
 import { filterLeagueIds } from "@/utils/filterLeagues";
-import { Roster } from "@/lib/types/userTypes";
-import { getKtcAvgValue } from "@/utils/getKtcRanks";
 import LeaguemateLeagues from "./components/leaguemate-leagues";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
 
@@ -81,13 +76,13 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
 
         common.forEach((league_id) => {
           const ranks = [...(leagues || {})[league_id].rosters].sort((a, b) => {
-            const total_a = [...a[group]]
+            const total_a = [...(a[group] || [])]
               .filter(
                 (player_id) => allplayers?.[player_id]?.position === position
               )
               .reduce((acc, cur) => acc + (ktcCurrent?.[ktcType][cur] || 0), 0);
 
-            const total_b = [...b[group]]
+            const total_b = [...(b[group] || [])]
               .filter(
                 (player_id) => allplayers?.[player_id]?.position === position
               )
@@ -123,7 +118,7 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
               .filter(
                 (player_id) =>
                   allplayers?.[player_id]?.position === position &&
-                  !a[group].includes(player_id)
+                  !(a[group] || []).includes(player_id)
               )
               .reduce((acc, cur) => acc + (ktcCurrent?.[ktcType][cur] || 0), 0);
 
@@ -131,7 +126,7 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
               .filter(
                 (player_id) =>
                   allplayers?.[player_id]?.position === position &&
-                  !b[group].includes(player_id)
+                  !(b[group] || []).includes(player_id)
               )
               .reduce((acc, cur) => acc + (ktcCurrent?.[ktcType][cur] || 0), 0);
 
@@ -352,7 +347,7 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
       };
     });
     return obj;
-  }, [leaguemates, type1, type2]);
+  }, [leaguemates, type1, type2, allplayers, ktcCurrent, leagues]);
 
   const component = (
     <TableMain
@@ -426,7 +421,7 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
                 colspan: 2,
                 classname: "",
               },
-              ...[column1, column2, column3, column4].map((col, index) => {
+              ...[column1, column2, column3, column4].map((col) => {
                 const { text, sort, trendColor, classname } = leaguematesObj[
                   user_id
                 ]?.[col] || {

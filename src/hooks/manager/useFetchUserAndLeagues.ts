@@ -43,7 +43,7 @@ export const useFetchUserAndLeagues = (searched: string) => {
       !errorLeagues
     ) {
       console.log("FETCH LEAGUES");
-      dispatch(fetchLeagues({ user, nflState, ktcCurrent, projections }));
+      dispatch(fetchLeagues({ user, nflState }));
     }
   }, [
     dispatch,
@@ -56,5 +56,6 @@ export const useFetchUserAndLeagues = (searched: string) => {
     leagues,
     isLoadingLeagues,
     errorLeagues,
+    searched,
   ]);
 };

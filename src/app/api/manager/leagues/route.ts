@@ -5,9 +5,7 @@ import pool from "@/lib/pool";
 import { updateLeagues } from "./helpers/updateLeagues";
 import { League, Roster } from "@/lib/types/userTypes";
 import axiosInstance from "@/lib/axiosInstance";
-import { getOptimalStarters, getPlayerTotal } from "@/utils/getOptimalStarters";
 import { Allplayer } from "@/lib/types/commonTypes";
-import { getTotalProj } from "@/utils/getKtcRanks";
 import { getRosterStats } from "./helpers/getRosterStats";
 
 export async function GET(req: NextRequest) {

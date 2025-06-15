@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import pool from "@/lib/pool";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const { date: date_dynasty, values: values_dynasty } = await getKtcValues(
       "dynasty"
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (err) {
+  } catch {
     return NextResponse.json("Error fetching KTC values", { status: 500 });
   }
 }

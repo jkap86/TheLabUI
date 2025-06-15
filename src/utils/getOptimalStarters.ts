@@ -1,5 +1,4 @@
 import { Allplayer } from "@/lib/types/commonTypes";
-import store, { RootState } from "@/redux/store";
 
 export const position_map: { [key: string]: string[] } = {
   QB: ["QB"],

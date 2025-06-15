@@ -1,8 +1,8 @@
 import axiosInstance from "@/lib/axiosInstance";
 import pool from "@/lib/pool";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const data = await pool.query(
       "SELECT * FROM common WHERE name = 'projections_ros'"

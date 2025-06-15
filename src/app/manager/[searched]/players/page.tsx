@@ -1,6 +1,6 @@
 "use client";
 
-import { JSX, use, useMemo } from "react";
+import { use, useMemo } from "react";
 import ManagerLayout from "../manager-layout";
 import TableMain from "@/components/table-main/table-main";
 import { useDispatch, useSelector } from "react-redux";
@@ -173,7 +173,16 @@ const Players = ({ params }: PlayersProps) => {
     });
 
     return obj;
-  }, [playershares, type1, type2]);
+  }, [
+    playershares,
+    type1,
+    type2,
+    allplayers,
+    ktcCurrent,
+    leagues,
+    nflState,
+    projections,
+  ]);
 
   const draftClasses = Array.from(
     new Set(

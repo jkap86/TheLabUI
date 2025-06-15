@@ -1,7 +1,7 @@
 import pool from "@/lib/pool";
 import axiosInstance from "@/lib/axiosInstance";
 import { LeagueDb, UserDb } from "@/lib/types/dbTypes";
-import { Draftpick, League, Roster, Trade } from "@/lib/types/userTypes";
+import { Draftpick, Roster, Trade } from "@/lib/types/userTypes";
 import {
   SleeperDraft,
   SleeperDraftpick,
@@ -16,6 +16,7 @@ export const updateLeagues = async (
   dbLeagueIds: string[],
   week: string | null
 ) => {
+  console.log({ dbLeagueIds: dbLeagueIds.length });
   const usersDb: UserDb[] = [];
   const updatedLeagues: LeagueDb[] = [];
   const tradesBatch: Trade[] = [];

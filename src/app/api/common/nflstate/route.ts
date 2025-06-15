@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import pool from "@/lib/pool";
 import axiosInstance from "@/lib/axiosInstance";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const data = await pool.query(
       "SELECT * FROM common WHERE name = 'nflState'"
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 
       return NextResponse.json(data, { status: 200 });
     }
-  } catch (err) {
+  } catch {
     return NextResponse.json("Error fetching nfl state", { status: 500 });
   }
 }

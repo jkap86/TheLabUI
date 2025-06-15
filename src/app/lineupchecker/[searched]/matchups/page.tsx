@@ -13,7 +13,7 @@ import Link from "next/link";
 import { useSelector } from "react-redux";
 
 const Matchups = () => {
-  const { isLoadingMatchups, matchups, errorMatchups, schedule } = useSelector(
+  const { isLoadingMatchups, matchups } = useSelector(
     (state: RootState) => state.lineupchecker
   );
   useFetchNflState();

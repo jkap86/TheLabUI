@@ -1,7 +1,7 @@
 import { League as LeagueType } from "@/lib/types/userTypes";
 import { usePathname } from "next/navigation";
 import TableMain from "../table-main/table-main";
-import { JSX, useEffect, useMemo, useState } from "react";
+import { JSX, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { getKtcAvgValue, getTotalProj } from "@/utils/getKtcRanks";
@@ -72,7 +72,7 @@ const League = ({ league, type }: LeagueProps) => {
     });
 
     return { players, teams };
-  }, [league]);
+  }, [league, projections]);
 
   const teamsHeaders = [
     {
@@ -291,7 +291,7 @@ const League = ({ league, type }: LeagueProps) => {
     });
 
     return obj;
-  }, [league]);
+  }, [league, allplayers, ktcCurrent, projections, projectionsObj]);
 
   const playersHeaders = [
     {
@@ -358,7 +358,7 @@ const League = ({ league, type }: LeagueProps) => {
     });
 
     return obj;
-  }, [activeRoster]);
+  }, [activeRoster, ktcCurrent, league, projections, projectionsObj]);
 
   return (
     <>
@@ -412,7 +412,7 @@ const League = ({ league, type }: LeagueProps) => {
         ]}
         headers_sort={[2, 3]}
         headers_options={teamsHeaders}
-        data={[...league.rosters].map((roster, index) => {
+        data={[...league.rosters].map((roster) => {
           const defaultColumn = {
             text: "-",
             sort: 0,

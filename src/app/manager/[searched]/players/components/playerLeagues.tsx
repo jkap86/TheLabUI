@@ -7,11 +7,9 @@ import { AppDispatch, RootState } from "@/redux/store";
 import { filterLeagueIds } from "@/utils/filterLeagues";
 import {
   getLeaguesLeaguemateObj,
-  getLeaguesObj,
   leagueHeaders,
   leagueLeaguemateHeaders,
 } from "@/utils/getLeaguesObj";
-import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 const OwnedAvailableLeagues = ({ league_ids }: { league_ids: string[] }) => {
@@ -253,7 +251,7 @@ type PlayerLeaguesProps = {
   player_leagues: Playershare;
 };
 
-const PlayerLeagues = ({ player_id, player_leagues }: PlayerLeaguesProps) => {
+const PlayerLeagues = ({ player_leagues }: PlayerLeaguesProps) => {
   const dispatch: AppDispatch = useDispatch();
   const { playerLeaguesTab } = useSelector((state: RootState) => state.players);
 

@@ -31,7 +31,7 @@ const LeagueMatchups = ({
   const [activeIndex, setActiveIndex] = useState<string | false>(false);
 
   const slot_options = matchup.user_matchup.players.filter(
-    (player_id, index) =>
+    (player_id) =>
       !matchup.user_matchup.starters.includes(player_id) &&
       position_map[
         matchup.user_matchup.league.roster_positions[

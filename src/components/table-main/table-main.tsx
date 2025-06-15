@@ -1,4 +1,4 @@
-import { JSX, useEffect, useRef, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import Search from "../search/search";
 import "./table-main.css";
 import SortIcon from "../sort-icon/sort-icon";
@@ -96,11 +96,11 @@ const TableMain = ({
     column: 0 | 1 | 2 | 3 | 4;
     asc: boolean;
   }>({ column: 0, asc: false });
-  const initalRef = useRef(false);
 
   useEffect(() => {
-    headers_sort && setSortBy({ column: headers_sort[0] as 0 | 1, asc: false });
-  }, []);
+    if (headers_sort)
+      setSortBy({ column: headers_sort[0] as 0 | 1, asc: false });
+  }, [headers_sort]);
 
   const body = !half
     ? data
@@ -132,8 +132,8 @@ const TableMain = ({
   }, [sortBy, searched]);
 
   useEffect(() => {
-    sendActive && sendActive(active);
-  }, [active]);
+    if (sendActive) sendActive(active);
+  }, [active, sendActive]);
 
   return (
     <>
