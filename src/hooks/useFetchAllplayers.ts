@@ -17,5 +17,5 @@ export default function useFetchAllplayers() {
       errorCommon.length === 0
     )
       dispatch(fetchAllplayers());
-  }, [dispatch, allplayers, isLoadingCommon]);
+  }, [dispatch, allplayers, isLoadingCommon, errorCommon]);
 }

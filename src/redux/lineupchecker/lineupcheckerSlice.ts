@@ -12,6 +12,10 @@ export interface LineupcheckerState {
       league_index: number;
       league_name: string;
       league_avatar: string | null;
+      settings: {
+        best_ball: number;
+        type: number;
+      };
     };
   };
   schedule: { [team: string]: { kickoff: number; opp: string } };

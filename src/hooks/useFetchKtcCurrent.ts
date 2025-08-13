@@ -18,5 +18,5 @@ export default function useFetchKtcCurrent() {
     ) {
       dispatch(fetchKtc());
     }
-  }, [dispatch, ktcCurrent, isLoadingCommon]);
+  }, [dispatch, ktcCurrent, isLoadingCommon, errorCommon]);
 }

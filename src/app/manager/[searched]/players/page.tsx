@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useMemo } from "react";
+import { use, useMemo, useState } from "react";
 import ManagerLayout from "../manager-layout";
 import TableMain from "@/components/table-main/table-main";
 import { useDispatch, useSelector } from "react-redux";
@@ -35,6 +35,10 @@ const Players = ({ params }: PlayersProps) => {
     filterPosition,
     filterDraftClass,
   } = useSelector((state: RootState) => state.players);
+  const [sortBy, setSortBy] = useState<{
+    column: 0 | 1 | 2 | 3 | 4;
+    asc: boolean;
+  }>({ column: 1, asc: false });
 
   const playersHeaders = [
     {
@@ -83,10 +87,16 @@ const Players = ({ params }: PlayersProps) => {
     const obj: { [player_id: string]: { [col_abbrev: string]: colObj } } = {};
 
     Object.keys(playershares).forEach((player_id) => {
-      const num_owned = filterLeagueIds(playershares[player_id].owned).length;
+      const num_owned = filterLeagueIds(playershares[player_id].owned, {
+        type1,
+        type2,
+        leagues,
+      }).length;
 
       const percent_owned =
-        num_owned / filterLeagueIds(Object.keys(leagues || {})).length || 0;
+        num_owned /
+          filterLeagueIds(Object.keys(leagues || {}), { type1, type2, leagues })
+            .length || 0;
 
       const draftClass =
         parseInt(nflState?.season as string) -
@@ -390,6 +400,8 @@ const Players = ({ params }: PlayersProps) => {
             }),
         ]}
         placeholder="Players"
+        sortBy={sortBy}
+        setSortBy={setSortBy}
       />
     </>
   );

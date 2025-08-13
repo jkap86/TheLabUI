@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useMemo } from "react";
+import { use, useMemo, useState } from "react";
 import ManagerLayout from "../manager-layout";
 import TableMain from "@/components/table-main/table-main";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,6 +24,10 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
   const { column1, column2, column3, column4 } = useSelector(
     (state: RootState) => state.leaguemates
   );
+  const [sortBy, setSortBy] = useState<{
+    column: 0 | 1 | 2 | 3 | 4;
+    asc: boolean;
+  }>({ column: 1, asc: false });
 
   const leaguemateHeaders = [
     {
@@ -58,7 +62,11 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
     const obj: { [user_id: string]: { [col_abbrev: string]: colObj } } = {};
 
     Object.keys(leaguemates).forEach((lm_user_id) => {
-      const common = filterLeagueIds(leaguemates[lm_user_id].leagues);
+      const common = filterLeagueIds(leaguemates[lm_user_id].leagues, {
+        type1,
+        type2,
+        leagues,
+      });
 
       const avg_league_size =
         common.reduce(
@@ -391,11 +399,18 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
       data={Object.keys(leaguemates)
         .filter(
           (user_id) =>
-            filterLeagueIds(leaguemates[user_id].leagues).length > 0 &&
-            parseInt(user_id)
+            filterLeagueIds(leaguemates[user_id].leagues, {
+              type1,
+              type2,
+              leagues,
+            }).length > 0 && parseInt(user_id)
         )
         .map((user_id) => {
-          const common = filterLeagueIds(leaguemates[user_id].leagues);
+          const common = filterLeagueIds(leaguemates[user_id].leagues, {
+            type1,
+            type2,
+            leagues,
+          });
           return {
             id: user_id,
             search: {
@@ -446,6 +461,8 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
           };
         })}
       placeholder="Leaguemates"
+      sortBy={sortBy}
+      setSortBy={setSortBy}
     />
   );
 

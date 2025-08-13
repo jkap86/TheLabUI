@@ -17,5 +17,5 @@ export default function useFetchNflState() {
       errorCommon.length === 0
     )
       dispatch(fetchNflState());
-  }, [dispatch, nflState, isLoadingCommon]);
+  }, [dispatch, nflState, isLoadingCommon, errorCommon]);
 }

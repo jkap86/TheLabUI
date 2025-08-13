@@ -18,7 +18,7 @@ export const fetchMatchups = createAsyncThunk(
     } = await axios.get("/api/lineupchecker", {
       params: {
         searched,
-        week: Math.max(1, nflState?.week as number),
+        week: Math.max(1, nflState?.leg as number),
       },
     });
 
@@ -30,6 +30,10 @@ export const fetchMatchups = createAsyncThunk(
         league_index: number;
         league_name: string;
         league_avatar: string | null;
+        settings: {
+          best_ball: number;
+          type: number;
+        };
       };
     } = {};
 
@@ -58,6 +62,10 @@ export const fetchMatchups = createAsyncThunk(
           league_index: matchup_user.league.index,
           league_name: matchup_user.league.name,
           league_avatar: matchup_user.league.avatar,
+          settings: {
+            best_ball: matchup_user.league.settings.best_ball,
+            type: matchup_user.league.settings.type,
+          },
         };
       }
     });
@@ -115,6 +123,10 @@ export const syncMatchup = createAsyncThunk(
         league_index: matchup_user?.league.index,
         league_name: matchup_user?.league.name,
         league_avatar: matchup_user?.league.avatar,
+        settings: {
+          best_ball: matchup_user.league.settings.best_ball,
+          type: matchup_user.league.settings.type,
+        },
       };
     }
   }

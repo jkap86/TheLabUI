@@ -20,6 +20,17 @@ type entry = {
 };
 
 type TableMainProps = {
+  sortBy?: {
+    column: 0 | 1 | 2 | 3 | 4;
+    asc: boolean;
+  };
+  setSortBy?: ({
+    column,
+    asc,
+  }: {
+    column: 0 | 1 | 2 | 3 | 4;
+    asc: boolean;
+  }) => void;
   type: number;
   headers: {
     text: string;
@@ -78,6 +89,8 @@ const PageNumbers = ({
 };
 
 const TableMain = ({
+  sortBy,
+  setSortBy,
   type,
   headers,
   headers_sort,
@@ -92,41 +105,31 @@ const TableMain = ({
   const [searched, setSearched] = useState<false | string>(false);
   const [page, setPage] = useState(1);
   const [active, setActive] = useState<false | string>(false);
-  const [sortBy, setSortBy] = useState<{
-    column: 0 | 1 | 2 | 3 | 4;
-    asc: boolean;
-  }>({ column: 0, asc: false });
-
+  /*
   useEffect(() => {
     if (headers_sort)
-      setSortBy({ column: headers_sort[0] as 0 | 1, asc: false });
+      setSortBy({ column: headers_sort[0] as 0 | 1 | 2 | 3 | 4, asc: false });
   }, [headers_sort]);
-
+*/
   const body = !half
     ? data
         .filter((d) => !searched || d.id === searched)
         .sort((a, b) => {
-          return sortBy.asc
-            ? (a.columns[sortBy.column].sort || 0) >
-              (b.columns[sortBy.column].sort || 0)
+          return sortBy
+            ? sortBy.asc
+              ? (a.columns[sortBy.column].sort || 0) >
+                (b.columns[sortBy.column].sort || 0)
+                ? 1
+                : -1
+              : (b.columns[sortBy.column].sort || 0) >
+                (a.columns[sortBy.column].sort || 0)
               ? 1
               : -1
-            : (b.columns[sortBy.column].sort || 0) >
-              (a.columns[sortBy.column].sort || 0)
-            ? 1
-            : -1;
+            : 1;
         })
         .slice((page - 1) * 25, (page - 1) * 25 + 25)
     : data;
-  /*
-  useEffect(() => {
-    if (initalRef.current) {
-      if (setPage) setPage(1);
-    } else {
-      initalRef.current = true;
-    }
-  }, [searched, sortBy, setPage, initalRef]);
-*/
+
   useEffect(() => {
     setPage(1);
   }, [sortBy, searched]);
@@ -191,7 +194,7 @@ const TableMain = ({
                     colSpan={h.colspan}
                     className={"sort_header " + h.classname}
                   >
-                    {headers_sort?.includes(index) ? (
+                    {sortBy && setSortBy && headers_sort?.includes(index) ? (
                       <SortIcon
                         colNum={index as 0 | 1 | 2 | 3 | 4}
                         sortBy={sortBy}
@@ -229,15 +232,17 @@ const TableMain = ({
           {body.length > 0 ? (
             body
               .sort((a, b) => {
-                return sortBy.asc
-                  ? (a.columns[sortBy.column].sort || 0) >
-                    (b.columns[sortBy.column].sort || 0)
+                return sortBy
+                  ? sortBy.asc
+                    ? (a.columns[sortBy.column].sort || 0) >
+                      (b.columns[sortBy.column].sort || 0)
+                      ? 1
+                      : -1
+                    : (b.columns[sortBy.column].sort || 0) >
+                      (a.columns[sortBy.column].sort || 0)
                     ? 1
                     : -1
-                  : (b.columns[sortBy.column].sort || 0) >
-                    (a.columns[sortBy.column].sort || 0)
-                  ? 1
-                  : -1;
+                  : 1;
               })
               .map((row, rowIndex: number) => {
                 return (
@@ -271,7 +276,7 @@ const TableMain = ({
                                     "content " +
                                     col.classname +
                                     (headers_sort?.includes(index) &&
-                                    sortBy.column === index
+                                    sortBy?.column === index
                                       ? " sort"
                                       : "")
                                   }

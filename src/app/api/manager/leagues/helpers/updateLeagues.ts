@@ -16,7 +16,6 @@ export const updateLeagues = async (
   dbLeagueIds: string[],
   week: string | null
 ) => {
-  console.log({ dbLeagueIds: dbLeagueIds.length });
   const usersDb: UserDb[] = [];
   const updatedLeagues: LeagueDb[] = [];
   const tradesBatch: Trade[] = [];

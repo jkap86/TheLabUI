@@ -18,5 +18,5 @@ export default function useFetchRosProj() {
     ) {
       dispatch(fetchProjections());
     }
-  }, [dispatch, isLoadingCommon, projections]);
+  }, [dispatch, isLoadingCommon, projections, errorCommon]);
 }

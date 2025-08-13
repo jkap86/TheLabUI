@@ -9,19 +9,22 @@ import useFetchMatchups from "@/hooks/lineupchecker/useFetchMatchups";
 import useFetchAllplayers from "@/hooks/useFetchAllplayers";
 import useFetchNflState from "@/hooks/useFetchNflState";
 import { RootState } from "@/redux/store";
+
 import Link from "next/link";
+import { use } from "react";
 import { useSelector } from "react-redux";
 
-const Matchups = () => {
+const Matchups = ({ params }: { params: Promise<{ searched: string }> }) => {
+  const { searched } = use(params);
+  const { type1, type2 } = useSelector((state: RootState) => state.manager);
   const { isLoadingMatchups, matchups } = useSelector(
     (state: RootState) => state.lineupchecker
   );
   useFetchNflState();
   useFetchAllplayers();
-  useFetchMatchups({ searched: "jkap86" });
+  useFetchMatchups({ searched });
 
   console.log({ matchups });
-
   const headers = [
     {
       text: "League",
@@ -36,6 +39,16 @@ const Matchups = () => {
   ];
 
   const data = Object.keys(matchups)
+    .filter(
+      (league_id) =>
+        (type1 === "All" ||
+          (type1 === "Redraft" && matchups[league_id].settings.type !== 2) ||
+          (type1 === "Dynasty" && matchups[league_id].settings.type === 2)) &&
+        (type2 === "All" ||
+          (type2 === "Bestball" &&
+            matchups[league_id].settings.best_ball === 1) ||
+          (type2 === "Lineup" && matchups[league_id].settings.best_ball !== 1))
+    )
     .sort((a, b) => matchups[a].league_index - matchups[b].league_index)
     .map((league_id) => {
       const matchup = matchups[league_id];
@@ -43,7 +56,7 @@ const Matchups = () => {
       const { text, classname } =
         matchup.user_matchup.projection_current ===
         matchup.user_matchup.projection_optimal
-          ? { text: <>&#10004;</>, classname: "green" }
+          ? { text: <>&#10004;&#xfe0e;</>, classname: "green" }
           : {
               text: (
                 matchup.user_matchup.projection_optimal -

@@ -34,6 +34,10 @@ const League = ({ league, type }: LeagueProps) => {
   const { teamsColumn1, teamsColumn2, playersColumn1, playersColumn2 } =
     useSelector((state: RootState) => state.standings);
   const [activeRosterId, setActiveRosterId] = useState<false | string>(false);
+  const [sortBy, setSortBy] = useState<{
+    column: 0 | 1 | 2 | 3 | 4;
+    asc: boolean;
+  }>({ column: 2, asc: false });
 
   const activeRoster = league.rosters.find(
     (r) => r.roster_id.toString() === activeRosterId
@@ -469,6 +473,8 @@ const League = ({ league, type }: LeagueProps) => {
         })}
         placeholder=""
         sendActive={(active: string | false) => setActiveRosterId(active)}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
       />
       {activeRoster ? (
         <TableMain

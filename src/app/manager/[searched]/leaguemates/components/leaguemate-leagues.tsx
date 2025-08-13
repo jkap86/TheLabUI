@@ -9,6 +9,7 @@ import {
   leagueHeaders,
   leagueLeaguemateHeaders,
 } from "@/utils/getLeaguesObj";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 const LeaguemateLeagues = ({
@@ -24,6 +25,10 @@ const LeaguemateLeagues = ({
   );
   const { leaguesColumn1, leaguesColumn2, leaguesColumn3, leaguesColumn4 } =
     useSelector((state: RootState) => state.leaguemates);
+  const [sortBy, setSortBy] = useState<{
+    column: 0 | 1 | 2 | 3 | 4;
+    asc: boolean;
+  }>({ column: 0, asc: false });
 
   const lmObj = getLeaguesLeaguemateObj(
     league_ids.map((league_id) => {
@@ -112,7 +117,9 @@ const LeaguemateLeagues = ({
                 ),
                 colspan: 2,
                 classname: "",
-                sort: -(leagues?.[league_id].index || 0),
+                sort: sortBy.asc
+                  ? leagues?.[league_id]?.name
+                  : -(leagues?.[league_id].index || 0),
               },
               ...[
                 leaguesColumn1,
@@ -143,6 +150,8 @@ const LeaguemateLeagues = ({
           };
         })}
         placeholder=""
+        sortBy={sortBy}
+        setSortBy={setSortBy}
       />
     </>
   );

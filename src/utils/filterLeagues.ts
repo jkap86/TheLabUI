@@ -1,10 +1,11 @@
-import store, { RootState } from "@/redux/store";
+import type { RootState } from "@/redux/store";
 
-export const filterLeagueIds = (league_ids: string[]) => {
-  const state: RootState = store.getState();
+type ManagerSlice = Pick<RootState["manager"], "type1" | "type2" | "leagues">;
 
-  const { type1, type2, leagues } = state.manager;
-
+export const filterLeagueIds = (
+  league_ids: string[],
+  { type1, type2, leagues }: ManagerSlice
+) => {
   return league_ids.filter((league_id) => {
     const condition1 =
       type1 === "All" ||

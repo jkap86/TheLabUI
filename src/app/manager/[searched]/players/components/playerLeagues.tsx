@@ -10,16 +10,21 @@ import {
   leagueHeaders,
   leagueLeaguemateHeaders,
 } from "@/utils/getLeaguesObj";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 const OwnedAvailableLeagues = ({ league_ids }: { league_ids: string[] }) => {
   const dispatch: AppDispatch = useDispatch();
-  const { leagues, leaguesValuesObj } = useSelector(
+  const { leagues, leaguesValuesObj, type1, type2 } = useSelector(
     (state: RootState) => state.manager
   );
   const { OAColumn1, OAColumn2, OAColumn3, OAColumn4 } = useSelector(
     (state: RootState) => state.players
   );
+  const [sortBy, setSortBy] = useState<{
+    column: 0 | 1 | 2 | 3 | 4;
+    asc: boolean;
+  }>({ column: 0, asc: false });
 
   const leaguesObj = leaguesValuesObj;
 
@@ -63,48 +68,54 @@ const OwnedAvailableLeagues = ({ league_ids }: { league_ids: string[] }) => {
         },
       ]}
       headers_sort={[0, 1, 2, 3, 4]}
-      data={filterLeagueIds(league_ids).map((league_id) => {
-        return {
-          id: league_id,
-          search: {
-            text: leagues?.[league_id]?.name || league_id,
-            display: (
-              <Avatar
-                id={leagues?.[league_id]?.avatar}
-                text={leagues?.[league_id]?.name || league_id}
-                type="L"
-              />
-            ),
-          },
-          columns: [
-            {
-              text: (
+      data={filterLeagueIds(league_ids, { type1, type2, leagues }).map(
+        (league_id) => {
+          return {
+            id: league_id,
+            search: {
+              text: leagues?.[league_id]?.name || league_id,
+              display: (
                 <Avatar
                   id={leagues?.[league_id]?.avatar}
                   text={leagues?.[league_id]?.name || league_id}
                   type="L"
                 />
               ),
-              sort: leagues?.[league_id]?.name || league_id,
-              colspan: 2,
-              classname: "",
             },
-            ...[OAColumn1, OAColumn2, OAColumn3, OAColumn4].map((column) => {
-              return {
-                text: leaguesObj?.[league_id]?.[column]?.text,
-                sort: leaguesObj?.[league_id]?.[column]?.sort,
-                colspan: 1,
-                classname: leaguesObj?.[league_id]?.[column]?.classname,
-                style: leaguesObj?.[league_id]?.[column]?.trendColor,
-              };
-            }),
-          ],
-          secondary: (
-            <League type={3} league={leagues?.[league_id] as LeagueType} />
-          ),
-        };
-      })}
+            columns: [
+              {
+                text: (
+                  <Avatar
+                    id={leagues?.[league_id]?.avatar}
+                    text={leagues?.[league_id]?.name || league_id}
+                    type="L"
+                  />
+                ),
+                sort: sortBy.asc
+                  ? leagues?.[league_id]?.name
+                  : leagues?.[league_id]?.index && -leagues[league_id].index,
+                colspan: 2,
+                classname: "",
+              },
+              ...[OAColumn1, OAColumn2, OAColumn3, OAColumn4].map((column) => {
+                return {
+                  text: leaguesObj?.[league_id]?.[column]?.text,
+                  sort: leaguesObj?.[league_id]?.[column]?.sort,
+                  colspan: 1,
+                  classname: leaguesObj?.[league_id]?.[column]?.classname,
+                  style: leaguesObj?.[league_id]?.[column]?.trendColor,
+                };
+              }),
+            ],
+            secondary: (
+              <League type={3} league={leagues?.[league_id] as LeagueType} />
+            ),
+          };
+        }
+      )}
       placeholder="Leagues"
+      sortBy={sortBy}
+      setSortBy={setSortBy}
     />
   );
 };
@@ -119,12 +130,16 @@ const TakenLeagues = ({
   }[];
 }) => {
   const dispatch: AppDispatch = useDispatch();
-  const { leagues, leaguesValuesObj } = useSelector(
+  const { leagues, leaguesValuesObj, type1, type2 } = useSelector(
     (state: RootState) => state.manager
   );
   const { TColumn1, TColumn2 } = useSelector(
     (state: RootState) => state.players
   );
+  const [sortBy, setSortBy] = useState<{
+    column: 0 | 1 | 2 | 3 | 4;
+    asc: boolean;
+  }>({ column: 0, asc: false });
 
   const lmObj = getLeaguesLeaguemateObj(
     leaguesTaken.map((l) => {
@@ -179,69 +194,74 @@ const TakenLeagues = ({
           },
         },
       ]}
-      data={filterLeagueIds(leaguesTaken.map((l) => l.league_id)).map(
-        (league_id) => {
-          const lmRosterId = leaguesTaken.find(
-            (lt) => lt.league_id === league_id
-          )?.lm_roster_id;
-          const lmRoster = leagues?.[league_id]?.rosters?.find(
-            (r) => r.roster_id === lmRosterId
-          );
+      data={filterLeagueIds(
+        leaguesTaken.map((l) => l.league_id),
+        { type1, type2, leagues }
+      ).map((league_id) => {
+        const lmRosterId = leaguesTaken.find(
+          (lt) => lt.league_id === league_id
+        )?.lm_roster_id;
+        const lmRoster = leagues?.[league_id]?.rosters?.find(
+          (r) => r.roster_id === lmRosterId
+        );
 
-          return {
-            id: league_id,
-            search: {
-              text: leagues?.[league_id]?.name || league_id,
-              display: (
+        return {
+          id: league_id,
+          search: {
+            text: leagues?.[league_id]?.name || league_id,
+            display: (
+              <Avatar
+                id={leagues?.[league_id]?.avatar}
+                text={leagues?.[league_id]?.name || league_id}
+                type="L"
+              />
+            ),
+          },
+          columns: [
+            {
+              text: (
                 <Avatar
                   id={leagues?.[league_id]?.avatar}
                   text={leagues?.[league_id]?.name || league_id}
                   type="L"
                 />
               ),
+              colspan: 2,
+              classname: "",
+              sort: sortBy.asc
+                ? leagues?.[league_id]?.name
+                : -(leagues?.[league_id]?.index || 0),
             },
-            columns: [
-              {
-                text: (
-                  <Avatar
-                    id={leagues?.[league_id]?.avatar}
-                    text={leagues?.[league_id]?.name || league_id}
-                    type="L"
-                  />
-                ),
-                colspan: 2,
-                classname: "",
-                sort: -(leagues?.[league_id]?.index || 0),
-              },
-              {
-                text: (
-                  <Avatar
-                    id={lmRoster?.avatar}
-                    text={lmRoster?.username || "-"}
-                    type="U"
-                  />
-                ),
-                colspan: 2,
-                classname: "",
-                sort: lmRoster?.username || "Orphan",
-              },
-              ...[TColumn1, TColumn2].map((column) => {
-                return {
-                  text: leaguesObj[league_id][column]?.text || "-",
-                  colspan: 1,
-                  classname: leaguesObj[league_id][column]?.classname,
-                  style: leaguesObj[league_id][column]?.trendColor,
-                  sort: leaguesObj[league_id][column]?.sort || "-",
-                };
-              }),
-            ],
-            secondary: (
-              <League type={3} league={leagues?.[league_id] as LeagueType} />
-            ),
-          };
-        }
-      )}
+            {
+              text: (
+                <Avatar
+                  id={lmRoster?.avatar}
+                  text={lmRoster?.username || "-"}
+                  type="U"
+                />
+              ),
+              colspan: 2,
+              classname: "",
+              sort: lmRoster?.username || "Orphan",
+            },
+            ...[TColumn1, TColumn2].map((column) => {
+              return {
+                text: leaguesObj[league_id][column]?.text || "-",
+                colspan: 1,
+                classname: leaguesObj[league_id][column]?.classname,
+                style: leaguesObj[league_id][column]?.trendColor,
+                sort: leaguesObj[league_id][column]?.sort || "-",
+              };
+            }),
+          ],
+          secondary: (
+            <League type={3} league={leagues?.[league_id] as LeagueType} />
+          ),
+        };
+      })}
       placeholder=""
+      sortBy={sortBy}
+      setSortBy={setSortBy}
     />
   );
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import ManagerLayout from "../manager-layout";
 import TableMain from "@/components/table-main/table-main";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,12 +19,16 @@ interface LeaguesProps {
 const Leagues = ({ params }: LeaguesProps) => {
   const dispatch: AppDispatch = useDispatch();
   const { searched } = use(params);
-  const { leagues, leaguesValuesObj } = useSelector(
+  const { leagues, leaguesValuesObj, type1, type2 } = useSelector(
     (state: RootState) => state.manager
   );
   const { column1, column2, column3, column4 } = useSelector(
     (state: RootState) => state.leagues
   );
+  const [sortBy, setSortBy] = useState<{
+    column: 0 | 1 | 2 | 3 | 4;
+    asc: boolean;
+  }>({ column: 0, asc: false });
 
   const leaguesObj = leaguesValuesObj;
 
@@ -64,7 +68,11 @@ const Leagues = ({ params }: LeaguesProps) => {
               dispatch(updateLeaguesState({ key: "column4", value: value })),
           },
         ]}
-        data={filterLeagueIds(Object.keys(leagues || {})).map((league_id) => {
+        data={filterLeagueIds(Object.keys(leagues || {}), {
+          type1,
+          type2,
+          leagues,
+        }).map((league_id) => {
           const league = leagues?.[league_id] as LeagueType;
 
           return {
@@ -78,7 +86,7 @@ const Leagues = ({ params }: LeaguesProps) => {
             columns: [
               {
                 text: <Avatar id={league.avatar} text={league.name} type="L" />,
-                sort: -league.index,
+                sort: sortBy.asc ? league.name : -league.index,
                 colspan: 2,
                 classname: "",
               },
@@ -96,6 +104,8 @@ const Leagues = ({ params }: LeaguesProps) => {
           };
         })}
         placeholder="Leagues"
+        sortBy={sortBy}
+        setSortBy={setSortBy}
       />
     </>
   );
