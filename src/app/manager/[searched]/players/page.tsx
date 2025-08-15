@@ -40,6 +40,8 @@ const Players = ({ params }: PlayersProps) => {
     asc: boolean;
   }>({ column: 1, asc: false });
 
+  console.log({ leagues });
+
   const playersHeaders = [
     {
       abbrev: "# Own",

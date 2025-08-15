@@ -1,10 +1,55 @@
 import pool from "@/lib/pool";
+import { Allplayer } from "@/lib/types/commonTypes";
 import { NextRequest, NextResponse } from "next/server";
+import { getRosterStats } from "../leagues/helpers/getRosterStats";
+import { Trade } from "@/lib/types/userTypes";
 
 export async function POST(req: NextRequest) {
   const formData = await req.json();
 
   const { leaguemate_ids, offset, limit, manager, player } = formData;
+
+  const projections_db: {
+    player_id: string;
+    stats: { [cat: string]: number };
+  }[] = await (
+    await pool.query("SELECT * FROM common WHERE name = 'projections_ros'")
+  ).rows[0].data;
+
+  const projections = Object.fromEntries(
+    projections_db.map((p) => [p.player_id, p.stats])
+  );
+
+  const allplayers_db = await (
+    await pool.query("SELECT * FROM common WHERE name = 'allplayers'")
+  ).rows[0].data;
+
+  const allplayers = Object.fromEntries(
+    allplayers_db.map((p: Allplayer) => [p.player_id, p])
+  );
+
+  const ktc_dynasty = await (
+    await pool.query("SELECT * FROM common WHERE name = 'ktc_dates_dynasty'")
+  ).rows[0].data;
+
+  const ktc_redraft = await (
+    await pool.query("SELECT * FROM common WHERE name = 'ktc_dates_fantasy'")
+  ).rows[0].data;
+
+  const ktcCurrent = {
+    dynasty:
+      ktc_dynasty[
+        Object.keys(ktc_dynasty).sort(
+          (a, b) => new Date(b).getTime() - new Date(a).getTime()
+        )[0]
+      ],
+    redraft:
+      ktc_redraft[
+        Object.keys(ktc_redraft).sort(
+          (a, b) => new Date(b).getTime() - new Date(a).getTime()
+        )[0]
+      ],
+  };
 
   const conditions: string[] = [];
 
@@ -44,10 +89,17 @@ export async function POST(req: NextRequest) {
 
       const count = await pool.query(countLmTradesQuery, [player, [manager]]);
 
+      const trades = getTradesWithStats(
+        result.rows,
+        projections,
+        allplayers,
+        ktcCurrent
+      );
+
       return NextResponse.json(
         {
           count: count.rows[0].count,
-          rows: result.rows,
+          rows: trades,
           manager,
           player,
         },
@@ -78,10 +130,17 @@ export async function POST(req: NextRequest) {
 
       const count = await pool.query(countLmTradesQuery, [[manager]]);
 
+      const trades = getTradesWithStats(
+        result.rows,
+        projections,
+        allplayers,
+        ktcCurrent
+      );
+
       return NextResponse.json(
         {
           count: count.rows[0].count,
-          rows: result.rows,
+          rows: trades,
           manager,
           player,
         },
@@ -125,10 +184,17 @@ export async function POST(req: NextRequest) {
         [leaguemate_ids],
       ]);
 
+      const trades = getTradesWithStats(
+        result.rows,
+        projections,
+        allplayers,
+        ktcCurrent
+      );
+
       return NextResponse.json(
         {
           count: count.rows[0].count,
-          rows: result.rows,
+          rows: trades,
           manager,
           player,
         },
@@ -159,12 +225,43 @@ export async function POST(req: NextRequest) {
 
     const count = await pool.query(countLmTradesQuery, [leaguemate_ids]);
 
+    const trades = getTradesWithStats(
+      result.rows,
+      projections,
+      allplayers,
+      ktcCurrent
+    );
+
     return NextResponse.json(
       {
         count: count.rows[0].count,
-        rows: result.rows,
+        rows: trades,
       },
       { status: 200 }
     );
   }
 }
+
+const getTradesWithStats = (
+  rows: Trade[],
+  projections: { [player_id: string]: { [cat: string]: number } },
+  allplayers: { [player_id: string]: Allplayer },
+  ktcCurrent: {
+    dynasty: { [player_id: string]: number };
+    redraft: { [player_id: string]: number };
+  }
+) => {
+  return rows.map((trade) => {
+    const rosters_stats = getRosterStats(
+      trade.league,
+      projections,
+      allplayers,
+      ktcCurrent
+    );
+
+    return {
+      ...trade,
+      rosters: rosters_stats,
+    };
+  });
+};

@@ -82,7 +82,10 @@ export const fetchLeagues = createAsyncThunk(
       user
     );
 
-    const leaguesValuesObj = getLeaguesObj(Object.values(leaguesState));
+    const leaguesValuesObj = getLeaguesObj(
+      Object.values(leaguesState),
+      user.user_id
+    );
 
     return {
       leaguesState,

@@ -1,3 +1,5 @@
+import { LeagueDb } from "./dbTypes";
+
 export type User = {
   user_id: string;
   username: string;
@@ -35,6 +37,16 @@ export type LeagueSettings = {
   daily_waivers: number;
 };
 
+type RosterScores = {
+  starters: number;
+  bench_top_5: number;
+  starter_qb: number;
+  bench_top_qb: number;
+  bench_top5_flex: number;
+  starter_rb: number;
+  starter_wr: number;
+};
+
 export type Roster = {
   roster_id: number;
   username: string;
@@ -50,17 +62,26 @@ export type Roster = {
   ties: number;
   fp: number;
   fpa: number;
+  rank?: number;
   starters_optimal_dynasty?: string[];
-  starters_optimal_redraft?: string[];
   starters_optimal_ppg?: string[];
-  starter_proj?: number;
-  bench_top5_proj?: number;
-  starters_ktc_dynasty?: number;
-  bench_top5_ktc_dynasty?: number;
-  starter_qb_proj?: number;
-  bench_top_qb_proj?: number;
-  starter_rb_proj?: number;
-  starter_wr_proj?: number;
+  bench_ppg?: string[];
+  bench_dynasty?: string[];
+  ktc_dynasty__starters?: number;
+  ktc_dynasty__bench_top_5?: number;
+  ktc_dynasty__starter_qb?: number;
+  ktc_dynasty__bench_top_qb?: number;
+  ktc_dynasty__bench_top5_flex?: number;
+  ktc_dynasty__starter_rb?: number;
+  ktc_dynasty__starter_wr?: number;
+
+  ros_projections__starters?: number;
+  ros_projections__bench_top_5?: number;
+  ros_projections__starter_qb?: number;
+  ros_projections__bench_top_qb?: number;
+  ros_projections__bench_top5_flex?: number;
+  ros_projections__starter_rb?: number;
+  ros_projections__starter_wr?: number;
 };
 
 export type Draftpick = {
@@ -140,7 +161,7 @@ export type Trade = {
     old: string;
     new: string;
   }[];
-  league: League;
+  league: LeagueDb;
   managers: string[];
   rosters: Roster[];
   league_id: string;

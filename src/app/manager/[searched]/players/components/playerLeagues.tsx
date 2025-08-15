@@ -6,7 +6,7 @@ import { updatePlayersState } from "@/redux/players/playersSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { filterLeagueIds } from "@/utils/filterLeagues";
 import {
-  getLeaguesLeaguemateObj,
+  getLeaguesObj,
   leagueHeaders,
   leagueLeaguemateHeaders,
 } from "@/utils/getLeaguesObj";
@@ -141,22 +141,16 @@ const TakenLeagues = ({
     asc: boolean;
   }>({ column: 0, asc: false });
 
-  const lmObj = getLeaguesLeaguemateObj(
-    leaguesTaken.map((l) => {
-      return {
-        ...(leagues?.[l.league_id] as LeagueType),
-        lm_roster_id: l.lm_roster_id,
-      };
-    })
-  );
-
   const leaguesObj = Object.fromEntries(
-    Object.keys(leaguesValuesObj).map((league_id) => {
+    leaguesTaken.map((lt) => {
+      const lmObj =
+        (leagues && getLeaguesObj([leagues[lt.league_id]], lt.lm.user_id)) ||
+        {};
       return [
-        league_id,
+        lt.league_id,
         {
-          ...leaguesValuesObj[league_id],
-          ...lmObj[league_id],
+          ...leaguesValuesObj[lt.league_id],
+          ...lmObj[lt.league_id],
         },
       ];
     })

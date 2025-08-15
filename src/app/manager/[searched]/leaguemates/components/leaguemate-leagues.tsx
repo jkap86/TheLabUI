@@ -1,23 +1,22 @@
 import Avatar from "@/components/avatar/avatar";
 import League from "@/components/league/league";
 import TableMain from "@/components/table-main/table-main";
+import { colObj } from "@/lib/types/commonTypes";
 import { League as LeagueType } from "@/lib/types/userTypes";
 import { updateLeaguematesState } from "@/redux/leaguemates/leaguematesSlice";
 import { AppDispatch, RootState } from "@/redux/store";
-import {
-  getLeaguesLeaguemateObj,
-  leagueHeaders,
-  leagueLeaguemateHeaders,
-} from "@/utils/getLeaguesObj";
+import { leagueHeaders, leagueLeaguemateHeaders } from "@/utils/getLeaguesObj";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 const LeaguemateLeagues = ({
   league_ids,
-  lm_user_id,
+  lmObj,
 }: {
   league_ids: string[];
-  lm_user_id: string;
+  lmObj: {
+    [league_id: string]: { [col_abbrev: string]: colObj };
+  };
 }) => {
   const dispatch: AppDispatch = useDispatch();
   const { leagues, leaguesValuesObj } = useSelector(
@@ -30,28 +29,21 @@ const LeaguemateLeagues = ({
     asc: boolean;
   }>({ column: 0, asc: false });
 
-  const lmObj = getLeaguesLeaguemateObj(
-    league_ids.map((league_id) => {
-      return {
-        ...(leagues?.[league_id] as LeagueType),
-        lm_roster_id: leagues?.[league_id]?.rosters?.find(
-          (r) => r.user_id === lm_user_id
-        )?.roster_id,
-      };
-    })
+  const leaguesObj = Object.fromEntries(
+    Object.keys(leaguesValuesObj)
+      .filter((league_id) => lmObj[league_id])
+      .map((league_id) => {
+        return [
+          league_id,
+          {
+            ...leaguesValuesObj[league_id],
+            ...lmObj[league_id],
+          },
+        ];
+      })
   );
 
-  const leaguesObj = Object.fromEntries(
-    Object.keys(leaguesValuesObj).map((league_id) => {
-      return [
-        league_id,
-        {
-          ...leaguesValuesObj[league_id],
-          ...lmObj[league_id],
-        },
-      ];
-    })
-  );
+  console.log({ leaguesObj });
 
   return (
     <>

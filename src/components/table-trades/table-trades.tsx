@@ -287,9 +287,6 @@ const Trade = ({
 };
 
 const TradeDetail = ({ trade }: { trade: TradeType }) => {
-  const { ktcCurrent, projections, allplayers } = useSelector(
-    (state: RootState) => state.common
-  );
   const { detail_tab } = useSelector((state: RootState) => state.lmtrades);
 
   const tradeLeague: LeagueType = {
@@ -302,38 +299,7 @@ const TradeDetail = ({ trade }: { trade: TradeType }) => {
     settings: trade.league.settings,
     scoring_settings: trade.league.scoring_settings,
     roster_positions: trade.league.roster_positions,
-    rosters: trade.rosters.map((r) => {
-      const values = Object.fromEntries(
-        (r.players || []).map((player_id) => [
-          player_id,
-          getPlayerTotal(
-            trade.league.scoring_settings,
-            projections?.[player_id] || {}
-          ),
-        ])
-      );
-      return {
-        ...r,
-        starters_optimal_dynasty: getOptimalStarters(
-          trade.league.roster_positions,
-          r.players || [],
-          ktcCurrent?.dynasty || {},
-          allplayers || {}
-        ),
-        starters_optimal_redraft: getOptimalStarters(
-          trade.league.roster_positions,
-          r.players || [],
-          ktcCurrent?.redraft || {},
-          allplayers || {}
-        ),
-        starters_optimal_ppg: getOptimalStarters(
-          trade.league.roster_positions,
-          r.players || [],
-          values,
-          allplayers || {}
-        ),
-      };
-    }),
+    rosters: trade.rosters,
     user_roster: trade.rosters[0],
   };
 

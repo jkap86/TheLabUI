@@ -11,6 +11,13 @@ import { colObj } from "@/lib/types/commonTypes";
 import { filterLeagueIds } from "@/utils/filterLeagues";
 import LeaguemateLeagues from "./components/leaguemate-leagues";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
+import {
+  getLeaguesObj,
+  getRankColObj,
+  leagueHeaders,
+  rankBy,
+} from "@/utils/getLeaguesObj";
+import { Roster } from "@/lib/types/userTypes";
 
 const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
   const dispatch: AppDispatch = useDispatch();
@@ -18,7 +25,7 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
   const { allplayers, ktcCurrent } = useSelector(
     (state: RootState) => state.common
   );
-  const { leaguemates, type1, type2, leagues } = useSelector(
+  const { leaguemates, type1, type2, leagues, leaguesValuesObj } = useSelector(
     (state: RootState) => state.manager
   );
   const { column1, column2, column3, column4 } = useSelector(
@@ -29,51 +36,102 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
     asc: boolean;
   }>({ column: 1, asc: false });
 
-  const leaguemateHeaders = [
+  const leaguemateHeaders: {
+    abbrev: string;
+    text: string;
+    desc: string;
+    key?: string;
+  }[] = [
     {
       abbrev: "# Common",
       text: "Number of Common Leagues",
       desc: "Number of Common Leagues",
     },
+    ...leagueHeaders.map((h) => {
+      return {
+        ...{
+          ...h,
+          key: h.abbrev,
+        },
+      };
+    }),
+    ...leagueHeaders
+      .filter((h) => h.key)
+      .map((h) => {
+        return {
+          ...{
+            abbrev: h.abbrev + " Lm",
+            text: h.text + " - Leaguemate",
+            desc: h.desc.replace("user", "leaguemate"),
+            key: h.abbrev + " Lm",
+          },
+        };
+      }),
+    /*
     {
-      abbrev: "B QB D Rk",
-      text: "Bench QBs Dynasty Rank",
-      desc: "Rank of the total KTC value of bench QBs",
+      abbrev: "KTC S QB Rk",
+      text: "Keep Trade Cut Dynasty Starting QBs Rank",
+      desc: "The rank of the total KTC dynasty value of starting QBs when optimal dynasty roster is set.  Optimal starters are determined by KTC dynasty values",
+      key: "KTC S QB Rk",
     },
     {
-      abbrev: "B QB D Rk L",
-      text: "Bench QBs Dynasty Rank - Leaguemate",
-      desc: "Leaguemate's Rank of the total KTC value of bench QBs",
-    },
-
-    {
-      abbrev: "B RB D Rk",
-      text: "Bench RBs Dynasty Rank",
-      desc: "Rank of the total KTC value of bench RBs",
+      abbrev: "KTC S QB Rk Lm",
+      text: "Keep Trade Cut Dynasty Starting QBs Rank",
+      desc: "The rank of the total KTC dynasty value of starting QBs when optimal dynasty roster is set.  Optimal starters are determined by KTC dynasty values",
+      key: "KTC S QB Rk Lm",
     },
     {
-      abbrev: "B RB D Rk L",
-      text: "Bench RBs Dynasty Rank - Leaguemate",
-      desc: "Leaguemate's Rank of the total KTC value of bench RBs",
+      abbrev: "Proj S Rk Lm",
+      text: "Projected Points Starters Rank",
+      desc: "The rank of the total projected points of optimal starters.  Starters are determined by projected points",
+      key: "Proj S Rk Lm",
     },
+    */
   ];
 
-  const leaguematesObj = useMemo(() => {
-    const obj: { [user_id: string]: { [col_abbrev: string]: colObj } } = {};
+  const allLmRanks = useMemo(() => {
+    const obj: {
+      [lm_user_id: string]: {
+        [league_id: string]: { [col_abbrev: string]: colObj };
+      };
+    } = {};
 
-    Object.keys(leaguemates).forEach((lm_user_id) => {
-      const common = filterLeagueIds(leaguemates[lm_user_id].leagues, {
-        type1,
-        type2,
-        leagues,
+    if (leagues) {
+      Object.keys(leaguemates).forEach((lm_user_id) => {
+        const common = leaguemates[lm_user_id].leagues;
+
+        const lm_ranks =
+          getLeaguesObj(
+            common.map((league_id) => leagues[league_id]),
+            lm_user_id
+          ) || {};
+
+        obj[lm_user_id] = lm_ranks;
       });
+    }
+    return obj;
+  }, [leagues, leaguemates, leaguesValuesObj]);
 
-      const avg_league_size =
-        common.reduce(
-          (acc, cur) => acc + (leagues?.[cur].rosters.length || 0),
-          0
-        ) / common.length;
+  const leaguematesObj = useMemo(() => {
+    const rankAverages: {
+      [lm_user_id: string]: { [col_abbrev: string]: colObj };
+    } = {};
 
+    if (leagues) {
+      Object.keys(leaguemates).forEach((lm_user_id) => {
+        const rankAverages_lm: { [col_abbrev: string]: colObj } = {};
+
+        const common = leaguemates[lm_user_id].leagues;
+
+        const avg_league_size =
+          common.reduce(
+            (acc, cur) => acc + (leagues?.[cur].rosters.length || 0),
+            0
+          ) / common.length;
+
+        const lm_ranks = allLmRanks[lm_user_id] || {};
+
+        /*
       const getStartingPositionRanks = (
         position: string,
         group: "starters_optimal_dynasty",
@@ -177,185 +235,64 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
 
       const { user_ranks: user_rb_d_b_ranks, lm_ranks: lm_rb_d_b_ranks } =
         getBenchPositionRanks("RB", "starters_optimal_dynasty", "dynasty");
+        */
 
-      obj[lm_user_id] = {
-        "# Common": {
-          text: common.length.toString(),
-          sort: common.length,
-          trendColor: {},
-          classname: "",
-        },
+        for (const { abbrev, key } of leaguemateHeaders.filter(
+          (h) => h.key !== undefined
+        )) {
+          let ranksArray: number[] = [];
 
-        "S QB D Rk": {
-          text: s_qb_d_rk.toLocaleString("en-US", { maximumFractionDigits: 1 }),
-          sort: s_qb_d_rk,
-          trendColor: getTrendColor_Range(s_qb_d_rk, 1, avg_league_size, true),
-          classname: "",
-        },
-        "S QB D Rk Lm": {
-          text: s_qb_d_rk_lm.toLocaleString("en-US", {
-            maximumFractionDigits: 1,
-          }),
-          sort: s_qb_d_rk_lm,
-          trendColor: getTrendColor_Range(
-            s_qb_d_rk_lm,
-            1,
-            avg_league_size,
-            true
-          ),
-          classname: "",
-        },
-        "S QB D Diff": {
-          text: (s_qb_d_rk - s_qb_d_rk_lm).toLocaleString("en-US", {
-            maximumFractionDigits: 1,
-          }),
-          sort: s_qb_d_rk - s_qb_d_rk_lm,
-          trendColor: getTrendColor_Range(
-            s_qb_d_rk - s_qb_d_rk_lm,
-            1,
-            avg_league_size,
-            true
-          ),
-          classname: "",
-        },
+          if (abbrev.endsWith(" Lm")) {
+            ranksArray = Object.keys(lm_ranks).flatMap(
+              (league_id) => lm_ranks[league_id][key as string]?.sort as number
+            );
+          } else {
+            ranksArray = common.flatMap(
+              (league_id) =>
+                leaguesValuesObj[league_id][key as string]?.sort as number
+            );
+          }
+          const rankAvg =
+            ranksArray.length === 0
+              ? 0
+              : ranksArray.reduce((acc, cur) => acc + cur, 0) /
+                ranksArray.length;
 
-        "B QB D Rk": {
-          text:
-            user_qb_d_b_ranks.length === 0
-              ? "-"
-              : (
-                  user_qb_d_b_ranks.reduce((acc, cur) => acc + cur, 0) /
-                  user_qb_d_b_ranks.length
-                ).toLocaleString("en-US", { maximumFractionDigits: 1 }),
-          sort:
-            user_qb_d_b_ranks.length === 0
-              ? 0
-              : user_qb_d_b_ranks.reduce((acc, cur) => acc + cur, 0) /
-                user_qb_d_b_ranks.length,
-          trendColor: getTrendColor_Range(
-            user_qb_d_b_ranks.reduce((acc, cur) => acc + cur, 0) /
-              user_qb_d_b_ranks.length,
-            1,
-            avg_league_size,
-            true
-          ),
-          classname: "",
-        },
-        "B QB D Rk L": {
-          text:
-            lm_qb_d_ranks.length === 0
-              ? "-"
-              : (
-                  lm_qb_d_b_ranks.reduce((acc, cur) => acc + cur, 0) /
-                  lm_qb_d_b_ranks.length
-                ).toLocaleString("en-US", { maximumFractionDigits: 1 }),
-          sort:
-            lm_qb_d_b_ranks.length === 0
-              ? 0
-              : lm_qb_d_b_ranks.reduce((acc, cur) => acc + cur, 0) /
-                lm_qb_d_b_ranks.length,
-          trendColor: getTrendColor_Range(
-            lm_qb_d_b_ranks.reduce((acc, cur) => acc + cur, 0) /
-              lm_qb_d_b_ranks.length,
-            1,
-            avg_league_size,
-            true
-          ),
-          classname: "",
-        },
+          rankAverages_lm[abbrev] = {
+            sort: rankAvg,
+            text: rankAvg.toFixed(1),
+            trendColor: getTrendColor_Range(rankAvg, 1, avg_league_size, true),
+            classname: "rank",
+          };
+        }
 
-        "S RB D Rk": {
-          text:
-            user_rb_d_ranks.length === 0
-              ? "-"
-              : (
-                  user_rb_d_ranks.reduce((acc, cur) => acc + cur, 0) /
-                  user_rb_d_ranks.length
-                ).toLocaleString("en-US", { maximumFractionDigits: 1 }),
-          sort:
-            user_rb_d_ranks.length === 0
-              ? 0
-              : user_rb_d_ranks.reduce((acc, cur) => acc + cur, 0) /
-                user_rb_d_ranks.length,
-          trendColor: getTrendColor_Range(
-            user_rb_d_ranks.reduce((acc, cur) => acc + cur, 0) /
-              user_rb_d_ranks.length,
-            1,
-            avg_league_size,
-            true
-          ),
-          classname: "",
-        },
-        "S RB D Rk Lm": {
-          text:
-            lm_rb_d_ranks.length === 0
-              ? "-"
-              : (
-                  lm_rb_d_ranks.reduce((acc, cur) => acc + cur, 0) /
-                  lm_rb_d_ranks.length
-                ).toLocaleString("en-US", { maximumFractionDigits: 1 }),
-          sort:
-            lm_rb_d_ranks.length === 0
-              ? 0
-              : lm_rb_d_ranks.reduce((acc, cur) => acc + cur, 0) /
-                lm_rb_d_ranks.length,
-          trendColor: getTrendColor_Range(
-            lm_rb_d_ranks.reduce((acc, cur) => acc + cur, 0) /
-              lm_rb_d_ranks.length,
-            1,
-            avg_league_size,
-            true
-          ),
-          classname: "",
-        },
-        "B RB D Rk": {
-          text:
-            user_rb_d_b_ranks.length === 0
-              ? "-"
-              : (
-                  user_rb_d_b_ranks.reduce((acc, cur) => acc + cur, 0) /
-                  user_rb_d_b_ranks.length
-                ).toLocaleString("en-US", { maximumFractionDigits: 1 }),
-          sort:
-            user_rb_d_b_ranks.length === 0
-              ? 0
-              : user_rb_d_b_ranks.reduce((acc, cur) => acc + cur, 0) /
-                user_rb_d_b_ranks.length,
-          trendColor: getTrendColor_Range(
-            user_rb_d_b_ranks.reduce((acc, cur) => acc + cur, 0) /
-              user_rb_d_b_ranks.length,
-            1,
-            avg_league_size,
-            true
-          ),
-          classname: "",
-        },
-        "B RB D Rk L": {
-          text:
-            lm_rb_d_ranks.length === 0
-              ? "-"
-              : (
-                  lm_rb_d_b_ranks.reduce((acc, cur) => acc + cur, 0) /
-                  lm_rb_d_b_ranks.length
-                ).toLocaleString("en-US", { maximumFractionDigits: 1 }),
-          sort:
-            lm_rb_d_b_ranks.length === 0
-              ? 0
-              : lm_rb_d_b_ranks.reduce((acc, cur) => acc + cur, 0) /
-                lm_rb_d_b_ranks.length,
-          trendColor: getTrendColor_Range(
-            lm_rb_d_b_ranks.reduce((acc, cur) => acc + cur, 0) /
-              lm_rb_d_b_ranks.length,
-            1,
-            avg_league_size,
-            true
-          ),
-          classname: "",
-        },
-      };
-    });
-    return obj;
-  }, [leaguemates, type1, type2, allplayers, ktcCurrent, leagues]);
+        const dynastyStartingQbsDelta =
+          (rankAverages_lm["KTC S QB Rk Lm"]?.sort as number) -
+          (rankAverages_lm["KTC S QB Rk"]?.sort as number);
+
+        rankAverages[lm_user_id] = {
+          "# Common": {
+            text: common.length.toString(),
+            sort: common.length,
+            trendColor: {},
+            classname: "",
+          },
+          "KTC S QB \u0394": {
+            sort: dynastyStartingQbsDelta,
+            text: dynastyStartingQbsDelta.toFixed(1),
+            trendColor: getTrendColor_Range(
+              dynastyStartingQbsDelta,
+              -(avg_league_size / 3),
+              avg_league_size / 3
+            ),
+            classname: "",
+          },
+          ...rankAverages_lm,
+        };
+      });
+    }
+    return rankAverages;
+  }, [leaguemates, allplayers, ktcCurrent, leagues, allLmRanks]);
 
   const component = (
     <TableMain
@@ -456,7 +393,10 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
               }),
             ],
             secondary: (
-              <LeaguemateLeagues league_ids={common} lm_user_id={user_id} />
+              <LeaguemateLeagues
+                league_ids={common}
+                lmObj={allLmRanks[user_id]}
+              />
             ),
           };
         })}

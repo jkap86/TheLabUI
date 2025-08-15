@@ -94,7 +94,7 @@ export const getOptimalStarters = (
       }
     });
 
-  return optimal_starters.map((os) => os.optimal_player_id);
+  return optimal_starters;
 };
 
 export const getOptimalStartersLineupCheck = (

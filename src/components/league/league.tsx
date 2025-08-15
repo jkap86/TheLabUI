@@ -80,57 +80,45 @@ const League = ({ league, type }: LeagueProps) => {
 
   const teamsHeaders = [
     {
-      abbrev: "P S",
-      text: "P S",
-      desc: "P S",
+      abbrev: "Proj S",
+      text: "Proj S",
+      desc: "Proj S",
     },
     {
-      abbrev: "P B T5",
-      text: "P B T5",
-      desc: "P B T5",
+      abbrev: "Proj B T5",
+      text: "Proj B T5",
+      desc: "Proj B T5",
     },
     {
-      abbrev: "D S",
+      abbrev: "KTC S",
       text: "KTC Dynasty Average Starter Value",
       desc: "Average KTC Dynasty Value of Optimal Starters. Optimal starters are determined by KTC dynasty values",
     },
     {
-      abbrev: "D B T5",
+      abbrev: "KTC B T5",
       text: "KTC Dynasty Average of Top 5 Bench Players Value",
       desc: `Average KTC Dynasty Value of top 5 bench players when optimal starters are set. 
             Optimal starters and top bench players are determined by KTC dynasty values.`,
     },
-
     {
-      abbrev: "R S",
-      text: "KTC Redraft Average Starter Value",
-      desc: "Average KTC Redraft Value of Optimal Starters. Optimal starters are determined by KTC redraft values",
-    },
-    {
-      abbrev: "R B T5",
-      text: "KTC Redraft Average of Top 5 Bench Players Value",
-      desc: `Average KTC Redraft Value of top 5 bench players when optimal starters are set. 
-            Optimal starters and top bench players are determined by KTC redraft values.`,
-    },
-    {
-      abbrev: "D S QB",
+      abbrev: "KTC S QB",
       text: "KTC S D QB",
       desc: "KTC S D QB",
     },
     {
-      abbrev: "D B QB",
-      text: "D B QB",
-      desc: "D B QB",
+      abbrev: "KTC B QB",
+      text: "KTC B QB",
+      desc: "KTC B QB",
     },
     {
-      abbrev: "D S RB",
+      abbrev: "KTC S RB",
       text: "KTC S D RB",
       desc: "KTC S D RB",
     },
     {
-      abbrev: "D B RB",
-      text: "D B RB",
-      desc: "D B RB",
+      abbrev: "KTC B RB",
+      text: "KTC B RB",
+      desc: "KTC B RB",
     },
   ];
 
@@ -142,34 +130,18 @@ const League = ({ league, type }: LeagueProps) => {
     } = {};
 
     league.rosters.forEach((r) => {
-      const ktc_d_s = getKtcAvgValue(r.starters_optimal_dynasty || [], "D");
-      const ktc_d_b_5 = getKtcAvgValue(
-        (r.players || [])
-          .filter(
-            (player_id) =>
-              !(r.starters_optimal_dynasty || []).includes(player_id)
-          )
-          .sort(
-            (a, b) =>
-              (ktcCurrent?.dynasty?.[b] || 0) - (ktcCurrent?.dynasty?.[a] || 0)
-          )
-          .slice(0, 5),
-        "D"
+      const bench_players_length = (r.players || []).filter(
+        (player_id) => !r.starters.includes(player_id)
+      ).length;
+
+      const ktc_d_s = Math.round(
+        (r.ktc_dynasty__starters || 0) / r.starters.length
       );
-      const ktc_r_s = getKtcAvgValue(r.starters_optimal_redraft || [], "R");
-      const ktc_r_b_5 = getKtcAvgValue(
-        (r.players || [])
-          .filter(
-            (player_id) =>
-              !(r.starters_optimal_redraft || []).includes(player_id)
-          )
-          .sort(
-            (a, b) =>
-              (ktcCurrent?.redraft?.[b] || 0) - (ktcCurrent?.redraft?.[a] || 0)
-          )
-          .slice(0, 5),
-        "R"
+
+      const ktc_d_b_5 = Math.round(
+        (r.ktc_dynasty__bench_top_5 || 0) / bench_players_length
       );
+
       const ktc_s_d_qb = (r.starters_optimal_dynasty || [])
         .filter((player_id) => allplayers?.[player_id]?.position === "QB")
         .reduce((acc, cur) => acc + (ktcCurrent?.dynasty?.[cur] || 0), 0);
@@ -194,80 +166,52 @@ const League = ({ league, type }: LeagueProps) => {
         )
         .reduce((acc, cur) => acc + (ktcCurrent?.dynasty?.[cur] || 0), 0);
 
-      const P_s = getTotalProj(
-        r.starters_optimal_ppg || [],
-        league.scoring_settings
-      );
+      const p_s = r.ros_projections__starters || 0;
 
-      const p_b_5 = getTotalProj(
-        (r.players || [])
-          .filter(
-            (player_id) => !(r.starters_optimal_ppg || []).includes(player_id)
-          )
-          .sort(
-            (a, b) =>
-              getPlayerTotal(league.scoring_settings, projections?.[b] || {}) -
-              getPlayerTotal(league.scoring_settings, projections?.[a] || {})
-          )
-          .slice(0, 5),
-        league.scoring_settings
-      );
+      const p_b_5 = r.ros_projections__bench_top_5 || 0;
 
       obj[r.roster_id] = {
-        "D S": {
+        "KTC S": {
           sort: ktc_d_s,
           text: ktc_d_s.toString(),
           trendColor: {},
           classname: "ktc",
         },
-        "D B T5": {
+        "KTC B T5": {
           sort: ktc_d_b_5,
           text: ktc_d_b_5.toString(),
           trendColor: {},
           classname: "ktc",
         },
-
-        "R S": {
-          sort: ktc_r_s,
-          text: ktc_r_s.toString(),
-          trendColor: {},
-          classname: "ktc",
-        },
-        "R B T5": {
-          sort: ktc_r_b_5,
-          text: ktc_r_b_5.toString(),
-          trendColor: {},
-          classname: "ktc",
-        },
-        "D S QB": {
+        "KTC S QB": {
           sort: ktc_s_d_qb,
           text: ktc_s_d_qb.toString(),
           trendColor: {},
           classname: "",
         },
-        "D B QB": {
+        "KTC B QB": {
           sort: ktc_s_d_qb_bench,
           text: ktc_s_d_qb_bench.toString(),
           trendColor: {},
           classname: "",
         },
-        "D S RB": {
+        "KTC S RB": {
           sort: ktc_s_d_rb,
           text: ktc_s_d_rb.toString(),
           trendColor: {},
           classname: "",
         },
-        "D B RB": {
+        "KTC B RB": {
           sort: ktc_s_d_rb_bench,
           text: ktc_s_d_rb_bench.toString(),
           trendColor: {},
           classname: "",
         },
-        "P S": {
-          sort: P_s,
-          text: P_s.toLocaleString("en-US", { maximumFractionDigits: 0 }),
+        "Proj S": {
+          sort: p_s,
+          text: p_s.toLocaleString("en-US", { maximumFractionDigits: 0 }),
           trendColor: getTrendColor_Range(
-            P_s,
+            p_s,
             Math.min(
               ...Object.values(projectionsObj.teams).map((obj) => obj.p_s)
             ),
@@ -277,7 +221,7 @@ const League = ({ league, type }: LeagueProps) => {
           ),
           classname: "",
         },
-        "P B T5": {
+        "Proj B T5": {
           sort: p_b_5,
           text: p_b_5.toLocaleString("en-US", { maximumFractionDigits: 0 }),
           trendColor: getTrendColor_Range(
