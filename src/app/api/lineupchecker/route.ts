@@ -198,6 +198,10 @@ export async function GET(req: NextRequest) {
 
                 updated_matchups.push({
                   ...m,
+                  starters:
+                    league.settings.best_ball === 1
+                      ? starters_optimal.map((so) => so.optimal_player_id)
+                      : m.starters,
                   week: parseInt(week as string),
                   updated_at: new Date(),
                   league_id,

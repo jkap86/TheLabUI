@@ -1,16 +1,20 @@
-import { League as LeagueType } from "@/lib/types/userTypes";
+import { League as LeagueType, Roster } from "@/lib/types/userTypes";
 import { usePathname } from "next/navigation";
 import TableMain from "../table-main/table-main";
 import { JSX, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
-import { getKtcAvgValue, getTotalProj } from "@/utils/getKtcRanks";
 import Avatar from "../avatar/avatar";
 import { getPlayerTotal, getSlotAbbrev } from "@/utils/getOptimalStarters";
 import { getDraftPickId } from "@/utils/getPickId";
 import { updateStandingsState } from "@/redux/standings/standingsSlice";
 import { syncLeague } from "@/redux/manager/managerActions";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
+import {
+  getLeaguesObj,
+  getRankColObj,
+  leagueHeaders,
+} from "@/utils/getLeaguesObj";
 
 type LeagueProps = {
   type: number;
@@ -30,7 +34,9 @@ const League = ({ league, type }: LeagueProps) => {
   const { nflState, allplayers, ktcCurrent, projections } = useSelector(
     (state: RootState) => state.common
   );
-  const { isSyncingLeague } = useSelector((state: RootState) => state.manager);
+  const { isSyncingLeague, leaguesValuesObj } = useSelector(
+    (state: RootState) => state.manager
+  );
   const { teamsColumn1, teamsColumn2, playersColumn1, playersColumn2 } =
     useSelector((state: RootState) => state.standings);
   const [activeRosterId, setActiveRosterId] = useState<false | string>(false);
@@ -78,7 +84,27 @@ const League = ({ league, type }: LeagueProps) => {
     return { players, teams };
   }, [league, projections]);
 
-  const teamsHeaders = [
+  const teamsHeaders: {
+    abbrev: string;
+    text: string;
+    desc: string;
+    key: keyof Roster;
+  }[] = leagueHeaders
+    .filter((h) => h.key)
+    .map((h) => {
+      return {
+        ...h,
+        abbrev: h.abbrev.replace(" Rk", ""),
+        text: h.text.startsWith("League ")
+          ? h.text
+          : h.text.replace(" Rank", ""),
+        desc: h.desc.replace("rank of the", ""),
+        key: h.key as keyof Roster,
+      };
+    });
+
+  /*
+  [
     {
       abbrev: "Proj S",
       text: "Proj S",
@@ -121,135 +147,34 @@ const League = ({ league, type }: LeagueProps) => {
       desc: "KTC B RB",
     },
   ];
+*/
 
   const teamsObj = useMemo(() => {
-    const obj: {
-      [roster_id: number]: {
-        [column: string]: colObj;
-      };
-    } = {};
+    const obj: { [roster_id: number]: { [col: string]: colObj } } = {};
 
-    league.rosters.forEach((r) => {
-      const bench_players_length = (r.players || []).filter(
-        (player_id) => !r.starters.includes(player_id)
-      ).length;
+    league.rosters.forEach((roster) => {
+      obj[roster.roster_id] = {};
 
-      const ktc_d_s = Math.round(
-        (r.ktc_dynasty__starters || 0) / r.starters.length
-      );
-
-      const ktc_d_b_5 = Math.round(
-        (r.ktc_dynasty__bench_top_5 || 0) / bench_players_length
-      );
-
-      const ktc_s_d_qb = (r.starters_optimal_dynasty || [])
-        .filter((player_id) => allplayers?.[player_id]?.position === "QB")
-        .reduce((acc, cur) => acc + (ktcCurrent?.dynasty?.[cur] || 0), 0);
-
-      const ktc_s_d_qb_bench = (r.players || [])
-        .filter(
-          (player_id) =>
-            allplayers?.[player_id]?.position === "QB" &&
-            !(r.starters_optimal_dynasty || []).includes(player_id)
-        )
-        .reduce((acc, cur) => acc + (ktcCurrent?.dynasty?.[cur] || 0), 0);
-
-      const ktc_s_d_rb = (r.starters_optimal_dynasty || [])
-        .filter((player_id) => allplayers?.[player_id]?.position === "RB")
-        .reduce((acc, cur) => acc + (ktcCurrent?.dynasty?.[cur] || 0), 0);
-
-      const ktc_s_d_rb_bench = (r.players || [])
-        .filter(
-          (player_id) =>
-            allplayers?.[player_id]?.position === "RB" &&
-            !(r.starters_optimal_dynasty || []).includes(player_id)
-        )
-        .reduce((acc, cur) => acc + (ktcCurrent?.dynasty?.[cur] || 0), 0);
-
-      const p_s = r.ros_projections__starters || 0;
-
-      const p_b_5 = r.ros_projections__bench_top_5 || 0;
-
-      obj[r.roster_id] = {
-        "KTC S": {
-          sort: ktc_d_s,
-          text: ktc_d_s.toString(),
-          trendColor: {},
-          classname: "ktc",
-        },
-        "KTC B T5": {
-          sort: ktc_d_b_5,
-          text: ktc_d_b_5.toString(),
-          trendColor: {},
-          classname: "ktc",
-        },
-        "KTC S QB": {
-          sort: ktc_s_d_qb,
-          text: ktc_s_d_qb.toString(),
-          trendColor: {},
-          classname: "",
-        },
-        "KTC B QB": {
-          sort: ktc_s_d_qb_bench,
-          text: ktc_s_d_qb_bench.toString(),
-          trendColor: {},
-          classname: "",
-        },
-        "KTC S RB": {
-          sort: ktc_s_d_rb,
-          text: ktc_s_d_rb.toString(),
-          trendColor: {},
-          classname: "",
-        },
-        "KTC B RB": {
-          sort: ktc_s_d_rb_bench,
-          text: ktc_s_d_rb_bench.toString(),
-          trendColor: {},
-          classname: "",
-        },
-        "Proj S": {
-          sort: p_s,
-          text: p_s.toLocaleString("en-US", { maximumFractionDigits: 0 }),
-          trendColor: getTrendColor_Range(
-            p_s,
-            Math.min(
-              ...Object.values(projectionsObj.teams).map((obj) => obj.p_s)
-            ),
-            Math.max(
-              ...Object.values(projectionsObj.teams).map((obj) => obj.p_s)
-            )
-          ),
-          classname: "",
-        },
-        "Proj B T5": {
-          sort: p_b_5,
-          text: p_b_5.toLocaleString("en-US", { maximumFractionDigits: 0 }),
-          trendColor: getTrendColor_Range(
-            p_b_5,
-            Math.min(
-              ...Object.values(projectionsObj.teams).map((obj) => obj.p_b_5)
-            ),
-            Math.max(
-              ...Object.values(projectionsObj.teams).map((obj) => obj.p_b_5)
-            )
-          ),
-          classname: "",
-        },
-      };
+      teamsHeaders.forEach((h) => {
+        if (h.key) {
+          const value = roster[h.key] as number;
+          obj[roster.roster_id][h.abbrev] = {
+            sort: value,
+            text: Math.round(value).toLocaleString("en-US"),
+            trendColor: getTrendColor_Range(value, 1, league.rosters.length),
+            classname: "",
+          };
+        }
+      });
     });
 
     return obj;
-  }, [league, allplayers, ktcCurrent, projections, projectionsObj]);
+  }, [league, teamsHeaders]);
 
   const playersHeaders = [
     {
       abbrev: "KTC D",
       text: "KTC Dynasty Value",
-      desc: "",
-    },
-    {
-      abbrev: "KTC R",
-      text: "KTC Redraft Value",
       desc: "",
     },
     {
@@ -275,7 +200,6 @@ const League = ({ league, type }: LeagueProps) => {
 
     (activeRoster?.players || []).forEach((player_id) => {
       const ktc_d = ktcCurrent?.dynasty?.[player_id] || 0;
-      const ktc_r = ktcCurrent?.redraft?.[player_id] || 0;
 
       const proj = players_proj[player_id];
 
@@ -283,12 +207,6 @@ const League = ({ league, type }: LeagueProps) => {
         "KTC D": {
           sort: ktc_d,
           text: ktc_d.toString(),
-          trendColor: {},
-          classname: "rank",
-        },
-        "KTC R": {
-          sort: ktc_r,
-          text: ktc_r.toString(),
           trendColor: {},
           classname: "rank",
         },

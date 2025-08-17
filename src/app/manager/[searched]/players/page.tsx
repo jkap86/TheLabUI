@@ -40,8 +40,6 @@ const Players = ({ params }: PlayersProps) => {
     asc: boolean;
   }>({ column: 1, asc: false });
 
-  console.log({ leagues });
-
   const playersHeaders = [
     {
       abbrev: "# Own",
@@ -104,10 +102,6 @@ const Players = ({ params }: PlayersProps) => {
         parseInt(nflState?.season as string) -
         (allplayers?.[player_id].years_exp || 0);
 
-      const ktcDynastyPointsRatio =
-        (projections?.[player_id]?.pts_ppr || 0) /
-          (ktcCurrent?.dynasty[player_id] || 0) || 0;
-
       obj[player_id] = {
         "# Own": {
           sort: num_owned,
@@ -128,16 +122,6 @@ const Players = ({ params }: PlayersProps) => {
             ktcCurrent?.dynasty[player_id] || 0,
             1000,
             6500
-          ),
-          classname: "ktc",
-        },
-        "KTC R": {
-          sort: ktcCurrent?.redraft[player_id] || 0,
-          text: (ktcCurrent?.redraft[player_id] || 0).toString(),
-          trendColor: getTrendColor_Range(
-            ktcCurrent?.redraft[player_id] || 0,
-            2000,
-            6000
           ),
           classname: "ktc",
         },
@@ -173,12 +157,6 @@ const Players = ({ params }: PlayersProps) => {
             parseInt(nflState?.season as string) - 10,
             parseInt(nflState?.season as string)
           ),
-          classname: "stat",
-        },
-        "KTC Pts R": {
-          sort: ktcDynastyPointsRatio,
-          text: Math.round(ktcDynastyPointsRatio * 10000).toString(),
-          trendColor: {},
           classname: "stat",
         },
       };

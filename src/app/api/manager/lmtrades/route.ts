@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
       conditions.push(`t.managers && $2`);
 
       const getLmTradesQuery = ` 
-          SELECT t.*, l.name, l.avatar, l.settings, l.scoring_settings, l.roster_positions
+          SELECT t.*, to_jsonb(l) AS league
           FROM trades t
           JOIN leagues l ON t.league_id = l.league_id
           WHERE ${conditions.join(" AND ")}
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
     } else if (manager && !player) {
       conditions.push(`t.managers && $1`);
       const getLmTradesQuery = ` 
-          SELECT t.*, l.name, l.avatar, l.settings, l.scoring_settings, l.roster_positions
+          SELECT t.*, to_jsonb(l) AS league
           FROM trades t
           JOIN leagues l ON t.league_id = l.league_id
           WHERE ${conditions.join(" AND ")}
@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
       conditions.push(`t.managers && $2`);
 
       const getLmTradesQuery = ` 
-          SELECT t.*, l.name, l.avatar, l.settings, l.scoring_settings, l.roster_positions
+          SELECT t.*, to_jsonb(l) AS league
           FROM trades t
           JOIN leagues l ON t.league_id = l.league_id
           WHERE ${conditions.join(" AND ")}

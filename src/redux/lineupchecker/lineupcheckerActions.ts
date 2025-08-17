@@ -100,7 +100,7 @@ export const syncMatchup = createAsyncThunk(
       {
         params: {
           league_id,
-          week: Math.max(1, nflState?.week as number),
+          week: Math.max(1, nflState?.leg as number),
           user_id,
           index,
         },

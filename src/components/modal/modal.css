@@ -22,6 +22,10 @@
   color: black;
 }
 
+.modal-content * {
+  text-shadow: none;
+}
+
 .modal-content > div {
   display: flex;
   justify-content: center;

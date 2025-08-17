@@ -12,6 +12,7 @@ import { filterLeagueIds } from "@/utils/filterLeagues";
 import LeaguemateLeagues from "./components/leaguemate-leagues";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
 import {
+  getLeaguemateHeaders,
   getLeaguesObj,
   getRankColObj,
   leagueHeaders,
@@ -25,9 +26,8 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
   const { allplayers, ktcCurrent } = useSelector(
     (state: RootState) => state.common
   );
-  const { leaguemates, type1, type2, leagues, leaguesValuesObj } = useSelector(
-    (state: RootState) => state.manager
-  );
+  const { leaguemates, type1, type2, leagues, leaguesValuesObj, user } =
+    useSelector((state: RootState) => state.manager);
   const { column1, column2, column3, column4 } = useSelector(
     (state: RootState) => state.leaguemates
   );
@@ -55,18 +55,7 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
         },
       };
     }),
-    ...leagueHeaders
-      .filter((h) => h.key)
-      .map((h) => {
-        return {
-          ...{
-            abbrev: h.abbrev + " Lm",
-            text: h.text + " - Leaguemate",
-            desc: h.desc.replace("user", "leaguemate"),
-            key: h.abbrev + " Lm",
-          },
-        };
-      }),
+    ...getLeaguemateHeaders(leagueHeaders),
     /*
     {
       abbrev: "KTC S QB Rk",
@@ -110,7 +99,7 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
       });
     }
     return obj;
-  }, [leagues, leaguemates, leaguesValuesObj]);
+  }, [leagues, leaguemates]);
 
   const leaguematesObj = useMemo(() => {
     const rankAverages: {
@@ -121,7 +110,11 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
       Object.keys(leaguemates).forEach((lm_user_id) => {
         const rankAverages_lm: { [col_abbrev: string]: colObj } = {};
 
-        const common = leaguemates[lm_user_id].leagues;
+        const common = filterLeagueIds(leaguemates[lm_user_id].leagues, {
+          type1,
+          type2,
+          leagues,
+        });
 
         const avg_league_size =
           common.reduce(
@@ -131,6 +124,7 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
 
         const lm_ranks = allLmRanks[lm_user_id] || {};
 
+        console.log({ common, lm_ranks });
         /*
       const getStartingPositionRanks = (
         position: string,
@@ -238,13 +232,17 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
         */
 
         for (const { abbrev, key } of leaguemateHeaders.filter(
-          (h) => h.key !== undefined
+          (h) => h.key !== undefined || h.abbrev.endsWith("\u0394")
         )) {
           let ranksArray: number[] = [];
 
           if (abbrev.endsWith(" Lm")) {
-            ranksArray = Object.keys(lm_ranks).flatMap(
+            ranksArray = common.flatMap(
               (league_id) => lm_ranks[league_id][key as string]?.sort as number
+            );
+          } else if (abbrev.endsWith("\u0394")) {
+            ranksArray = common.flatMap(
+              (league_id) => lm_ranks[league_id][abbrev]?.sort as number
             );
           } else {
             ranksArray = common.flatMap(
@@ -261,7 +259,13 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
           rankAverages_lm[abbrev] = {
             sort: rankAvg,
             text: rankAvg.toFixed(1),
-            trendColor: getTrendColor_Range(rankAvg, 1, avg_league_size, true),
+            trendColor: abbrev.endsWith("\u0394")
+              ? getTrendColor_Range(
+                  rankAvg,
+                  -avg_league_size / 2,
+                  avg_league_size / 2
+                )
+              : getTrendColor_Range(rankAvg, 1, avg_league_size, true),
             classname: "rank",
           };
         }
@@ -277,7 +281,7 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
             trendColor: {},
             classname: "",
           },
-          "KTC S QB \u0394": {
+          "KTC S QB Rk \u0394": {
             sort: dynastyStartingQbsDelta,
             text: dynastyStartingQbsDelta.toFixed(1),
             trendColor: getTrendColor_Range(
@@ -292,7 +296,7 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
       });
     }
     return rankAverages;
-  }, [leaguemates, allplayers, ktcCurrent, leagues, allLmRanks]);
+  }, [leaguemates, allplayers, ktcCurrent, leagues, allLmRanks, type1, type2]);
 
   const component = (
     <TableMain
@@ -334,14 +338,7 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
         },
       ]}
       data={Object.keys(leaguemates)
-        .filter(
-          (user_id) =>
-            filterLeagueIds(leaguemates[user_id].leagues, {
-              type1,
-              type2,
-              leagues,
-            }).length > 0 && parseInt(user_id)
-        )
+        .filter((user_id) => parseInt(user_id) && user_id !== user?.user_id)
         .map((user_id) => {
           const common = filterLeagueIds(leaguemates[user_id].leagues, {
             type1,

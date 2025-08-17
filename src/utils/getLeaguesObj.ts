@@ -45,6 +45,27 @@ export const getLeaguesObj = (
 
       ranks[abbrev + (user_id === league.user_roster.user_id ? "" : " Lm")] =
         getRankColObj(rk, league.rosters.length);
+
+      if (user_id !== league.user_roster.user_id) {
+        const delta =
+          rk -
+          rankBy(
+            league.rosters,
+            league.user_roster.user_id,
+            key as keyof Roster
+          );
+
+        ranks[abbrev + " \u0394"] = {
+          sort: delta,
+          text: delta.toString(),
+          trendColor: getTrendColor_Range(
+            delta,
+            -league.rosters.length / 2,
+            league.rosters.length / 2
+          ),
+          classname: "rank",
+        };
+      }
     }
 
     obj[league.league_id] = {
@@ -177,56 +198,27 @@ export const leagueHeaders = [
   },
 ];
 
-export const leagueLeaguemateHeaders = [
-  {
-    abbrev: "D S Rk Lm",
-    text: "Keep Trade Cut Dynasty Starters Rank - Leaguemate",
-    desc: "Leaguemate rank of the total KTC value of optimal dynasty starters.  Optimal starters are determined by KTC dynasty values",
-  },
-  {
-    abbrev: "D B T5 Rk Lm",
-    text: "Keep Trade Cut Dynasty Top 5 Bench Rank - Leaguemate",
-    desc: "Leaguemate rank of the total KTC value of top 5 bench players when optimal dynasty roster is set.  Optimal starters are determined by KTC dynasty values",
-  },
-  {
-    abbrev: "R S Rk Lm",
-    text: "Keep Trade Cut Redraft Starters Rank - Leaguemate",
-    desc: "Leaguemate rank of the total value of top redraft players.  Starters are determined by KTC redraft values",
-  },
-  {
-    abbrev: "R B T5 Rk Lm",
-    text: "Keep Trade Cut Redraft Top 5 Bench Rank - Leaguemate",
-    desc: "Leaguemate rank of the total KTC value of top 5 bench players when optimal redraft roster is set.  Optimal starters are determined by KTC redraft values",
-  },
+export type Header = {
+  abbrev: string;
+  text: string;
+  desc: string;
+  key?: string;
+};
 
-  {
-    abbrev: "D S QB Rk Lm",
-    text: "Keep Trade Cut Dynasty Starting QBs Rank - Leaguemate",
-    desc: "Leaguemate rank of the total KTC dynasty value of starting QBs when optimal dynasty roster is set.  Optimal starters are determined by KTC dynasty values",
-  },
-  {
-    abbrev: "P S Rk Lm",
-    text: "Projected Points Starters Rank - Leaguemate",
-    desc: "The Leaguemate rank of the total projected points of top projected starters.  Starters are determined by projected points",
-  },
-  {
-    abbrev: "P B T5 Rk Lm",
-    text: "Projected Points Top 5 Bench Rank - Leaguemate",
-    desc: "The Leaguemate rank of the total projected points of top 5 bench players when optimal projected roster is set.",
-  },
-  {
-    abbrev: "P S QB Rk Lm",
-    text: "P S QB Rk Lm",
-    desc: "P S QB Rk Lm",
-  },
-  {
-    abbrev: "P S RB Rk Lm",
-    text: "P S RB Rk Lm",
-    desc: "P S RB Rk Lm",
-  },
-  {
-    abbrev: "P S WR Rk Lm",
-    text: "P S WR Rk Lm",
-    desc: "P S WR Rk Lm",
-  },
-];
+export const getLeaguemateHeaders = (leagueHeaders: Header[]) => {
+  return leagueHeaders
+    .filter((h) => h.key)
+    .flatMap((h) => [
+      {
+        abbrev: h.abbrev + " Lm",
+        text: h.text + " - Leaguemate",
+        desc: h.desc.replace("user", "leaguemate"),
+        key: h.abbrev + " Lm",
+      },
+      {
+        abbrev: h.abbrev + " \u0394",
+        text: h.text + " - Delta",
+        desc: "Difference between user and leaguemate " + h.text,
+      },
+    ]);
+};

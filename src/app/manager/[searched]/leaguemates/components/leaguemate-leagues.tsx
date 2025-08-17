@@ -5,7 +5,7 @@ import { colObj } from "@/lib/types/commonTypes";
 import { League as LeagueType } from "@/lib/types/userTypes";
 import { updateLeaguematesState } from "@/redux/leaguemates/leaguematesSlice";
 import { AppDispatch, RootState } from "@/redux/store";
-import { leagueHeaders, leagueLeaguemateHeaders } from "@/utils/getLeaguesObj";
+import { getLeaguemateHeaders, leagueHeaders } from "@/utils/getLeaguesObj";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -43,8 +43,7 @@ const LeaguemateLeagues = ({
       })
   );
 
-  console.log({ leaguesObj });
-
+  const leagueLeaguemateHeaders = getLeaguemateHeaders(leagueHeaders);
   return (
     <>
       <div className="nav"></div>

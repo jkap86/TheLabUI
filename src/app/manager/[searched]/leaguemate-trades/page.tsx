@@ -94,6 +94,7 @@ const LeaguemateTrades = ({
       />
     </div>
   );
+  console.log({ lmTradeSearches });
 
   const tradesDisplay =
     searched_player || searched_manager

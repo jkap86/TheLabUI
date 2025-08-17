@@ -4,7 +4,6 @@ div.columndropdown {
   box-shadow: inset 0 0 5rem var(--color3);
   height: inherit;
   width: inherit;
-  font-size: 2rem;
 }
 
 div.columndropdown div,
@@ -32,6 +31,8 @@ div.columndropdown > div.columnText > div {
   white-space: nowrap;
 
   text-overflow: ellipsis;
+  font-size: 1.75rem;
+  font-weight: 100;
 }
 
 div.columndropdown:hover > div.columnText > div {

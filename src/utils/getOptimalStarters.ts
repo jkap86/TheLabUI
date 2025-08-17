@@ -123,6 +123,7 @@ export const getOptimalStartersLineupCheck = (
             player_id,
             position,
             value: values?.[player_id] || 0,
+            kickoff: schedule[allplayers[player_id]?.team]?.kickoff || 0,
           };
         }
       );
@@ -173,23 +174,90 @@ export const getOptimalStartersLineupCheck = (
       }
     });
 
-  const starters_optimal = optimal_starters.map((so) => {
-    return {
-      ...so,
-      earlyInFlex: optimal_starters.some(
-        (os) =>
-          so.kickoff < os.kickoff &&
-          position_map[so.slot__index.split("__")[0]].length >
-            position_map[os.slot__index.split("__")[0]].length
-      ),
-      lateNotInFlex: optimal_starters.some(
-        (os) =>
-          so.kickoff > os.kickoff &&
-          position_map[so.slot__index.split("__")[0]].length <
-            position_map[os.slot__index.split("__")[0]].length
-      ),
-    };
-  });
+  const optimal_starters_ordered: {
+    index: number;
+    slot__index: string;
+    optimal_player_id: string;
+    player_position: string;
+    value: number;
+    kickoff: number;
+    earlyInFlex: boolean;
+    lateNotInFlex: boolean;
+  }[] = [];
+
+  optimal_starters
+    .filter((os) => position_map[os.slot__index.split("__")[0]])
+    .sort(
+      (a, b) =>
+        position_map[a.slot__index.split("__")[0]].length -
+        position_map[b.slot__index.split("__")[0]].length
+    )
+    .forEach((os) => {
+      const slot_options_optimal = playersWithValues
+        .filter(
+          (player) =>
+            optimal_starters.some(
+              (os) => os.optimal_player_id === player.player_id
+            ) &&
+            position_map[os.slot__index.split("__")[0]].includes(
+              player.position
+            ) &&
+            !optimal_starters_ordered.find(
+              (os) => os.optimal_player_id === player.player_id
+            )
+        )
+        .sort((a, b) => a.kickoff - b.kickoff);
+
+      const optimal_player = slot_options_optimal[0] || {
+        player_id: "0",
+        value: 0,
+      };
+
+      const current_player_id = starters[os.index];
+      const current_player_kickoff = os.kickoff;
+      const current_player_position = allplayers[current_player_id]?.position;
+      const current_slot = os.slot__index.split("__")[0];
+
+      const earlyInFlex = starters.some((s, index2) => {
+        const option_player_id = s;
+        const option_player_kickoff =
+          schedule[allplayers[option_player_id]?.team]?.kickoff || 0;
+        const option_player_position = allplayers[option_player_id]?.position;
+        const option_slot = roster_positions[index2];
+
+        const early =
+          current_player_kickoff < option_player_kickoff &&
+          position_map[current_slot].length >
+            position_map[option_slot].length &&
+          position_map[option_slot].includes(current_player_position) &&
+          position_map[current_slot].includes(option_player_position);
+
+        return early;
+      });
+
+      const lateNotInFlex = starters.some((s, index2) => {
+        const option_player_id = s;
+        const option_player_kickoff =
+          schedule[allplayers[option_player_id]?.team]?.kickoff || 0;
+        const option_player_position = allplayers[option_player_id]?.position;
+        const option_slot = roster_positions[index2];
+
+        return (
+          current_player_kickoff > option_player_kickoff &&
+          position_map[current_slot].length <
+            position_map[option_slot].length &&
+          position_map[current_slot].includes(option_player_position) &&
+          position_map[option_slot].includes(current_player_position)
+        );
+      });
+      optimal_starters_ordered.push({
+        ...os,
+        optimal_player_id: optimal_player.player_id,
+        earlyInFlex,
+        lateNotInFlex,
+      });
+    });
+
   const projection_optimal = optimal_starters.reduce(
     (acc, cur) => acc + cur.value,
     0
@@ -199,7 +267,11 @@ export const getOptimalStartersLineupCheck = (
     0
   );
 
-  return { starters_optimal, projection_current, projection_optimal };
+  return {
+    starters_optimal: optimal_starters_ordered,
+    projection_current,
+    projection_optimal,
+  };
 };
 
 export const getPlayerTotal = (

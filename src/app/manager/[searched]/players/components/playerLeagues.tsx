@@ -6,9 +6,9 @@ import { updatePlayersState } from "@/redux/players/playersSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { filterLeagueIds } from "@/utils/filterLeagues";
 import {
+  getLeaguemateHeaders,
   getLeaguesObj,
   leagueHeaders,
-  leagueLeaguemateHeaders,
 } from "@/utils/getLeaguesObj";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -156,11 +156,13 @@ const TakenLeagues = ({
     })
   );
 
+  const lmHeaders = getLeaguemateHeaders(leagueHeaders);
+
   return (
     <TableMain
       type={2}
       headers_sort={[0, 1, 2, 3]}
-      headers_options={[...leagueHeaders, ...leagueLeaguemateHeaders]}
+      headers_options={[...leagueHeaders, ...lmHeaders]}
       headers={[
         {
           text: "League",
@@ -253,7 +255,7 @@ const TakenLeagues = ({
           ),
         };
       })}
-      placeholder=""
+      placeholder="Leagues"
       sortBy={sortBy}
       setSortBy={setSortBy}
     />

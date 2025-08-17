@@ -54,8 +54,15 @@ const Matchups = ({ params }: { params: Promise<{ searched: string }> }) => {
       const matchup = matchups[league_id];
 
       const { text, classname } =
-        matchup.user_matchup.projection_current ===
-        matchup.user_matchup.projection_optimal
+        !matchup.user_matchup.starters.some(
+          (s) =>
+            !matchup.user_matchup.starters_optimal?.some(
+              (so) => so.optimal_player_id === s
+            )
+        ) &&
+        !matchup.user_matchup.starters_optimal?.some(
+          (so) => !matchup.user_matchup.starters.includes(so.optimal_player_id)
+        )
           ? { text: <>&#10004;&#xfe0e;</>, classname: "green" }
           : {
               text: (

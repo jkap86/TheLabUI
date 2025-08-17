@@ -15,7 +15,7 @@ const initialState: LeaguematesState = {
   column1: "# Common",
   column2: "Proj S Rk",
   column3: "Proj S Rk Lm",
-  column4: "KTC S QB \u0394",
+  column4: "Proj S Rk \u0394",
   leaguesColumn1: "Proj S Rk",
   leaguesColumn2: "Proj S Rk Lm",
   leaguesColumn3: "KTC S Rk",
