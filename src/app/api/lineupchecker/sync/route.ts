@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
   const user_id = searchParams.get("user_id") as string;
   const week = searchParams.get("week") as string;
   const index = searchParams.get("index") as string;
+  const best_ball = searchParams.get("best_ball") as string;
 
   const schedule_week = await getSchedule(week);
   const projections_week = await getProjections(week);
@@ -87,6 +88,10 @@ export async function GET(req: NextRequest) {
 
     updated_matchups.push({
       ...m,
+      starters:
+        best_ball === "1"
+          ? starters_optimal.map((so) => so.optimal_player_id)
+          : m.starters,
       week: parseInt(week as string),
       updated_at: new Date(),
       league_id,

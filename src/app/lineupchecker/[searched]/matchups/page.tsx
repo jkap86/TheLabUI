@@ -24,7 +24,6 @@ const Matchups = ({ params }: { params: Promise<{ searched: string }> }) => {
   useFetchAllplayers();
   useFetchMatchups({ searched });
 
-  console.log({ matchups });
   const headers = [
     {
       text: "League",

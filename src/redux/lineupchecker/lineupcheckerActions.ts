@@ -94,6 +94,7 @@ export const syncMatchup = createAsyncThunk(
   ) => {
     const state = getState() as RootState;
     const { nflState } = state.common;
+    const { leagues } = state.manager;
 
     const league_matchups: { data: Matchup[] } = await axios.get(
       "/api/lineupchecker/sync",
@@ -103,6 +104,7 @@ export const syncMatchup = createAsyncThunk(
           week: Math.max(1, nflState?.leg as number),
           user_id,
           index,
+          best_ball: leagues?.[league_id]?.settings?.best_ball,
         },
       }
     );

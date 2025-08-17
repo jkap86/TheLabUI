@@ -40,30 +40,50 @@ const LeagueMatchups = ({
       ]?.includes(allplayers?.[player_id]?.position || "")
   );
 
-  console.log({ activeIndex });
+  const text1 = (
+    <>
+      {matchup.user_matchup.projection_current.toLocaleString("en-US", {
+        maximumFractionDigits: 1,
+      })}{" "}
+      -{" "}
+      {matchup.user_matchup.projection_optimal.toLocaleString("en-US", {
+        maximumFractionDigits: 1,
+      })}{" "}
+      Median:{" "}
+      {(
+        matchup.league_matchups.reduce(
+          (acc, cur) => acc + (cur.projection_optimal || 0),
+          0
+        ) / matchup.league_matchups.length
+      ).toLocaleString("en-US", {
+        maximumFractionDigits: 1,
+        minimumFractionDigits: 1,
+      })}
+    </>
+  );
+
+  const text2 = (
+    <>
+      {" "}
+      {matchup.opp_matchup.username}{" "}
+      {matchup.opp_matchup.projection_current.toLocaleString("en-US", {
+        maximumFractionDigits: 1,
+      })}{" "}
+      -{" "}
+      {matchup.opp_matchup.projection_optimal.toLocaleString("en-US", {
+        maximumFractionDigits: 1,
+      })}{" "}
+    </>
+  );
 
   return (
     <>
       <div className="nav">
-        <div>
-          {matchup.user_matchup.projection_current.toLocaleString("en-US", {
-            maximumFractionDigits: 1,
-          })}{" "}
-          -{" "}
-          {matchup.user_matchup.projection_optimal.toLocaleString("en-US", {
-            maximumFractionDigits: 1,
-          })}{" "}
-          Median:{" "}
-          {(
-            matchup.league_matchups.reduce(
-              (acc, cur) => acc + (cur.projection_optimal || 0),
-              0
-            ) / matchup.league_matchups.length
-          ).toLocaleString("en-US", {
-            maximumFractionDigits: 1,
-            minimumFractionDigits: 1,
-          })}
-        </div>
+        <div></div>
+        <div></div>
+      </div>
+      <div className="nav">
+        <div></div>
         <div className="sync">
           <i
             className={
@@ -83,16 +103,7 @@ const LeagueMatchups = ({
             }
           ></i>
         </div>
-        <div>
-          {matchup.opp_matchup.username}{" "}
-          {matchup.opp_matchup.projection_current.toLocaleString("en-US", {
-            maximumFractionDigits: 1,
-          })}{" "}
-          -{" "}
-          {matchup.opp_matchup.projection_optimal.toLocaleString("en-US", {
-            maximumFractionDigits: 1,
-          })}{" "}
-        </div>
+        <div></div>
       </div>
       <TableMain
         type={2}
