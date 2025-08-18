@@ -263,7 +263,7 @@ const TableMain = ({
                             onClick={() =>
                               setActive &&
                               (active === row.id
-                                ? setActive("")
+                                ? setActive(false)
                                 : setActive(row.id))
                             }
                           >
