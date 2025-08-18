@@ -1,6 +1,7 @@
 "use client";
 
 import Avatar from "@/components/avatar/avatar";
+import LoadingIcon from "@/components/loading-icon/loading-icon";
 import Search from "@/components/search/search";
 import TableTrades from "@/components/table-trades/table-trades";
 import useFetchAllplayers from "@/hooks/useFetchAllplayers";
@@ -22,6 +23,7 @@ const Trades = () => {
     trades,
     isLoadingTrades,
   } = useSelector((state: RootState) => state.trades);
+  const { user } = useSelector((state: RootState) => state.manager);
 
   useFetchAllplayers();
   useFetchKtcCurrent();
@@ -49,7 +51,7 @@ const Trades = () => {
   ];
 
   const searches = (
-    <div className="search-box">
+    <div className="search-box flex flex-col items-center">
       <div className="searches-wrapper">
         <div className="searches pc">
           <p>Team 1</p>
@@ -151,6 +153,7 @@ const Trades = () => {
           t.player_id4 === searched_player4_pc
       ) ? null : (
         <button
+          className="text-[2.5rem] px-6 py-3 bg-blue-900"
           onClick={() =>
             dispatch(
               fetchTrades({
@@ -180,26 +183,39 @@ const Trades = () => {
 
   return (
     <>
-      <Link href={"/"} className="home">
+      <Link href={"/"} className="home float-left w-0 absolute">
         Home
       </Link>
-      {searches}
-      <TableTrades
-        trades={tradeObj?.trades || []}
-        tradeCount={tradeObj?.count || 0}
-        fetchMore={() =>
-          dispatch(
-            fetchTrades({
-              player_id1: searched_player1_pc,
-              player_id2: searched_player2_pc,
-              player_id3: searched_player3_pc,
-              player_id4: searched_player4_pc,
-              offset: tradeObj?.trades?.length || 0,
-              limit: 125,
-            })
-          )
-        }
-      />
+      {isLoadingTrades ? (
+        <LoadingIcon messages={[]} />
+      ) : (
+        <>
+          <div className="flex justify-center text-[2rem] m-8 absolute right-0 text-orange-600">
+            {user?.user_id ? (
+              <Link href={`/manager/${user?.username}/leaguemate-trades`}>
+                Leaguemate Trades
+              </Link>
+            ) : null}
+          </div>
+          {searches}
+          <TableTrades
+            trades={tradeObj?.trades || []}
+            tradeCount={tradeObj?.count || 0}
+            fetchMore={() =>
+              dispatch(
+                fetchTrades({
+                  player_id1: searched_player1_pc,
+                  player_id2: searched_player2_pc,
+                  player_id3: searched_player3_pc,
+                  player_id4: searched_player4_pc,
+                  offset: tradeObj?.trades?.length || 0,
+                  limit: 125,
+                })
+              )
+            }
+          />
+        </>
+      )}
     </>
   );
 };

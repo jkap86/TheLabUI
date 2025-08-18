@@ -50,8 +50,8 @@ const Trade = ({
           </td>
           <td colSpan={12}>
             <Avatar
-              id={trade.league.avatar}
-              text={trade.league.name}
+              id={trade.league?.avatar}
+              text={trade.league?.name}
               type="L"
             />
           </td>
@@ -293,7 +293,7 @@ const TradeDetail = ({ trade }: { trade: TradeType }) => {
     index: 0,
     league_id: trade.league_id,
     name: trade.league.name,
-    avatar: trade.league.avatar,
+    avatar: trade.league?.avatar,
     season: new Date().getFullYear().toString(),
     status: "",
     settings: trade.league.settings,
@@ -306,7 +306,7 @@ const TradeDetail = ({ trade }: { trade: TradeType }) => {
   return (
     <>
       <div className="nav">
-        {["Tips", "League"].map((text) => {
+        {["League"].map((text) => {
           return (
             <button key={text} className={detail_tab === text ? "active" : ""}>
               {text}

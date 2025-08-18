@@ -42,31 +42,32 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
     )
     .reduce(
       (acc, cur) => {
+        const key = "projection_current";
+        const user_proj = cur.user_matchup[key];
+        const opp_proj = cur.opp_matchup[key];
+
         const resultOpp =
-          cur.user_matchup.projection_current >
-          cur.opp_matchup.projection_current
+          user_proj > opp_proj
             ? "W"
-            : cur.user_matchup.projection_current <
-              cur.opp_matchup.projection_current
+            : user_proj < opp_proj
             ? "L"
-            : cur.user_matchup.projection_current ===
-              cur.opp_matchup.projection_current
+            : user_proj === opp_proj
             ? "T"
             : "-";
 
         const median = cur.user_matchup.league.settings.league_average_match
           ? cur.league_matchups.reduce(
-              (acc, cur2) => acc + (cur2.projection_current || 0),
+              (acc, cur2) => acc + (cur2[key] || 0),
               0
             ) / cur.league_matchups.length
           : false;
 
         const resultMedian = median
-          ? cur.user_matchup.projection_current < median
+          ? user_proj < median
             ? "L"
-            : cur.user_matchup.projection_current > median
+            : user_proj > median
             ? "W"
-            : cur.user_matchup.projection_current === median
+            : user_proj === median
             ? "T"
             : ""
           : "";
@@ -91,7 +92,7 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
     );
 
   const recordTable = (
-    <table className="!table-auto !w-[50%] !border-spacing-8 p-4 m-auto text-[2.25rem] text-center bg-gray-700 shadow-[inset_0_0_25rem_var(--color10)]">
+    <table className="!table-auto !w-[50%] !border-spacing-8 p-4 m-auto text-[3rem] text-center bg-gray-700 shadow-[inset_0_0_25rem_var(--color10)], shadow-[0_0_2rem_goldenrod]">
       <tbody>
         <tr>
           <td colSpan={3} className="font-chill text-[3rem]">
@@ -157,68 +158,6 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
         </tr>
       </tbody>
     </table>
-  );
-
-  const x = (
-    <div className="flex flex-col w-fit m-auto text-[2.5rem] text-center bg-yellow-900 p-8 shadow-[inset_0_0_2rem_black]">
-      <div className="flex items-center m-2 p-2 justify-center ">
-        <strong className="font-metal text-[3rem]">Projected Record</strong>
-      </div>
-
-      <div className="flex p-2 m-2 whitespace-nowrap">
-        <strong className="font-chill w-[33%] mx-8 my-4">vs Opponent</strong>
-        <p className="font-pulang w-[33%] m-4 ">
-          {proj_record.wins_opp} - {proj_record.losses_opp}
-          {proj_record.ties_opp ? ` - ${proj_record.ties_opp}` : ""}
-        </p>
-        <em className="w-[33%] m-4">
-          {(
-            proj_record.wins_opp /
-            (proj_record.wins_opp +
-              proj_record.losses_opp +
-              proj_record.ties_opp)
-          ).toFixed(4)}
-        </em>
-      </div>
-
-      <div className="flex p-2 m-2 whitespace-nowrap">
-        <strong className="font-chill w-[33%] mx-8 my-4">vs Median</strong>
-        <p className="font-pulang w-[33%] m-4">
-          {proj_record.wins_med} - {proj_record.losses_med}
-          {proj_record.ties_med ? ` - ${proj_record.ties_med}` : ""}
-        </p>
-        <em className="w-[33%] m-4">
-          {(
-            proj_record.wins_med /
-            (proj_record.wins_med +
-              proj_record.losses_med +
-              proj_record.ties_med)
-          ).toFixed(4)}
-        </em>
-      </div>
-
-      <div className="flex m-2 p-2 whitespace-nowrap">
-        <strong className="font-chill w-[33%] mx-8 my-4">Ovr</strong>
-        <p className="font-pulang w-[33%] m-4">
-          {proj_record.wins_opp + proj_record.wins_med} -{" "}
-          {proj_record.losses_opp + proj_record.losses_med}
-          {proj_record.ties_opp + proj_record.ties_med
-            ? ` - ${proj_record.ties_opp + proj_record.ties_med}`
-            : ""}
-        </p>
-        <em className="w-[33%] m-4">
-          {(
-            (proj_record.wins_opp + proj_record.wins_med) /
-            (proj_record.wins_opp +
-              proj_record.wins_med +
-              proj_record.losses_opp +
-              proj_record.losses_med +
-              proj_record.ties_opp +
-              proj_record.ties_med)
-          ).toFixed(4)}
-        </em>
-      </div>
-    </div>
   );
 
   return (

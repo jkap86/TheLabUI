@@ -1,5 +1,5 @@
 import { Allplayer } from "@/lib/types/commonTypes";
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, Draft, PayloadAction } from "@reduxjs/toolkit";
 import {
   fetchAllplayers,
   fetchKtc,
@@ -36,7 +36,22 @@ export const projectionsMessage = "ROS Projections";
 const commonSlice = createSlice({
   name: "common",
   initialState,
-  reducers: {},
+  reducers: {
+    updateKtcProjections: (
+      state: Draft<CommonState>,
+      action: PayloadAction<{
+        ktcCurrent: {
+          dynasty: { [player_id: string]: number };
+          redraft: { [player_id: string]: number };
+        } | null;
+        projections: { [player_id: string]: { [cat: string]: number } } | null;
+      }>
+    ) => {
+      state.ktcCurrent = action.payload.ktcCurrent;
+
+      state.projections = action.payload.projections;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchNflState.pending, (state) => {

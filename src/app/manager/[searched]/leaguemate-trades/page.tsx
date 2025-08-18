@@ -10,6 +10,7 @@ import { updatedLmtradesState } from "@/redux/lmtrades/lmtradesSlice";
 import Avatar from "@/components/avatar/avatar";
 import { fetchLmTrades } from "@/redux/manager/managerActions";
 import LoadingIcon from "@/components/loading-icon/loading-icon";
+import Link from "next/link";
 
 const LeaguemateTrades = ({
   params,
@@ -94,7 +95,6 @@ const LeaguemateTrades = ({
       />
     </div>
   );
-  console.log({ lmTradeSearches });
 
   const tradesDisplay =
     searched_player || searched_manager
@@ -112,23 +112,28 @@ const LeaguemateTrades = ({
 
   const component = (
     <>
-      {searches}
       {isLoadingLmTrades ? (
         <LoadingIcon messages={[]} />
       ) : (
-        <TableTrades
-          trades={tradesDisplay}
-          tradeCount={tradeCount}
-          fetchMore={() =>
-            dispatch(
-              fetchLmTrades({
-                manager: searched_manager,
-                player: searched_player,
-                offset: tradesDisplay.length,
-              })
-            )
-          }
-        />
+        <>
+          <div className="flex justify-center text-[2rem]">
+            <Link href={"/trades"}>Search All Trades</Link>
+          </div>
+          {searches}
+          <TableTrades
+            trades={tradesDisplay}
+            tradeCount={tradeCount}
+            fetchMore={() =>
+              dispatch(
+                fetchLmTrades({
+                  manager: searched_manager,
+                  player: searched_player,
+                  offset: tradesDisplay.length,
+                })
+              )
+            }
+          />
+        </>
       )}
     </>
   );
