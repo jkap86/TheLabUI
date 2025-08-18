@@ -11,6 +11,7 @@
   --color7: rgb(218, 165, 32);
   --color8: #ffff0040;
   --color9: rgba(218, 165, 32, 0.5);
+  --color10: rgb(20, 4, 60);
   --fontPulang: "Pulang", sans-serif;
   --fontChill: "Chillit", sans-serif;
   --fontMetal: "d Dredex", sans-serif;
@@ -21,8 +22,6 @@
 }
 
 * {
-  padding: 0;
-  margin: 0;
   border: none;
   scrollbar-width: none;
   text-shadow: 0 0 0.5rem black;
@@ -54,6 +53,27 @@ h6 {
 
 h1 {
   font-size: 2rem;
+}
+
+.font-pulang {
+  font-family: var(--fontPulang);
+  letter-spacing: 0.25rem;
+}
+
+.font-chill {
+  font-family: var(--fontChill);
+}
+
+.font-score {
+  font-family: var(--fontScore);
+}
+
+.font-metal {
+  font-family: var(--fontMetal);
+}
+
+.font-hugmate {
+  font-family: var(--fontHugmate);
 }
 
 table {

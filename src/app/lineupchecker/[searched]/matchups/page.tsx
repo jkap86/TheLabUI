@@ -2,29 +2,19 @@
 
 import Avatar from "@/components/avatar/avatar";
 import LeagueMatchups from "@/components/league-matchups/league-matchups";
-import LeagueTypeSwitch from "@/components/leagueTypeSwitch/leagueTypeSwitch";
-import LoadingIcon from "@/components/loading-icon/loading-icon";
 import TableMain from "@/components/table-main/table-main";
-import useFetchMatchups from "@/hooks/lineupchecker/useFetchMatchups";
-import useFetchAllplayers from "@/hooks/useFetchAllplayers";
-import useFetchNflState from "@/hooks/useFetchNflState";
 import { RootState } from "@/redux/store";
 import { position_map } from "@/utils/getOptimalStarters";
-
-import Link from "next/link";
 import { use } from "react";
 import { useSelector } from "react-redux";
+import "../../../../components/heading/heading.css";
+import LineupcheckerLayout from "../lineupchecker-layout";
 
 const Matchups = ({ params }: { params: Promise<{ searched: string }> }) => {
   const { searched } = use(params);
   const { allplayers } = useSelector((state: RootState) => state.common);
   const { type1, type2 } = useSelector((state: RootState) => state.manager);
-  const { isLoadingMatchups, matchups } = useSelector(
-    (state: RootState) => state.lineupchecker
-  );
-  useFetchNflState();
-  useFetchAllplayers();
-  useFetchMatchups({ searched });
+  const { matchups } = useSelector((state: RootState) => state.lineupchecker);
 
   const headers = [
     {
@@ -144,8 +134,7 @@ const Matchups = ({ params }: { params: Promise<{ searched: string }> }) => {
           ? "L"
           : matchup.user_matchup.projection_current > median_current
           ? "W"
-          : matchup.user_matchup.projection_current ===
-            matchup.opp_matchup.projection_current
+          : matchup.user_matchup.projection_current === median_current
           ? "T"
           : ""
         : "";
@@ -213,19 +202,11 @@ const Matchups = ({ params }: { params: Promise<{ searched: string }> }) => {
       };
     });
 
-  return (
-    <>
-      <Link href={"/"} className="home">
-        Home
-      </Link>
-      <LeagueTypeSwitch />
-      {isLoadingMatchups ? (
-        <LoadingIcon messages={[]} />
-      ) : (
-        <TableMain type={1} headers={headers} data={data} placeholder="" />
-      )}
-    </>
+  const component = (
+    <TableMain type={1} headers={headers} data={data} placeholder="" />
   );
+
+  return <LineupcheckerLayout searched={searched} component={component} />;
 };
 
 export default Matchups;

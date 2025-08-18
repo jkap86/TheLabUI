@@ -78,6 +78,10 @@ export async function GET(req: NextRequest) {
           (m2) => m2.league_id === m.league_id
         );
 
+        const league = leagues.data.find(
+          (league) => league.league_id === m.league_id
+        ) as SleeperLeague;
+
         const roster_id_user = m.rosters.find(
           (r: Roster) => r.user_id === user_id
         )?.roster_id;
@@ -104,6 +108,10 @@ export async function GET(req: NextRequest) {
           );
         const { ...up_to_date_matchup } = {
           ...m,
+          starters:
+            league.settings.best_ball === 1
+              ? starters_optimal.map((so) => so.optimal_player_id)
+              : m.starters,
           roster_id_user,
           roster_id_opp,
           league: {
@@ -115,7 +123,10 @@ export async function GET(req: NextRequest) {
             roster_positions: m.roster_positions,
           },
           starters_optimal: starters_optimal,
-          projection_current,
+          projection_current:
+            league.settings.best_ball === 1
+              ? projection_optimal
+              : projection_current,
           projection_optimal,
         };
 
@@ -221,7 +232,10 @@ export async function GET(req: NextRequest) {
                     roster_positions: league.roster_positions,
                   },
                   starters_optimal,
-                  projection_current,
+                  projection_current:
+                    league.settings.best_ball === 1
+                      ? projection_optimal
+                      : projection_current,
                   projection_optimal,
                 });
               });

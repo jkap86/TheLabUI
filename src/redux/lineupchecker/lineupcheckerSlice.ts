@@ -18,6 +18,7 @@ export interface LineupcheckerState {
       };
     };
   };
+  searchedName: string;
   schedule: { [team: string]: { kickoff: number; opp: string } };
   projections: { [player_id: string]: { [cat: string]: number } };
   errorMatchups: string | null;
@@ -28,6 +29,7 @@ export interface LineupcheckerState {
 const initialState: LineupcheckerState = {
   isLoadingMatchups: false,
   matchups: {},
+  searchedName: "",
   schedule: {},
   projections: {},
   errorMatchups: null,
@@ -55,6 +57,7 @@ const lineupcheckerSlice = createSlice({
         state.matchups = action.payload.matchups;
         state.schedule = action.payload.schedule;
         state.projections = action.payload.projections;
+        state.searchedName = action.payload.searched;
       })
       .addCase(fetchMatchups.rejected, (state, action) => {
         state.isLoadingMatchups = false;

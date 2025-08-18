@@ -43,3 +43,9 @@ div.heading h2 > select {
 div.heading h2 > select option {
   background-color: black;
 }
+
+h1.tool-title {
+  font-family: var(--fontMetal);
+  font-size: 3rem;
+  color: var(--color7);
+}

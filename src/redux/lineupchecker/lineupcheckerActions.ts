@@ -71,6 +71,7 @@ export const fetchMatchups = createAsyncThunk(
     });
 
     return {
+      searched,
       matchups: matchups_obj,
       schedule: matchups.data.schedule_week,
       projections: matchups.data.projections_week,
@@ -94,7 +95,7 @@ export const syncMatchup = createAsyncThunk(
   ) => {
     const state = getState() as RootState;
     const { nflState } = state.common;
-    const { leagues } = state.manager;
+    const { matchups } = state.lineupchecker;
 
     const league_matchups: { data: Matchup[] } = await axios.get(
       "/api/lineupchecker/sync",
@@ -104,7 +105,7 @@ export const syncMatchup = createAsyncThunk(
           week: Math.max(1, nflState?.leg as number),
           user_id,
           index,
-          best_ball: leagues?.[league_id]?.settings?.best_ball,
+          best_ball: matchups?.[league_id]?.settings?.best_ball,
         },
       }
     );

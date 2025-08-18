@@ -98,7 +98,7 @@ export async function GET(req: NextRequest) {
       roster_id_user,
       roster_id_opp,
       username: user?.display_name || "Orphan",
-      user_id,
+      user_id: user?.user_id || "0",
       avatar: user?.avatar || null,
       league: {
         index: parseInt(index),
@@ -109,7 +109,8 @@ export async function GET(req: NextRequest) {
         roster_positions: league.data.roster_positions,
       },
       starters_optimal,
-      projection_current,
+      projection_current:
+        best_ball === "1" ? projection_optimal : projection_current,
       projection_optimal,
     });
   });

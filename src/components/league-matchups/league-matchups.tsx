@@ -200,6 +200,7 @@ const LeagueMatchups = ({
       matchupLocal.user_id === matchup.opp_matchup.user_id &&
       median_optimal
     ) {
+      console.log({ matchupLocal, matchup, median_optimal });
       total_cols.push({
         text: median_optimal,
         colspan: 2,
