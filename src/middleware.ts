@@ -12,7 +12,7 @@ export async function middleware(request: NextRequest) {
     // Log details
 
     const redirectUrl = new URL(
-      "/api/log",
+      "/api/logs",
       "https://the-lab.southharmonff.com"
     );
 
@@ -33,9 +33,9 @@ export async function middleware(request: NextRequest) {
 // Define the routes this middleware applies to
 export const config = {
   matcher: [
-    "/manager/:path",
-    "/lineupchecker/:path",
-    "/trades/:path",
-    "/picktracker/:path",
+    "/manager/:path*",
+    "/lineupchecker/:path*",
+    "/trades/:path*",
+    "/picktracker/:path*",
   ],
 };
