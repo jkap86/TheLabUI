@@ -29,7 +29,9 @@ export async function GET() {
 
         Object.values(allplayers.data)
           .filter(
-            (player) => player.active && positions.includes(player.position)
+            (player) =>
+              player.active &&
+              (positions.includes(player.position) || player.position === "FB")
           )
           .forEach((value) => {
             const player_obj = value as Allplayer;
