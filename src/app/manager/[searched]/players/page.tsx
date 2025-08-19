@@ -100,7 +100,7 @@ const Players = ({ params }: PlayersProps) => {
 
       const draftClass =
         parseInt(nflState?.season as string) -
-        (allplayers?.[player_id].years_exp || 0);
+        (allplayers?.[player_id]?.years_exp || 0);
 
       obj[player_id] = {
         "# Own": {
@@ -192,9 +192,9 @@ const Players = ({ params }: PlayersProps) => {
 
   const positions = Array.from(
     new Set(
-      Object.keys(playershares).map(
-        (player_id) => allplayers?.[player_id].position
-      )
+      Object.keys(playershares)
+        .filter((player_id) => allplayers?.[player_id]?.position)
+        .map((player_id) => allplayers?.[player_id]?.position)
     )
   );
 
@@ -319,11 +319,11 @@ const Players = ({ params }: PlayersProps) => {
               return {
                 id: player_id,
                 search: {
-                  text: allplayers?.[player_id].full_name || player_id,
+                  text: allplayers?.[player_id]?.full_name || player_id,
                   display: (
                     <Avatar
                       id={player_id}
-                      text={allplayers?.[player_id].full_name || player_id}
+                      text={allplayers?.[player_id]?.full_name || player_id}
                       type="P"
                     />
                   ),

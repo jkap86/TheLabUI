@@ -28,15 +28,18 @@ const Homepage = ({
 
   return (
     <div id="homepage">
-      <Link href={"/tools"} className="picktracker">
+      <Link
+        href={"/tools"}
+        className="m-8 absolute text-yellow-600 !text-[2.5rem] font-score"
+      >
         Tools
       </Link>
       <div className="logo-container">
         <Image src={thelablogo} alt="logo" className="home-logo" />
 
         <div className="home-title">
-          <h1>The Lab</h1>
-          <h1>{title}</h1>
+          <h1 className="font-metal text-[var(--color1)]">The Lab</h1>
+          <h1 className="font-metal text-yellow-600">{title}</h1>
           {/* <select
             className="nav-options"
             value={tab}

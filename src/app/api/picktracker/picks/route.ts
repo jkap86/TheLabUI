@@ -67,7 +67,10 @@ export async function GET(req: NextRequest) {
 
       return NextResponse.json({ league: league.data, picks }, { status: 200 });
     } else {
-      return NextResponse.json("no draft found", { status: 200 });
+      return NextResponse.json(
+        { league: league.data, error: "No draft with K slot found" },
+        { status: 200 }
+      );
     }
   } catch (err) {
     return NextResponse.json(err, { status: 200 });

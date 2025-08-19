@@ -31,25 +31,19 @@ const Trades = () => {
   useFetchKtcCurrent();
 
   const player_pick_options = [
-    ...Object.keys(allplayers || {})
-      .filter(
-        (player_id) =>
-          allplayers?.[player_id]?.active &&
-          ["QB", "RB", "WR", "TE"].includes(allplayers?.[player_id]?.position)
-      )
-      .map((player_id) => {
-        return {
-          id: player_id,
-          text: allplayers?.[player_id]?.full_name || player_id,
-          display: (
-            <Avatar
-              id={player_id}
-              text={allplayers?.[player_id]?.full_name || player_id}
-              type="P"
-            />
-          ),
-        };
-      }),
+    ...Object.keys(allplayers || {}).map((player_id) => {
+      return {
+        id: player_id,
+        text: allplayers?.[player_id]?.full_name || player_id,
+        display: (
+          <Avatar
+            id={player_id}
+            text={allplayers?.[player_id]?.full_name || player_id}
+            type="P"
+          />
+        ),
+      };
+    }),
   ];
 
   const searches = (
@@ -98,7 +92,7 @@ const Trades = () => {
             />
           ) : null}
         </div>
-        {searched_player1_pc ? (
+        {
           <div className="searches">
             <p>Team 2</p>
             <Search
@@ -120,6 +114,7 @@ const Trades = () => {
                   ].includes(o.id)
               )}
               placeholder="Player"
+              disabled={searched_player1_pc ? false : true}
             />
             {searched_player3_pc ? (
               <Search
@@ -144,7 +139,7 @@ const Trades = () => {
               />
             ) : null}
           </div>
-        ) : null}
+        }
       </div>
       {isLoadingTrades ||
       trades.some(
@@ -187,7 +182,7 @@ const Trades = () => {
     <>
       <Link
         href={"/tools"}
-        className="home float-left w-0 absolute text-yellow-600 !text-[3rem]"
+        className="m-8 absolute text-yellow-600 !text-[2.5rem] font-score"
       >
         Tools
       </Link>
@@ -195,15 +190,28 @@ const Trades = () => {
         <LoadingIcon messages={[]} />
       ) : (
         <>
-          <div className="flex justify-center text-[2rem] m-8 absolute right-0 text-orange-600">
-            {user?.user_id ? (
-              <Link href={`/manager/${user?.username}/leaguemate-trades`}>
-                Leaguemate Trades
-              </Link>
-            ) : null}
+          <div className="flex justify-center text-[2.5rem] m-8 text-orange-600 font-score absolute right-0">
+            <Link
+              href={
+                user?.user_id
+                  ? `/manager/${user?.username}/leaguemate-trades`
+                  : "/manager"
+              }
+              onClick={() => localStorage.setItem("tab", "leaguemate-trades")}
+            >
+              Leaguemate Trades
+            </Link>
           </div>
-          <div className="flex justify-center items-center p-8">
-            <Image src={thelablogo} alt="logo" className="w-[15rem]" />
+
+          <div className="flex justify-center items-center p-8 w-fit m-auto relative">
+            <Image
+              src={thelablogo}
+              alt="logo"
+              className="w-[25rem] m-8 opacity-[.35] drop-shadow-[0_0_1rem_white]"
+            />
+            <h1 className="absolute !text-[15rem] font-metal text-yellow-900 ![text-shadow:0_0_.5rem_silver] drop-shadow-[0_0_1rem_black]">
+              Trades
+            </h1>
           </div>
           {searches}
           <TableTrades

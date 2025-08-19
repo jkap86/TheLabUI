@@ -185,7 +185,7 @@ const TableMain = ({
         }
       >
         <thead className="main_heading">
-          {
+          {headers_sort ? (
             <tr>
               {headers.map((h, index) => {
                 return (
@@ -205,7 +205,7 @@ const TableMain = ({
                 );
               })}
             </tr>
-          }
+          ) : null}
           <tr>
             {headers.map((h, index) => {
               return (

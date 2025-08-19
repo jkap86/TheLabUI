@@ -94,7 +94,8 @@ const LeagueMatchups = ({
           ? "green"
           : "red"
       } ${
-        so?.earlyInFlex && matchup.user_matchup.league.settings.best_ball !== 1
+        (so?.earlyInFlex || so?.lateNotInFlex) &&
+        matchup.user_matchup.league.settings.best_ball !== 1
           ? "yellowb"
           : ""
       }`;
@@ -107,13 +108,16 @@ const LeagueMatchups = ({
             classname,
           },
           {
-            text: (
-              <Avatar
-                id={player_id}
-                text={allplayers?.[player_id]?.full_name || player_id}
-                type="P"
-              />
-            ),
+            text:
+              player_id === "0" ? (
+                "-"
+              ) : (
+                <Avatar
+                  id={player_id}
+                  text={allplayers?.[player_id]?.full_name || player_id}
+                  type="P"
+                />
+              ),
             colspan: 5,
             classname,
           },
@@ -356,7 +360,7 @@ const LeagueMatchups = ({
     );
   };
 
-  const tableOptions = [`Lineup`, `Optimal`, "Options"];
+  const tableOptions = [`Lineup`, `Optimal`];
 
   const getTableComponent = (table: string, num: 1 | 2) => {
     const m = num === 1 ? matchup.user_matchup : matchup.opp_matchup;
@@ -381,7 +385,23 @@ const LeagueMatchups = ({
   return (
     <>
       <div className="nav">
-        <div>
+        <div className="flex justify-evenly w-[50%]">
+          {table1 === "Options" ? (
+            <button className="active">Options</button>
+          ) : (
+            tableOptions.map((option) => {
+              return (
+                <button
+                  key={option}
+                  className={table1 === option ? "active" : "opacity-[.5]"}
+                  onClick={() => setTable1(option)}
+                >
+                  {option}
+                </button>
+              );
+            })
+          )}
+          {/* 
           <select
             value={table1}
             className={select_classname}
@@ -399,6 +419,7 @@ const LeagueMatchups = ({
               );
             })}
           </select>
+          */}
         </div>
         <div className="sync">
           <i
@@ -419,7 +440,23 @@ const LeagueMatchups = ({
             }
           ></i>
         </div>
-        <div>
+        <div className="flex justify-evenly w-[50%]">
+          {table2 === "Options" ? (
+            <button className="active">Options</button>
+          ) : (
+            tableOptions.map((option) => {
+              return (
+                <button
+                  key={option}
+                  className={table2 === option ? "active" : "opacity-[.5]"}
+                  onClick={() => setTable2(option)}
+                >
+                  {option}
+                </button>
+              );
+            })
+          )}
+          {/* 
           <select
             value={table2}
             className={select_classname}
@@ -437,6 +474,7 @@ const LeagueMatchups = ({
               );
             })}
           </select>
+            */}
         </div>
       </div>
       <div className="relative z-0">

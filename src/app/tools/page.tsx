@@ -10,16 +10,16 @@ export default function Tools() {
   ];
   return (
     <>
-      <div className="absolute top-0 left-0 right-0 h-[20rem] z-2 text-[10rem] flex justify-center items-center font-metal text-[var(--color1)]">
+      <div className="absolute top-0 left-0 right-0 h-[20rem] z-2 text-[10rem] flex justify-center items-center font-metal font-black text-[var(--color1)] ![text-shadow:0_0_1rem_red]">
         The Lab
       </div>
-      <div className="relative h-screen flex items-center justify-center z-1">
+      <div className="relative h-[100dvh] flex items-center justify-center z-1">
         <div className="scale-150 drop-shadow-[0_0_5rem_white] opacity-[0.25]">
           <LoadingIcon messages={[]} />
         </div>
       </div>
 
-      <div className="h-screen pt-[20rem] pb-[15rem] flex flex-col justify-between items-center absolute top-0 left-0 right-0 z-2">
+      <div className="h-[100dvh] pt-[20rem] pb-[15rem] flex flex-col justify-between items-center absolute top-0 left-0 right-0 z-2">
         {links.map((link) => {
           return (
             <Link

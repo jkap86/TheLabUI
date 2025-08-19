@@ -116,9 +116,6 @@ const LeaguemateTrades = ({
         <LoadingIcon messages={[]} />
       ) : (
         <>
-          <div className="flex justify-center text-[2rem]">
-            <Link href={"/trades"}>Search All Trades</Link>
-          </div>
           {searches}
           <TableTrades
             trades={tradesDisplay}

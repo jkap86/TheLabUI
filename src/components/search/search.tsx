@@ -12,11 +12,13 @@ const Search = ({
   setSearched,
   options,
   placeholder,
+  disabled,
 }: {
   searched: string;
   setSearched: (searched: string) => void;
   options: Option[];
   placeholder: string;
+  disabled?: boolean;
 }) => {
   const searchRef = useRef<HTMLDivElement>(null);
   const [searchText, setSearchText] = useState<string>("");
@@ -75,10 +77,10 @@ const Search = ({
   return (
     <div className="search_container" ref={searchRef}>
       <input
-        className="search"
+        className={"search" + (disabled ? " opacity-[.25]" : "")}
         type="text"
         value={searchText}
-        onChange={(e) => handleSearch(e.target.value)}
+        onChange={(e) => !disabled && handleSearch(e.target.value)}
         placeholder={placeholder}
         autoFocus={false}
       />

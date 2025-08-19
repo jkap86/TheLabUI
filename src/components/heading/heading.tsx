@@ -18,10 +18,19 @@ const Heading = () => {
   }, [pathname]);
 
   return (
-    <div className="heading">
-      <Link href={"/"} className="home">
-        The Lab Home
+    <div className="heading relative">
+      <Link
+        href={"/"}
+        className="m-8 absolute text-yellow-600 !text-[2.5rem] font-score"
+      >
+        Manager Home
       </Link>
+
+      {pathname.split("/")[3] === "leaguemate-trades" ? (
+        <div className="flex justify-center text-[2.5rem] m-8 absolute right-0 text-orange-600 font-score">
+          <Link href={"/trades"}>Search All Trades</Link>
+        </div>
+      ) : null}
 
       <h1>
         <Avatar id={user?.avatar || ""} type="U" text={user?.username || ""} />

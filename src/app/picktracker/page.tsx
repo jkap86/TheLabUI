@@ -8,7 +8,7 @@ const Picktracker = () => {
 
   return (
     <Homepage
-      title="Picktracker"
+      title="Pick Tracker"
       linkTo={`/picktracker/${league_id_searched}`}
       id_searched={league_id_searched}
       setId_searched={setLeague_id_searched}
