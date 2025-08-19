@@ -33,9 +33,9 @@ export async function middleware(request: NextRequest) {
 // Define the routes this middleware applies to
 export const config = {
   matcher: [
-    "/manager/:path*",
-    "/lineupchecker/:path*",
+    "/manager/:path+",
+    "/lineupchecker/:path+",
     "/trades/:path*",
-    "/picktracker/:path*",
+    "/picktracker/:path+",
   ],
 };
