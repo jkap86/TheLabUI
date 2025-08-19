@@ -32,8 +32,94 @@ const Leagues = ({ params }: LeaguesProps) => {
 
   const leaguesObj = leaguesValuesObj;
 
+  const overallRecord = filterLeagueIds(Object.keys(leagues || {}), {
+    type1,
+    type2,
+    leagues,
+  }).reduce(
+    (acc, cur) => {
+      const { wins, losses, ties, fp, fpa } = leagues?.[cur]?.user_roster || {
+        wins: 0,
+        losses: 0,
+        ties: 0,
+        fp: 0,
+        fpa: 0,
+      };
+      return {
+        wins: acc.wins + wins,
+        losses: acc.losses + losses,
+        ties: acc.ties + ties,
+        fp: acc.fp + fp,
+        fpa: acc.fpa + fpa,
+      };
+    },
+    {
+      wins: 0,
+      losses: 0,
+      ties: 0,
+      fp: 0,
+      fpa: 0,
+    }
+  );
+
+  const recordTable = (
+    <table className="!table-auto !w-[50%] !border-spacing-8 p-4 mx-auto my-8 text-[3rem] text-center bg-gray-700 shadow-[inset_0_0_25rem_var(--color10)], shadow-[0_0_2rem_goldenrod]">
+      <tbody>
+        <tr className="shadow-[inset_0_0_5rem_var(--color10)]">
+          <td>Record</td>
+          <td>
+            {overallRecord.wins} - {overallRecord.losses}
+            {overallRecord.ties ? ` - ${overallRecord.ties}` : ""}
+          </td>
+          <td>
+            <em>
+              {overallRecord.wins + overallRecord.losses + overallRecord.ties >
+              0
+                ? (
+                    overallRecord.wins /
+                    (overallRecord.wins +
+                      overallRecord.losses +
+                      overallRecord.ties)
+                  ).toFixed(4)
+                : ".0000"}
+            </em>
+          </td>
+        </tr>
+        <tr className="shadow-[inset_0_0_5rem_var(--color10)]">
+          <td>Points For/Against</td>
+          <td>
+            {overallRecord.fp.toLocaleString("en-US", {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            })}
+          </td>
+          <td>
+            {overallRecord.fpa.toLocaleString("en-US", {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            })}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  );
+
+  const current_month_index = new Date().getMonth();
   const component = (
     <>
+      <h3 className="text-[2.5rem]">
+        League Count:{" "}
+        {
+          filterLeagueIds(Object.keys(leagues || {}), {
+            type1,
+            type2,
+            leagues,
+          }).length
+        }
+      </h3>
+      {current_month_index >= 7 || current_month_index === 0
+        ? recordTable
+        : null}
       <TableMain
         type={1}
         headers_sort={[0, 1, 2, 3, 4]}

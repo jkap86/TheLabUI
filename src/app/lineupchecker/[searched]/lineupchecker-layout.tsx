@@ -12,6 +12,7 @@ import { RootState } from "@/redux/store";
 import LeagueTypeSwitch from "@/components/leagueTypeSwitch/leagueTypeSwitch";
 import { usePathname, useRouter } from "next/navigation";
 import { filterLeagueIds } from "@/utils/filterLeagues";
+import ShNavbar from "@/components/sh-navbar/sh-navbar";
 
 interface LayoutProps {
   searched: string;
@@ -162,8 +163,9 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
 
   return (
     <>
+      <ShNavbar />
       <div className="heading">
-        <Link href={"/"} className="home">
+        <Link href={"/lineupchecker"} className="home">
           Home
         </Link>
         {Object.values(matchups)[0]?.user_matchup?.username ? (

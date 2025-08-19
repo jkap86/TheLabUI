@@ -106,7 +106,7 @@ const Search = ({
             )
           }
         >
-          ^
+          <i className="fa-solid fa-caret-down"></i>
         </button>
       )}
       {searchOptions.length > 0 && (

@@ -7,12 +7,17 @@ import { useDispatch, useSelector } from "react-redux";
 export default function useFetchMatchups({ searched }: { searched: string }) {
   const dispatch: AppDispatch = useDispatch();
   const { nflState } = useSelector((state: RootState) => state.common);
-  const { searchedName, isLoadingMatchups } = useSelector(
+  const { searchedName, isLoadingMatchups, errorMatchups } = useSelector(
     (state: RootState) => state.lineupchecker
   );
 
   useEffect(() => {
-    if (nflState && !isLoadingMatchups && searched !== searchedName) {
+    if (
+      nflState &&
+      !isLoadingMatchups &&
+      searched !== searchedName &&
+      !errorMatchups
+    ) {
       dispatch(fetchMatchups({ searched }));
     }
   }, [searched, nflState, searchedName, isLoadingMatchups, dispatch]);

@@ -28,8 +28,8 @@ const Homepage = ({
 
   return (
     <div id="homepage">
-      <Link href={"/"} className="picktracker">
-        The Lab Home
+      <Link href={"/tools"} className="picktracker">
+        Tools
       </Link>
       <div className="logo-container">
         <Image src={thelablogo} alt="logo" className="home-logo" />

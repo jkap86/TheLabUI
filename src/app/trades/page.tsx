@@ -11,6 +11,8 @@ import { fetchTrades } from "@/redux/trades/tradesActions";
 import { updateTradesState } from "@/redux/trades/tradesSlice";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
+import Image from "next/image";
+import thelablogo from "../../../public/images/thelab.png";
 
 const Trades = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -183,8 +185,11 @@ const Trades = () => {
 
   return (
     <>
-      <Link href={"/"} className="home float-left w-0 absolute">
-        Home
+      <Link
+        href={"/tools"}
+        className="home float-left w-0 absolute text-yellow-600 !text-[3rem]"
+      >
+        Tools
       </Link>
       {isLoadingTrades ? (
         <LoadingIcon messages={[]} />
@@ -196,6 +201,9 @@ const Trades = () => {
                 Leaguemate Trades
               </Link>
             ) : null}
+          </div>
+          <div className="flex justify-center items-center p-8">
+            <Image src={thelablogo} alt="logo" className="w-[15rem]" />
           </div>
           {searches}
           <TableTrades

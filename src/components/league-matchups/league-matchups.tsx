@@ -134,26 +134,32 @@ const LeagueMatchups = ({
       };
     });
 
-    const total_cols = [
-      {
-        text: matchupLocal[`projection_current`].toFixed(1),
-        colspan:
-          matchupLocal.user_id === matchup.opp_matchup.user_id && median_current
-            ? 2
-            : 4,
-        classname: "highlight",
-      },
-    ];
+    let total_cols;
 
     if (
       matchupLocal.user_id === matchup.opp_matchup.user_id &&
       median_current
     ) {
-      total_cols.push({
-        text: median_current,
-        colspan: 2,
-        classname: "italic highlight",
-      });
+      total_cols = [
+        {
+          text: matchupLocal[`projection_current`].toFixed(1),
+          colspan: 2,
+          classname: "highlight",
+        },
+        {
+          text: median_current,
+          colspan: 2,
+          classname: "italic highlight",
+        },
+      ];
+    } else {
+      total_cols = [
+        {
+          text: matchupLocal[`projection_current`].toFixed(1),
+          colspan: 4,
+          classname: "highlight",
+        },
+      ];
     }
 
     return (
@@ -161,10 +167,6 @@ const LeagueMatchups = ({
         key={`Lineup__${matchupLocal.user_id}`}
         type={2}
         half={true}
-        headers_options={[
-          { abbrev: "Cur", text: "Current", desc: "Current Projection" },
-          { abbrev: "Opt", text: "Optimal", desc: "Optimal Projection" },
-        ]}
         headers={[
           {
             text: matchupLocal.username,
@@ -200,7 +202,6 @@ const LeagueMatchups = ({
       matchupLocal.user_id === matchup.opp_matchup.user_id &&
       median_optimal
     ) {
-      console.log({ matchupLocal, matchup, median_optimal });
       total_cols.push({
         text: median_optimal,
         colspan: 2,

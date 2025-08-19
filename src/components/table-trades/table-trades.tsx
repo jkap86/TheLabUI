@@ -10,7 +10,6 @@ import { RootState } from "@/redux/store";
 import { getDraftPickId } from "@/utils/getPickId";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
 import League from "../league/league";
-import { getOptimalStarters, getPlayerTotal } from "@/utils/getOptimalStarters";
 
 const Trade = ({
   trade,

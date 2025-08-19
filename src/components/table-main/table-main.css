@@ -34,11 +34,11 @@ table {
   border-spacing: 0.25rem 0;
 }
 
-th {
+table.main th {
   background-image: radial-gradient(#fff -250%, #000 100%);
 }
 
-th.highlight {
+table.main th.highlight {
   background-image: radial-gradient(black -10%, blue 100%);
   box-shadow: inset 0 0 5rem black;
 }
@@ -73,7 +73,7 @@ td.sort.content {
   box-shadow: inset 0 0 2.5rem var(--color7);
 }
 
-th,
+table.main th,
 td.content {
   text-align: center;
   height: 7rem;
@@ -243,7 +243,7 @@ div.nav div.sync i.fa-arrows-rotate {
   }
 }
 
-thead > tr {
+table.main thead > tr {
   position: sticky;
   top: 0;
   z-index: 10;

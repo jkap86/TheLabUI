@@ -210,7 +210,7 @@ const TableMain = ({
             {headers.map((h, index) => {
               return (
                 <th
-                  key={index}
+                  key={`${h.text}__${index}`}
                   colSpan={h.colspan}
                   className={"main_header " + h.classname}
                 >

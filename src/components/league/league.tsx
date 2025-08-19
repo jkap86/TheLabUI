@@ -584,8 +584,47 @@ const League = ({ league, type }: LeagueProps) => {
         <TableMain
           type={type}
           half={true}
-          headers={[]}
-          data={[]}
+          headers={[{ text: "Scoring Settings", colspan: 2 }]}
+          data={Object.keys(league.scoring_settings)
+            .filter(
+              (cat) =>
+                league.scoring_settings[cat] !== 0 &&
+                (league.roster_positions.includes("K") ||
+                  (!cat.includes("fg") && !cat.includes("xp"))) &&
+                (league.roster_positions.includes("DEF") ||
+                  !cat.includes("pts_allow"))
+            )
+            .sort(
+              (a, b) =>
+                ((b.startsWith("pass") && 1) || 0) -
+                  ((a.startsWith("pass") && 1) || 0) ||
+                b.indexOf("pass") - a.indexOf("pass") ||
+                ((b.startsWith("rush") && 1) || 0) -
+                  ((a.startsWith("rush") && 1) || 0) ||
+                b.indexOf("rush") - a.indexOf("rush") ||
+                ((b.startsWith("rec") && 1) || 0) -
+                  ((a.startsWith("rec") && 1) || 0) ||
+                b.indexOf("rec") - a.indexOf("rec")
+            )
+            .map((cat) => {
+              return {
+                id: cat,
+                columns: [
+                  {
+                    text: cat.replace(/_/g, " "),
+                    colspan: 1,
+                    classname: "",
+                  },
+                  {
+                    text: league.scoring_settings[cat].toLocaleString("en-US", {
+                      maximumFractionDigits: 2,
+                    }),
+                    colspan: 1,
+                    classname: "",
+                  },
+                ],
+              };
+            })}
           placeholder=""
         />
       )}

@@ -56,8 +56,8 @@ const Picks = ({ params }: { params: Promise<{ league_id: string }> }) => {
       ) : (
         <div className="picktracker">
           <ShNavbar />
-          <Link href={"/"} className="home">
-            The Lab Home
+          <Link href={"/picktracker"} className="home">
+            Home
           </Link>
           <h1>
             <Avatar
