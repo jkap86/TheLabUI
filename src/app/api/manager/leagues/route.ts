@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
       stats: { [cat: string]: number };
     }[] = await (
       await pool.query("SELECT * FROM common WHERE name = 'projections_ros'")
-    ).rows[0].data;
+    ).rows[0]?.data;
 
     const projections = Object.fromEntries(
       projections_db.map((p) => [p.player_id, p.stats])
@@ -40,10 +40,6 @@ export async function GET(req: NextRequest) {
       await pool.query("SELECT * FROM common WHERE name = 'ktc_dates_dynasty'")
     ).rows[0].data;
 
-    const ktc_redraft = await (
-      await pool.query("SELECT * FROM common WHERE name = 'ktc_dates_fantasy'")
-    ).rows[0].data;
-
     const ktcCurrent = {
       dynasty:
         ktc_dynasty[
@@ -51,12 +47,7 @@ export async function GET(req: NextRequest) {
             (a, b) => new Date(b).getTime() - new Date(a).getTime()
           )[0]
         ],
-      redraft:
-        ktc_redraft[
-          Object.keys(ktc_redraft).sort(
-            (a, b) => new Date(b).getTime() - new Date(a).getTime()
-          )[0]
-        ],
+      redraft: {},
     };
 
     const leagues = await axiosInstance.get(
