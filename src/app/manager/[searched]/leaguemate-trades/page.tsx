@@ -10,7 +10,6 @@ import { updatedLmtradesState } from "@/redux/lmtrades/lmtradesSlice";
 import Avatar from "@/components/avatar/avatar";
 import { fetchLmTrades } from "@/redux/manager/managerActions";
 import LoadingIcon from "@/components/loading-icon/loading-icon";
-import Link from "next/link";
 
 const LeaguemateTrades = ({
   params,

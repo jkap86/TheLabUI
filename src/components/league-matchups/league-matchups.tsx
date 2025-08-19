@@ -182,9 +182,15 @@ const LeagueMatchups = ({
         data={data}
         placeholder=""
         sendActive={(active: string | false) => {
-          matchupLocal.user_id === matchup.opp_matchup.user_id
-            ? active !== activeIndexOpp && setActiveIndexOpp(active)
-            : active !== activeIndexUser && setActiveIndexUser(active);
+          if (matchupLocal.user_id === matchup.opp_matchup.user_id) {
+            if (active !== activeIndexOpp) {
+              setActiveIndexOpp(active);
+            }
+          } else {
+            if (active !== activeIndexUser) {
+              setActiveIndexUser(active);
+            }
+          }
         }}
       />
     );
@@ -379,8 +385,6 @@ const LeagueMatchups = ({
   const table1Component = getTableComponent(table1, 1);
 
   const table2Component = getTableComponent(table2, 2);
-
-  const select_classname = `h-full w-fit bg-yellow-900 text-center`;
 
   return (
     <>

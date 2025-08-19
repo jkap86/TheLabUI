@@ -10,11 +10,7 @@ import { getDraftPickId } from "@/utils/getPickId";
 import { updateStandingsState } from "@/redux/standings/standingsSlice";
 import { syncLeague } from "@/redux/manager/managerActions";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
-import {
-  getLeaguesObj,
-  getRankColObj,
-  leagueHeaders,
-} from "@/utils/getLeaguesObj";
+import { leagueHeaders } from "@/utils/getLeaguesObj";
 
 type LeagueProps = {
   type: number;
@@ -34,9 +30,7 @@ const League = ({ league, type }: LeagueProps) => {
   const { nflState, allplayers, ktcCurrent, projections } = useSelector(
     (state: RootState) => state.common
   );
-  const { isSyncingLeague, leaguesValuesObj } = useSelector(
-    (state: RootState) => state.manager
-  );
+  const { isSyncingLeague } = useSelector((state: RootState) => state.manager);
   const { teamsColumn1, teamsColumn2, playersColumn1, playersColumn2 } =
     useSelector((state: RootState) => state.standings);
   const [activeRosterId, setActiveRosterId] = useState<false | string>(false);

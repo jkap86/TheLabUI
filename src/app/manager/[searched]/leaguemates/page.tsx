@@ -14,18 +14,12 @@ import { getTrendColor_Range } from "@/utils/getTrendColor";
 import {
   getLeaguemateHeaders,
   getLeaguesObj,
-  getRankColObj,
   leagueHeaders,
-  rankBy,
 } from "@/utils/getLeaguesObj";
-import { Roster } from "@/lib/types/userTypes";
 
 const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
   const dispatch: AppDispatch = useDispatch();
   const { searched } = use(params);
-  const { allplayers, ktcCurrent } = useSelector(
-    (state: RootState) => state.common
-  );
   const { leaguemates, type1, type2, leagues, leaguesValuesObj, user } =
     useSelector((state: RootState) => state.manager);
   const { column1, column2, column3, column4 } = useSelector(
@@ -41,42 +35,24 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
     text: string;
     desc: string;
     key?: string;
-  }[] = [
-    {
-      abbrev: "# Common",
-      text: "Number of Common Leagues",
-      desc: "Number of Common Leagues",
-    },
-    ...leagueHeaders.map((h) => {
-      return {
-        ...{
-          ...h,
-          key: h.abbrev,
-        },
-      };
-    }),
-    ...getLeaguemateHeaders(leagueHeaders),
-    /*
-    {
-      abbrev: "KTC S QB Rk",
-      text: "Keep Trade Cut Dynasty Starting QBs Rank",
-      desc: "The rank of the total KTC dynasty value of starting QBs when optimal dynasty roster is set.  Optimal starters are determined by KTC dynasty values",
-      key: "KTC S QB Rk",
-    },
-    {
-      abbrev: "KTC S QB Rk Lm",
-      text: "Keep Trade Cut Dynasty Starting QBs Rank",
-      desc: "The rank of the total KTC dynasty value of starting QBs when optimal dynasty roster is set.  Optimal starters are determined by KTC dynasty values",
-      key: "KTC S QB Rk Lm",
-    },
-    {
-      abbrev: "Proj S Rk Lm",
-      text: "Projected Points Starters Rank",
-      desc: "The rank of the total projected points of optimal starters.  Starters are determined by projected points",
-      key: "Proj S Rk Lm",
-    },
-    */
-  ];
+  }[] = useMemo(() => {
+    return [
+      {
+        abbrev: "# Common",
+        text: "Number of Common Leagues",
+        desc: "Number of Common Leagues",
+      },
+      ...leagueHeaders.map((h) => {
+        return {
+          ...{
+            ...h,
+            key: h.abbrev,
+          },
+        };
+      }),
+      ...getLeaguemateHeaders(leagueHeaders),
+    ];
+  }, []);
 
   const allLmRanks = useMemo(() => {
     const obj: {
@@ -296,7 +272,15 @@ const Leaguemates = ({ params }: { params: Promise<{ searched: string }> }) => {
       });
     }
     return rankAverages;
-  }, [leaguemates, allplayers, ktcCurrent, leagues, allLmRanks, type1, type2]);
+  }, [
+    leaguemates,
+    leagues,
+    allLmRanks,
+    type1,
+    type2,
+    leaguemateHeaders,
+    leaguesValuesObj,
+  ]);
 
   const component = (
     <TableMain

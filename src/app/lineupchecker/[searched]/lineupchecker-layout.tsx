@@ -11,7 +11,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import LeagueTypeSwitch from "@/components/leagueTypeSwitch/leagueTypeSwitch";
 import { usePathname, useRouter } from "next/navigation";
-import { filterLeagueIds } from "@/utils/filterLeagues";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
 
 interface LayoutProps {

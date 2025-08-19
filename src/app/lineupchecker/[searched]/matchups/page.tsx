@@ -120,7 +120,7 @@ const Matchups = ({ params }: { params: Promise<{ searched: string }> }) => {
             0
           ) / matchup.league_matchups.length
         : false;
-
+      /*
       const median_optimal = matchup.user_matchup.league.settings
         .league_average_match
         ? matchup.league_matchups.reduce(
@@ -128,7 +128,7 @@ const Matchups = ({ params }: { params: Promise<{ searched: string }> }) => {
             0
           ) / matchup.league_matchups.length
         : false;
-
+*/
       const matchupVsMed = median_current
         ? matchup.user_matchup.projection_current < median_current
           ? "L"

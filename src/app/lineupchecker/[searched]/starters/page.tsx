@@ -2,7 +2,7 @@
 
 import Avatar from "@/components/avatar/avatar";
 import { RootState } from "@/redux/store";
-import { use, useMemo, useState } from "react";
+import { use, useCallback, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import "../../../../components/heading/heading.css";
 import TableMain from "@/components/table-main/table-main";
@@ -24,18 +24,22 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
   const [col3, setCol3] = useState("Opp Start");
   const [col4, setCol4] = useState("Opp Bench");
 
-  const filterLeagueIds = (league_ids: string[]) => {
-    return league_ids.filter(
-      (league_id) =>
-        (type1 === "All" ||
-          (type1 === "Redraft" && matchups[league_id].settings.type !== 2) ||
-          (type1 === "Dynasty" && matchups[league_id].settings.type === 2)) &&
-        (type2 === "All" ||
-          (type2 === "Bestball" &&
-            matchups[league_id].settings.best_ball === 1) ||
-          (type2 === "Lineup" && matchups[league_id].settings.best_ball !== 1))
-    );
-  };
+  const filterLeagueIds = useCallback(
+    (league_ids: string[]) => {
+      return league_ids.filter(
+        (league_id) =>
+          (type1 === "All" ||
+            (type1 === "Redraft" && matchups[league_id].settings.type !== 2) ||
+            (type1 === "Dynasty" && matchups[league_id].settings.type === 2)) &&
+          (type2 === "All" ||
+            (type2 === "Bestball" &&
+              matchups[league_id].settings.best_ball === 1) ||
+            (type2 === "Lineup" &&
+              matchups[league_id].settings.best_ball !== 1))
+      );
+    },
+    [type1, type2, matchups]
+  );
 
   const starters = useMemo(() => {
     const obj: {
@@ -145,7 +149,7 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
     });
 
     return obj;
-  }, [starters, matchups, type1, type2]);
+  }, [starters, matchups, filterLeagueIds]);
 
   const headers = [
     {
@@ -203,7 +207,7 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
           classname: "",
           sort: allplayers?.[player_id]?.full_name || player_id,
         },
-        ...[col1, col2, col3, col4].map((col, index) => {
+        ...[col1, col2, col3, col4].map((col) => {
           const { sort, text, trendColor, classname } = startersObj[player_id][
             col
           ] || { sort: 0, text: "-", trendColor: {}, classname: "" };

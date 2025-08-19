@@ -37,16 +37,6 @@ export type LeagueSettings = {
   daily_waivers: number;
 };
 
-type RosterScores = {
-  starters: number;
-  bench_top_5: number;
-  starter_qb: number;
-  bench_top_qb: number;
-  bench_top5_flex: number;
-  starter_rb: number;
-  starter_wr: number;
-};
-
 export type Roster = {
   roster_id: number;
   username: string;

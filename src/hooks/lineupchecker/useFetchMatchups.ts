@@ -20,5 +20,12 @@ export default function useFetchMatchups({ searched }: { searched: string }) {
     ) {
       dispatch(fetchMatchups({ searched }));
     }
-  }, [searched, nflState, searchedName, isLoadingMatchups, dispatch]);
+  }, [
+    searched,
+    nflState,
+    searchedName,
+    isLoadingMatchups,
+    dispatch,
+    errorMatchups,
+  ]);
 }

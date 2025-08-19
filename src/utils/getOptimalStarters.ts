@@ -160,44 +160,6 @@ export const getOptimalStartersLineupCheck = (
 
         const current_player_id = starters[index];
 
-        const current_player_kickoff =
-          schedule[allplayers[current_player_id]?.team]?.kickoff || 0;
-        const current_player_position = allplayers[current_player_id]?.position;
-        const current_slot = slot;
-
-        const earlyInFlex = starters.some((s, index2) => {
-          const option_player_id = s;
-          const option_player_kickoff =
-            schedule[allplayers[option_player_id]?.team]?.kickoff || 0;
-          const option_player_position = allplayers[option_player_id]?.position;
-          const option_slot = roster_positions[index2];
-
-          const early =
-            current_player_kickoff < option_player_kickoff - 60 * 60 * 1000 &&
-            position_map[current_slot].length >
-              position_map[option_slot].length &&
-            position_map[option_slot].includes(current_player_position) &&
-            position_map[current_slot].includes(option_player_position);
-
-          return early;
-        });
-
-        const lateNotInFlex = starters.some((s, index2) => {
-          const option_player_id = s;
-          const option_player_kickoff =
-            schedule[allplayers[option_player_id]?.team]?.kickoff || 0;
-          const option_player_position = allplayers[option_player_id]?.position;
-          const option_slot = roster_positions[index2];
-
-          return (
-            option_player_kickoff - current_player_kickoff > 60 * 60 * 1000 &&
-            position_map[current_slot].length <
-              position_map[option_slot].length &&
-            position_map[current_slot].includes(option_player_position) &&
-            position_map[option_slot].includes(current_player_position)
-          );
-        });
-
         optimal_starters.push({
           index,
           slot__index: `${slot}__${index}`,
