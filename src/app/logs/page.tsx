@@ -42,10 +42,10 @@ const LogsPage = () => {
           let league_id = "";
           let manager_tab = "";
 
-          if (["manager", "lineupchecker"].includes(tool)) {
+          if (["manager", "lineupchecker"].includes(tool) && route_array[2]) {
             username = route_array[2].toLowerCase();
 
-            if (tool === "manager") {
+            if (tool === "manager" && route_array[3]) {
               manager_tab = route_array[3].toLowerCase();
             }
           } else if (tool === "picktracker") {
