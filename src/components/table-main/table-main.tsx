@@ -1,4 +1,4 @@
-import { JSX, useEffect, useState } from "react";
+import { JSX, useEffect, useRef, useState } from "react";
 import Search from "../search/search";
 import "./table-main.css";
 import SortIcon from "../sort-icon/sort-icon";
@@ -105,6 +105,7 @@ const TableMain = ({
   const [searched, setSearched] = useState<false | string>(false);
   const [page, setPage] = useState(1);
   const [active, setActive] = useState<false | string>(false);
+  const initalRef = useRef(true);
   /*
   useEffect(() => {
     if (headers_sort)
@@ -132,7 +133,7 @@ const TableMain = ({
 
   useEffect(() => {
     setPage(1);
-  }, [sortBy, searched, data]);
+  }, [sortBy, searched, data.length]);
 
   useEffect(() => {
     if (sendActive) sendActive(active);
