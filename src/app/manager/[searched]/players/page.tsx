@@ -180,13 +180,7 @@ const Players = ({ params }: PlayersProps) => {
     )
   ).sort((a, b) => (a > b ? 1 : -1));
 
-  const positions = Array.from(
-    new Set(
-      Object.keys(playershares)
-        .filter((player_id) => allplayers?.[player_id]?.position)
-        .map((player_id) => allplayers?.[player_id]?.position)
-    )
-  );
+  const positions = ["QB", "RB", "WR", "TE", "K", "DEF", "DL", "LB", "DB"];
 
   const component = (
     <>
@@ -309,11 +303,19 @@ const Players = ({ params }: PlayersProps) => {
               return {
                 id: player_id,
                 search: {
-                  text: allplayers?.[player_id]?.full_name || player_id,
+                  text:
+                    allplayers?.[player_id]?.full_name ||
+                    (parseInt(player_id) && `Inactive Player - ${player_id}`) ||
+                    player_id,
                   display: (
                     <Avatar
                       id={player_id}
-                      text={allplayers?.[player_id]?.full_name || player_id}
+                      text={
+                        allplayers?.[player_id]?.full_name ||
+                        (parseInt(player_id) &&
+                          `Inactive Player - ${player_id}`) ||
+                        player_id
+                      }
                       type="P"
                     />
                   ),

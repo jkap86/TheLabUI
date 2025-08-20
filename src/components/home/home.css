@@ -5,17 +5,6 @@ div#homepage {
   justify-content: center;
 }
 
-div#homepage > a {
-  position: absolute;
-  top: 0;
-  left: 0;
-  padding: 2rem;
-  font-size: 3rem;
-  color: goldenrod;
-  font-weight: 600;
-  z-index: 1000;
-}
-
 div#homepage div.logo-container {
   width: 100dvmin;
   height: 100dvmin;

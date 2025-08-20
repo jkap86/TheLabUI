@@ -29,10 +29,14 @@ select.columndropdown {
 div.columndropdown > div.columnText > div {
   overflow: hidden;
   white-space: nowrap;
-
+  font-family: var(--fontChill);
+  letter-spacing: 0.1rem;
   text-overflow: ellipsis;
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: 100;
+  line-height: 1.25;
+  white-space: wrap;
+  padding: 0 1rem;
 }
 
 div.columndropdown:hover > div.columnText > div {

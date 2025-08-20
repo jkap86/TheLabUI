@@ -28,10 +28,7 @@ const Homepage = ({
 
   return (
     <div id="homepage">
-      <Link
-        href={"/tools"}
-        className="m-8 absolute text-yellow-600 !text-[2.5rem] font-score"
-      >
+      <Link href={"/tools"} className="home !p-8">
         Tools
       </Link>
       <div className="logo-container">

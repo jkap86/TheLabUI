@@ -34,8 +34,13 @@ body {
 }
 
 a.home {
-  font-size: 2rem;
-  padding: 2rem;
+  font-size: 2.5rem;
+  padding: 1rem 0rem;
+  position: absolute;
+  font-family: var(--fontScore);
+  color: orangered;
+  top: 0;
+  left: 0;
 }
 
 img {
@@ -53,6 +58,10 @@ h6 {
 
 h1 {
   font-size: 2rem;
+}
+
+select {
+  text-align-last: center;
 }
 
 .font-pulang {
@@ -92,6 +101,7 @@ div.nav-buttons {
   display: flex;
   justify-content: center;
   font-size: 3rem;
+  width: 100dvmin;
 }
 
 div.nav-buttons > div {
@@ -99,12 +109,13 @@ div.nav-buttons > div {
   flex-direction: column;
   background-color: maroon;
   align-items: center;
-  width: 20rem;
+  width: 25%;
   box-shadow: inset 0 0 10rem black;
   border-radius: 2rem;
   padding: 1rem;
   border: 0.5rem double silver;
   margin: 2rem;
+  justify-content: center;
 }
 
 div.nav-buttons > div > label {

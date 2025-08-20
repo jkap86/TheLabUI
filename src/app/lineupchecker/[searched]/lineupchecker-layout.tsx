@@ -100,12 +100,12 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
           </td>
         </tr>
         <tr className="shadow-[inset_0_0_5rem_var(--color10)]">
-          <td className="font-metal p-4">vs Opponent</td>
-          <td className="font-pulang">
+          <td className="font-metal px-8 py-4">vs Opponent</td>
+          <td className="font-pulang px-8 py-4">
             {proj_record.wins_opp} - {proj_record.losses_opp}
             {proj_record.ties_opp ? ` - ${proj_record.ties_opp}` : ""}
           </td>
-          <td>
+          <td className="px-8 py-4">
             <em className="font-pulang">
               {(
                 proj_record.wins_opp /
@@ -117,13 +117,13 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
           </td>
         </tr>
         <tr className="shadow-[inset_0_0_5rem_var(--color10)]">
-          <td className="font-metal p-4">vs Median</td>
-          <td className="font-pulang">
+          <td className="font-metal px-8 py-4">vs Median</td>
+          <td className="font-pulang px-8 py-4">
             {proj_record.wins_med} - {proj_record.losses_med}
             {proj_record.ties_med ? ` - ${proj_record.ties_med}` : ""}
           </td>
           <td>
-            <em className="font-pulang">
+            <em className="font-pulang px-8 py-4">
               {(
                 proj_record.wins_med /
                 (proj_record.wins_med +
@@ -134,15 +134,15 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
           </td>
         </tr>
         <tr className="shadow-[inset_0_0_5rem_var(--color10)]">
-          <td className="font-metal p-4">Ovr</td>
-          <td className="font-pulang">
+          <td className="font-metal px-8 py-4">Total</td>
+          <td className="font-pulang px-8 py-4">
             {proj_record.wins_opp + proj_record.wins_med} -{" "}
             {proj_record.losses_opp + proj_record.losses_med}
             {proj_record.ties_opp + proj_record.ties_med
               ? ` - ${proj_record.ties_opp + proj_record.ties_med}`
               : ""}
           </td>
-          <td>
+          <td className="px-8 py-4">
             <em className="font-pulang">
               {(
                 (proj_record.wins_opp + proj_record.wins_med) /
@@ -163,20 +163,26 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
   return (
     <>
       <ShNavbar />
-      <div className="heading">
+      <div className="relative">
         <Link href={"/lineupchecker"} className="home">
-          Home
+          Lineup Checker Home
         </Link>
         {Object.values(matchups)[0]?.user_matchup?.username ? (
           <>
-            <h1>
-              <Avatar
-                id={Object.values(matchups)[0]?.user_matchup?.avatar}
-                type="U"
-                text={Object.values(matchups)[0]?.user_matchup?.username}
-              />
-            </h1>
-            <h1 className="tool-title">Lineup Checker</h1>
+            <div className="heading pt-[5rem]">
+              <h1 className="tool-title !text-[5rem] ![text-shadow:0_0_.5rem_red]">
+                Lineup Checker
+              </h1>
+
+              <h1>
+                <Avatar
+                  id={Object.values(matchups)[0]?.user_matchup?.avatar}
+                  type="U"
+                  text={Object.values(matchups)[0]?.user_matchup?.username}
+                />
+              </h1>
+            </div>
+
             <LeagueTypeSwitch />
             {recordTable}
             <br />
@@ -188,6 +194,7 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
                   )
                 }
                 value={pathname.split("/")[3]}
+                className="font-metal text-[var(--color1)] p-8 text-[4rem]"
               >
                 <option>matchups</option>
                 <option>starters</option>

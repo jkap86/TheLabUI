@@ -19,10 +19,7 @@ const Heading = () => {
 
   return (
     <div className="heading relative">
-      <Link
-        href={"/"}
-        className="m-8 absolute text-yellow-600 !text-[2.5rem] font-score"
-      >
+      <Link href={"/"} className="home">
         Manager Home
       </Link>
 

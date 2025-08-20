@@ -1,0 +1,6 @@
+table.record-table td {
+  box-shadow: inset 0 0 5rem black;
+}
+table.record-table tr td {
+  padding: 1rem;
+}

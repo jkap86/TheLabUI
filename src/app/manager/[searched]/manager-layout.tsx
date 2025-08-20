@@ -36,7 +36,7 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
   const errors = [...errorCommon, errorUser].filter((e) => e);
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="">
       <ShNavbar />
       {errors.length > 0 ? (
         <div className="h-screen flex-1 overflow-auto flex flex-col justify-center items-center">

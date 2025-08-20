@@ -11,6 +11,7 @@ import { League as LeagueType } from "@/lib/types/userTypes";
 import League from "@/components/league/league";
 import { updateLeaguesState } from "@/redux/leagues/leaguesSlice";
 import { leagueHeaders } from "@/utils/getLeaguesObj";
+import "./leagues.css";
 
 interface LeaguesProps {
   params: Promise<{ searched: string }>;
@@ -63,9 +64,9 @@ const Leagues = ({ params }: LeaguesProps) => {
   );
 
   const recordTable = (
-    <table className="!table-auto !w-[50%] !border-spacing-8 p-4 mx-auto my-8 text-[3rem] text-center bg-gray-700 shadow-[inset_0_0_25rem_var(--color10)], shadow-[0_0_2rem_goldenrod]">
+    <table className="record-table !table-auto !w-[70dvmin] !border-spacing-8 p-4 mx-auto my-8 text-[3rem] text-center bg-gray-700">
       <tbody>
-        <tr className="shadow-[inset_0_0_5rem_var(--color10)]">
+        <tr>
           <td>Record</td>
           <td>
             {overallRecord.wins} - {overallRecord.losses}
@@ -85,7 +86,7 @@ const Leagues = ({ params }: LeaguesProps) => {
             </em>
           </td>
         </tr>
-        <tr className="shadow-[inset_0_0_5rem_var(--color10)]">
+        <tr>
           <td>Points For/Against</td>
           <td>
             {overallRecord.fp.toLocaleString("en-US", {

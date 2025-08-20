@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import thelablogo from "../../../public/images/thelab.png";
+import ShNavbar from "@/components/sh-navbar/sh-navbar";
 
 const Trades = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -180,58 +181,58 @@ const Trades = () => {
 
   return (
     <>
-      <Link
-        href={"/tools"}
-        className="m-8 absolute text-yellow-600 !text-[2.5rem] font-score"
-      >
-        Tools
-      </Link>
-      {isLoadingTrades ? (
-        <LoadingIcon messages={[]} />
-      ) : (
-        <>
-          <div className="flex justify-center text-[2.5rem] m-8 text-orange-600 font-score absolute right-0">
-            <Link
-              href={
-                user?.user_id
-                  ? `/manager/${user?.username}/leaguemate-trades`
-                  : "/manager"
-              }
-              onClick={() => localStorage.setItem("tab", "leaguemate-trades")}
-            >
-              Leaguemate Trades
-            </Link>
-          </div>
+      <ShNavbar />
+      <div className="relative">
+        <Link href={"/tools"} className="home !p-8">
+          Tools
+        </Link>
+        {isLoadingTrades ? (
+          <LoadingIcon messages={[]} />
+        ) : (
+          <>
+            <div className="flex justify-center text-[2.5rem] !p-8 text-orange-600 font-score absolute right-0">
+              <Link
+                href={
+                  user?.user_id
+                    ? `/manager/${user?.username}/leaguemate-trades`
+                    : "/manager"
+                }
+                onClick={() => localStorage.setItem("tab", "leaguemate-trades")}
+              >
+                Leaguemate Trades
+              </Link>
+            </div>
 
-          <div className="flex justify-center items-center p-8 w-fit m-auto relative">
-            <Image
-              src={thelablogo}
-              alt="logo"
-              className="w-[25rem] m-8 opacity-[.35] drop-shadow-[0_0_1rem_white]"
+            <div className="flex justify-center items-center p-8 w-fit m-auto relative">
+              <Image
+                src={thelablogo}
+                alt="logo"
+                className="w-[25rem] m-8 opacity-[.35] drop-shadow-[0_0_1rem_white]"
+              />
+              <h1 className="absolute !text-[15rem] font-metal !text-[var(--color7)] ![text-shadow:0_0_.5rem_red] drop-shadow-[0_0_1rem_black]">
+                Trades
+              </h1>
+            </div>
+            {searches}
+            <TableTrades
+              trades={tradeObj?.trades || []}
+              tradeCount={tradeObj?.count || 0}
+              fetchMore={() =>
+                dispatch(
+                  fetchTrades({
+                    player_id1: searched_player1_pc,
+                    player_id2: searched_player2_pc,
+                    player_id3: searched_player3_pc,
+                    player_id4: searched_player4_pc,
+                    offset: tradeObj?.trades?.length || 0,
+                    limit: 125,
+                  })
+                )
+              }
             />
-            <h1 className="absolute !text-[15rem] font-metal text-yellow-900 ![text-shadow:0_0_.5rem_silver] drop-shadow-[0_0_1rem_black]">
-              Trades
-            </h1>
-          </div>
-          {searches}
-          <TableTrades
-            trades={tradeObj?.trades || []}
-            tradeCount={tradeObj?.count || 0}
-            fetchMore={() =>
-              dispatch(
-                fetchTrades({
-                  player_id1: searched_player1_pc,
-                  player_id2: searched_player2_pc,
-                  player_id3: searched_player3_pc,
-                  player_id4: searched_player4_pc,
-                  offset: tradeObj?.trades?.length || 0,
-                  limit: 125,
-                })
-              )
-            }
-          />
-        </>
-      )}
+          </>
+        )}
+      </div>
     </>
   );
 };

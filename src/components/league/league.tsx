@@ -203,10 +203,13 @@ const League = ({ league, type }: LeagueProps) => {
       ])
     );
 
-    (activeRoster?.players || []).forEach((player_id) => {
+    [
+      ...(activeRoster?.players || []),
+      ...(activeRoster?.draftpicks || []).map((pick) => getDraftPickId(pick)),
+    ].forEach((player_id) => {
       const ktc_d = ktcCurrent?.dynasty?.[player_id] || 0;
 
-      const proj = players_proj[player_id];
+      const proj = players_proj[player_id] || 0;
 
       const age = allplayers?.[player_id]?.age || 0;
 
@@ -285,7 +288,7 @@ const League = ({ league, type }: LeagueProps) => {
           },
           {
             text: "Manager",
-            colspan: 4,
+            colspan: 3,
           },
           {
             text: teamsColumn1,
@@ -335,7 +338,7 @@ const League = ({ league, type }: LeagueProps) => {
                 text: (
                   <Avatar id={roster.avatar} text={roster.username} type="U" />
                 ),
-                colspan: 4,
+                colspan: 3,
                 classname: "",
               },
 
@@ -562,14 +565,6 @@ const League = ({ league, type }: LeagueProps) => {
               ?.map((pick) => {
                 const pick_id = getDraftPickId(pick);
 
-                const { text, trendColor, classname } = playersObj[pick_id]?.[
-                  playersColumn1
-                ] || {
-                  text: "-",
-                  trendColor: {},
-                  classname: "",
-                };
-
                 return {
                   id: `${pick.season}_${pick.round}_${pick.roster_id}`,
                   columns: [
@@ -592,12 +587,21 @@ const League = ({ league, type }: LeagueProps) => {
                       colspan: 4,
                       classname: "",
                     },
-                    {
-                      text,
-                      colspan: 2,
-                      style: trendColor || {},
-                      classname,
-                    },
+                    ...[playersColumn1, playersColumn2].map((col) => {
+                      const { text, trendColor, classname } = playersObj[
+                        pick_id
+                      ]?.[col] || {
+                        text: "-",
+                        trendColor: {},
+                        classname: "",
+                      };
+                      return {
+                        text,
+                        colspan: 2,
+                        style: trendColor || {},
+                        classname,
+                      };
+                    }),
                   ],
                 };
               }) || []),

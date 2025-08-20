@@ -92,6 +92,7 @@ const Search = ({
         <button
           className="show"
           onClick={(e) =>
+            !disabled &&
             setSearchOptions(
               options.sort(
                 (a, b) =>

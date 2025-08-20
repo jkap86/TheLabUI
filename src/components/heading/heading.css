@@ -2,10 +2,6 @@ div.heading {
   margin: 3rem;
 }
 
-div.heading a.home {
-  font-size: 2rem;
-}
-
 div.heading div.avatar {
   margin: auto;
   width: fit-content;

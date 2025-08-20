@@ -226,10 +226,10 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
       ],
       secondary: (
         <PlayerMatchups
-          start={start}
-          bench={bench}
-          opp_start={opp_start}
-          opp_bench={opp_bench}
+          start={filterLeagueIds(start)}
+          bench={filterLeagueIds(bench)}
+          opp_start={filterLeagueIds(opp_start)}
+          opp_bench={filterLeagueIds(opp_bench)}
         />
       ),
     };
