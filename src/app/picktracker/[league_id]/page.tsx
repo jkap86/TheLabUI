@@ -69,7 +69,9 @@ const Picks = ({ params }: { params: Promise<{ league_id: string }> }) => {
               </h1>
             </div>
             {error ? (
-              <h1 className="!text-[4rem] m-[5rem] text-red-600">{error}</h1>
+              <h1 className="!text-[4rem] m-[5rem] text-red-600 font-score">
+                {error}
+              </h1>
             ) : (
               <TableMain
                 type={1}

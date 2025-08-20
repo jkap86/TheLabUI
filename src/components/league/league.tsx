@@ -11,6 +11,7 @@ import { updateStandingsState } from "@/redux/standings/standingsSlice";
 import { syncLeague } from "@/redux/manager/managerActions";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
 import { leagueHeaders } from "@/utils/getLeaguesObj";
+import { getPositionMaxAge } from "@/utils/getPositionMaxAge";
 
 type LeagueProps = {
   type: number;
@@ -169,12 +170,22 @@ const League = ({ league, type }: LeagueProps) => {
     {
       abbrev: "KTC D",
       text: "KTC Dynasty Value",
-      desc: "",
+      desc: "KTC Dynasty Value",
     },
     {
       abbrev: "ROS P",
       text: "Rest of Season Projected Points",
-      desc: "",
+      desc: "Rest of Season Projected Points",
+    },
+    {
+      abbrev: "Age",
+      text: "Age",
+      desc: "Age",
+    },
+    {
+      abbrev: "Draft Class",
+      text: "Draft Class",
+      desc: "Draft Class",
     },
   ];
 
@@ -197,6 +208,8 @@ const League = ({ league, type }: LeagueProps) => {
 
       const proj = players_proj[player_id];
 
+      const age = allplayers?.[player_id]?.age || 0;
+
       obj[player_id] = {
         "KTC D": {
           sort: ktc_d,
@@ -211,6 +224,16 @@ const League = ({ league, type }: LeagueProps) => {
             proj,
             Math.min(...Object.values(projectionsObj.players)),
             Math.max(...Object.values(projectionsObj.players))
+          ),
+          classname: "stat",
+        },
+        Age: {
+          sort: age,
+          text: (age > 0 && age.toString()) || "-",
+          trendColor: getTrendColor_Range(
+            age,
+            21,
+            getPositionMaxAge(allplayers?.[player_id]?.position)
           ),
           classname: "stat",
         },

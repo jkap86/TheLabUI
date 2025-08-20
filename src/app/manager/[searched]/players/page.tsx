@@ -57,11 +57,6 @@ const Players = ({ params }: PlayersProps) => {
       desc: "Keep Trade Cut Dynasty Ranking",
     },
     {
-      abbrev: "KTC R",
-      text: "Keep Trade Cut Redraft Ranking",
-      desc: "Keep Trade Cut Redraft Ranking",
-    },
-    {
       abbrev: "Ppr Proj",
       text: "Ppr Projection",
       desc: "Ppr Projection",
@@ -75,11 +70,6 @@ const Players = ({ params }: PlayersProps) => {
       abbrev: "Draft Class",
       text: "Draft Class",
       desc: "Draft Class",
-    },
-    {
-      abbrev: "KTC Pts R",
-      text: "Projected Points to KTC Dynasty Value Ratio",
-      desc: "Projected Points to KTC Dynasty Value Ratio",
     },
   ];
 
@@ -107,13 +97,13 @@ const Players = ({ params }: PlayersProps) => {
           sort: num_owned,
           text: num_owned.toString(),
           trendColor: getTrendColor_Range(percent_owned, 0, 0.25),
-          classname: "",
+          classname: "font-metal text-[3.5rem]",
         },
         "% Own": {
           sort: percent_owned,
           text: Math.round(percent_owned * 1000) / 10 + "%",
           trendColor: getTrendColor_Range(percent_owned, 0, 0.25),
-          classname: "",
+          classname: "font-metal text-[3.5rem]",
         },
         "KTC D": {
           sort: ktcCurrent?.dynasty[player_id] || 0,
@@ -140,14 +130,14 @@ const Players = ({ params }: PlayersProps) => {
         },
         Age: {
           sort: allplayers?.[player_id]?.age || 0,
-          text: allplayers?.[player_id]?.age || "-",
+          text: allplayers?.[player_id]?.age?.toString() || "-",
           trendColor: getTrendColor_Range(
-            parseInt(allplayers?.[player_id]?.age || "0"),
+            allplayers?.[player_id]?.age || 0,
             21,
             getPositionMaxAge(allplayers?.[player_id]?.position),
             true
           ),
-          classname: "ktc",
+          classname: "stat",
         },
         "Draft Class": {
           sort: draftClass,
@@ -313,7 +303,7 @@ const Players = ({ params }: PlayersProps) => {
                 (filterTeam === "All" ||
                   allplayers?.[player_id]?.team === filterTeam) &&
                 (filterPosition === "All" ||
-                  allplayers?.[player_id].position === filterPosition)
+                  allplayers?.[player_id]?.position === filterPosition)
             )
             .map((player_id) => {
               return {

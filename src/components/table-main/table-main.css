@@ -117,6 +117,11 @@ td.content.age {
   font-size: 3rem;
 }
 
+td.content.stat {
+  font-family: var(--fontScore);
+  font-size: 3.5rem;
+}
+
 table.half td.content.ktc,
 table.half td.content.rank {
   font-size: 2rem;

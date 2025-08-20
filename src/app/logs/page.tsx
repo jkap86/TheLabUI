@@ -3,6 +3,8 @@
 import TableMain from "@/components/table-main/table-main";
 import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
+import "./logs.css";
+import Link from "next/link";
 
 type LogDb = {
   ip: string;
@@ -140,13 +142,38 @@ const LogsPage = () => {
     },
   ];
 
+  const totals = [
+    {
+      label: "Entries",
+      array: filteredLogs,
+    },
+    {
+      label: "IP Addresses",
+      array: ips,
+    },
+    {
+      label: "Usernames",
+      array: usernames,
+    },
+    {
+      label: "League Ids",
+      array: league_ids,
+    },
+  ];
+
   return (
     <div className="h-dvh">
-      <h1 className="!text-[5rem] font-score text-blue-400">
+      <Link
+        href={"/tools"}
+        className="m-8 absolute text-yellow-600 !text-[2.5rem] font-score"
+      >
+        Tools
+      </Link>
+      <h1 className="!text-[5rem] font-score text-blue-400 m-8">
         Logs - Last 24 hrs
       </h1>
 
-      <div className="flex flex-col text-[3rem] items-center mx-auto my-8 bg-gray-700 w-fit p-8 max-w-[100vw]">
+      <div className="filters flex flex-col text-[3rem] items-center mx-auto my-8 bg-gray-700 w-fit p-8 max-w-[100vw]">
         {filters.map((f) => {
           return (
             <div
@@ -160,7 +187,7 @@ const LogsPage = () => {
                   value={f.state}
                   onChange={(e) => f.setState(e.target.value.trim())}
                   list={f.id}
-                  className="bg-gray-400 w-[25rem] text-center text-black font-black"
+                  className="bg-gray-400 w-[25rem] text-center text-black font-black ![text-shadow:none] !overflow-hidden text-ellipsis whitespace-nowrap "
                 />
                 <datalist id={f.id}>
                   {f.list
@@ -187,9 +214,18 @@ const LogsPage = () => {
         })}
       </div>
 
-      <h3 className="text-[3rem] m-8">
-        {filteredLogs.length.toLocaleString("en-US")} Entries
-      </h3>
+      <div className="text-[3rem] mx-auto my-8 w-[100vmin] flex justify-evenly">
+        {totals.map((t) => {
+          return (
+            <div key={t.label}>
+              <strong className="font-score text-yellow-600">
+                {t.array.length}
+              </strong>{" "}
+              <em className="font-chill">{t.label}</em>
+            </div>
+          );
+        })}
+      </div>
 
       <TableMain
         type={1}

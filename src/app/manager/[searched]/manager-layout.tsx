@@ -32,26 +32,39 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
 
   useFetchUserAndLeagues(searched);
   useFetchLmTrades();
-  return (
-    <>
-      <ShNavbar />
-      {errorCommon.length > 0 &&
-        errorCommon.map((err) => {
-          return <h5 key={err}>{err}</h5>;
-        })}
 
-      {errorUser}
-      {isLoadingCommon.length > 0 || isLoadingUser ? (
+  const errors = [...errorCommon, errorUser].filter((e) => e);
+
+  return (
+    <div className="h-screen flex flex-col">
+      <ShNavbar />
+      {errors.length > 0 ? (
+        <div className="h-screen flex-1 overflow-auto flex flex-col justify-center items-center">
+          {errors.map((error) => {
+            return (
+              <div
+                key={error}
+                className="text-[5rem] text-red-600 font-black font-score"
+              >
+                {error}
+              </div>
+            );
+          })}
+        </div>
+      ) : isLoadingCommon.length > 0 || isLoadingUser ? (
         <LoadingIcon messages={[]} />
       ) : (
-        <Heading />
+        <>
+          <Heading />
+          {isLoadingCommon.length > 0 ||
+          isLoadingUser ? null : isLoadingLeagues ? (
+            <LoadingIcon messages={[`${leaguesProgress} Leagues Loaded`]} />
+          ) : (
+            component
+          )}
+        </>
       )}
-      {isLoadingCommon.length > 0 || isLoadingUser ? null : isLoadingLeagues ? (
-        <LoadingIcon messages={[`${leaguesProgress} Leagues Loaded`]} />
-      ) : (
-        component
-      )}
-    </>
+    </div>
   );
 };
 

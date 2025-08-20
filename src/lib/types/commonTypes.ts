@@ -7,7 +7,7 @@ export type Allplayer = {
   full_name: string;
   first_name: string;
   last_name: string;
-  age: string;
+  age: number;
   fantasy_positions: string[];
   years_exp: number;
   active: boolean;
