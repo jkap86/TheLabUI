@@ -12,6 +12,8 @@ import { fetchLmTrades } from "@/redux/manager/managerActions";
 import LoadingIcon from "@/components/loading-icon/loading-icon";
 import { convertDraftPickName, getDraftPickIdFromRaw } from "@/utils/getPickId";
 import TableMain from "@/components/table-main/table-main";
+import RostersComparisonPage from "@/components/rosters-comparison/rosters-comparison";
+import { Roster } from "@/lib/types/userTypes";
 
 const LeaguemateTrades = ({
   params,
@@ -119,12 +121,22 @@ const LeaguemateTrades = ({
         )?.count || 0
       : lmTrades.count;
 
+  const rosterIncludesPlayerPick = (id: string, roster: Roster) => {
+    return id
+      ? roster.players?.includes(id) ||
+          roster.draftpicks.some(
+            (draft_pick) => id === getDraftPickIdFromRaw(draft_pick)
+          )
+      : true;
+  };
+
   const potentialTrades = useMemo(() => {
     const trades: {
       league: {
         league_id: string;
         name: string;
         avatar: string | null;
+        user_roster_id: number;
       };
       lm: {
         user_id: string;
@@ -134,50 +146,57 @@ const LeaguemateTrades = ({
       };
     }[] = [];
 
-    leagues &&
-      give1 &&
-      receive1 &&
+    if (leagues && give1 && receive1)
       Object.keys(leagues)
-        .filter(
-          (league_id) =>
+        .filter((league_id) => {
+          const allowsTrading =
             !leagues[league_id].settings.disable_trades &&
             leagues[league_id].settings.trade_deadline >=
-              (nflState?.leg as number) &&
-            (give1
-              ? leagues[league_id].user_roster.players?.includes(give1) ||
-                leagues[league_id].user_roster.draftpicks.some(
-                  (draft_pick) => give1 === getDraftPickIdFromRaw(draft_pick)
-                )
-              : true) &&
-            (receive1
-              ? leagues[league_id].rosters.some(
-                  (r) =>
-                    r.players?.includes(receive1) ||
-                    r.draftpicks.some(
-                      (draft_pick) =>
-                        receive1 === getDraftPickIdFromRaw(draft_pick)
-                    )
-                )
-              : true)
-        )
+              (nflState?.leg as number);
+
+          const userGiven1 = rosterIncludesPlayerPick(
+            give1,
+            leagues[league_id].user_roster
+          );
+
+          const userGiven2 = rosterIncludesPlayerPick(
+            give2,
+            leagues[league_id].user_roster
+          );
+
+          const lmReceive = receive1
+            ? leagues[league_id].rosters.some((r) => {
+                const lmReceive1 = rosterIncludesPlayerPick(receive1, r);
+                const lmReceive2 = rosterIncludesPlayerPick(receive2, r);
+
+                return lmReceive1 && lmReceive2;
+              })
+            : false;
+
+          return allowsTrading && userGiven1 && userGiven2 && lmReceive;
+        })
         .forEach((league_id) => {
           const rosters = leagues[league_id].rosters.filter((r) => {
-            return (
-              r.players?.includes(receive1) ||
-              r.draftpicks.some(
-                (draft_pick) => receive1 === getDraftPickIdFromRaw(draft_pick)
-              )
-            );
+            const lmReceive1 = receive1
+              ? rosterIncludesPlayerPick(receive1, r)
+              : false;
+            const lmReceive2 = rosterIncludesPlayerPick(receive2, r);
+            return lmReceive1 && lmReceive2;
           });
 
           rosters.forEach((r) => {
-            const { name, avatar: league_avatar } = leagues[league_id];
+            const {
+              name,
+              avatar: league_avatar,
+              user_roster,
+            } = leagues[league_id];
             const { user_id, username, avatar: lm_avatar, roster_id } = r;
             trades.push({
               league: {
                 league_id,
                 name,
                 avatar: league_avatar,
+                user_roster_id: user_roster.roster_id,
               },
               lm: {
                 user_id,
@@ -190,7 +209,7 @@ const LeaguemateTrades = ({
         });
 
     return trades;
-  }, [nflState, leagues, give1, receive1]);
+  }, [nflState, leagues, give1, give2, receive1, receive2]);
 
   const giveOptions = [
     ...Object.keys(playershares)
@@ -244,6 +263,33 @@ const LeaguemateTrades = ({
 
   const selected = [give1, give2, receive1, receive2].filter((x) => x);
 
+  const data = potentialTrades.map((pt) => {
+    return {
+      id: `${pt.league.league_id}__${pt.lm.roster_id}`,
+      columns: [
+        {
+          text: <Avatar id={pt.league.avatar} text={pt.league.name} type="L" />,
+          colspan: 12,
+          classname: "",
+        },
+        {
+          text: <Avatar id={pt.lm.avatar} text={pt.lm.username} type="U" />,
+          colspan: 12,
+          classname: "",
+        },
+      ],
+      secondary: leagues ? (
+        <RostersComparisonPage
+          league={leagues[pt.league.league_id]}
+          roster_id1={pt.league.user_roster_id}
+          roster_id2={pt.lm.roster_id}
+        />
+      ) : (
+        <></>
+      ),
+    };
+  });
+
   const component = (
     <>
       {isLoadingLmTrades ? (
@@ -262,7 +308,7 @@ const LeaguemateTrades = ({
               ) : null}
               <button
                 onClick={() => setFindTrades(true)}
-                className="w-full h-full"
+                className="w-full h-full text-[4rem] font-hugmate text-blue-400"
               >
                 Find Trades
               </button>
@@ -270,7 +316,9 @@ const LeaguemateTrades = ({
                 <div>
                   <div className="flex justify-center">
                     <div className="flex flex-col m-8 items-center">
-                      <label>Give</label>
+                      <label className="font-pulang bg-[var(--color2)] w-full text-center red">
+                        Trade Away
+                      </label>
                       <Search
                         searched={
                           giveOptions.find((o) => o.id === give1)?.text || ""
@@ -296,7 +344,9 @@ const LeaguemateTrades = ({
                       ) : null}
                     </div>
                     <div className="flex flex-col m-8 items-center">
-                      <label>Receive</label>
+                      <label className="font-pulang bg-[var(--color2)] w-full text-center green">
+                        Trade For
+                      </label>
                       <Search
                         searched={
                           receiveOptions.find((o) => o.id === receive1)?.text ||
@@ -325,36 +375,68 @@ const LeaguemateTrades = ({
                   </div>
                   <TableMain
                     type={1}
-                    headers={[]}
-                    data={potentialTrades.map((pt) => {
-                      return {
-                        id: `${pt.league.league_id}__${pt.lm.roster_id}`,
-                        columns: [
-                          {
-                            text: (
-                              <Avatar
-                                id={pt.league.avatar}
-                                text={pt.league.name}
-                                type="L"
-                              />
-                            ),
-                            colspan: 1,
-                            classname: "",
-                          },
-                          {
-                            text: (
-                              <Avatar
-                                id={pt.lm.avatar}
-                                text={pt.lm.username}
-                                type="U"
-                              />
-                            ),
-                            colspan: 1,
-                            classname: "",
-                          },
-                        ],
-                      };
-                    })}
+                    headers={[
+                      {
+                        text: allplayers?.[give1]?.full_name || give1,
+                        colspan: give2 ? 5 : 11,
+                        classname: "red !text-[2.5rem]",
+                      },
+                      {
+                        text: "+",
+                        colspan: give2 ? 1 : 0,
+                        classname: give2 ? "" : "hidden",
+                      },
+                      {
+                        text: allplayers?.[give2]?.full_name || give2,
+                        colspan: give2 ? 5 : 0,
+                        classname: give2
+                          ? "red !text-[2.5rem] leading-tight"
+                          : "hidden",
+                      },
+
+                      {
+                        text: "\u21D4",
+                        colspan: 2,
+                        classname: "text-yellow-600 text-[5rem]",
+                      },
+                      {
+                        text: allplayers?.[receive1]?.full_name || receive1,
+                        colspan: receive2 ? 5 : 11,
+                        classname: "green !text-[2.5rem] leading-tight",
+                      },
+                      {
+                        text: "+",
+                        colspan: receive2 ? 1 : 0,
+                        classname: receive2 ? "" : "hidden",
+                      },
+                      {
+                        text: allplayers?.[receive2]?.full_name || receive2,
+                        colspan: receive2 ? 5 : 0,
+                        classname: receive2
+                          ? "green !text-[2.5rem] leading-tight"
+                          : "hidden",
+                      },
+                    ]}
+                    data={
+                      !give1 || !receive1
+                        ? [
+                            {
+                              id: "-",
+                              columns: [
+                                {
+                                  text: `Selects Players/Picks to ${
+                                    give1 ? "" : "Give"
+                                  }${!(give1 || receive1) ? " And " : ""}${
+                                    receive1 ? "" : "Receive"
+                                  }`,
+                                  colspan: 24,
+                                  classname: "text-yellow-600",
+                                },
+                              ],
+                            },
+                          ]
+                        : data
+                    }
                     placeholder=""
                   />
                 </div>

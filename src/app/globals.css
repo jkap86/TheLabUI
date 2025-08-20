@@ -95,7 +95,10 @@ option {
   background-color: black;
   color: white;
 }
-
+div.nav-buttons-container {
+  position: fixed;
+  top: 0;
+}
 div.nav-buttons {
   margin: auto;
   display: flex;
