@@ -132,7 +132,7 @@ const TableMain = ({
 
   useEffect(() => {
     setPage(1);
-  }, [sortBy, searched]);
+  }, [sortBy, searched, data]);
 
   useEffect(() => {
     if (sendActive) sendActive(active);

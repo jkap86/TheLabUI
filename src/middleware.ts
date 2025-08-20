@@ -3,28 +3,29 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  if (process.env.NODE_ENV === "production") {
-    // Extract IP address from the request
-    const ipAddress = request.headers.get("x-forwarded-for") || "Unknown IP";
+  //if (process.env.NODE_ENV === "production") {
+  // Extract IP address from the request
+  const ipAddress = request.headers.get("x-forwarded-for") || "Unknown IP";
 
-    // Get the current timestamp
+  // Get the current timestamp
 
-    // Log details
+  // Log details
 
-    const redirectUrl = new URL(
-      "/api/logs",
-      "https://the-lab.southharmonff.com"
-    );
+  const url =
+    process.env.NODE_ENV === "production"
+      ? "https://the-lab.southharmonff.com"
+      : "http://localhost:3000";
+  const redirectUrl = new URL("/api/logs", url);
 
-    redirectUrl.searchParams.set("ip", ipAddress);
-    redirectUrl.searchParams.set("route", request.nextUrl.pathname);
+  redirectUrl.searchParams.set("ip", ipAddress);
+  redirectUrl.searchParams.set("route", request.nextUrl.pathname);
 
-    try {
-      await axios.get(redirectUrl.toString());
-    } catch (err: unknown) {
-      if (err instanceof Error) console.log(err.message);
-    }
+  try {
+    await axios.get(redirectUrl.toString());
+  } catch (err: unknown) {
+    if (err instanceof Error) console.log(err.message);
   }
+  //}
 
   // Proceed with the request
   return NextResponse.next();
