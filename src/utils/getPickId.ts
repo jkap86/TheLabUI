@@ -1,3 +1,4 @@
+import { Draftpick } from "@/lib/types/userTypes";
 import store, { RootState } from "@/redux/store";
 
 export const getDraftPickId = (pick: {
@@ -38,6 +39,14 @@ const getSuffix = (round: number) => {
     default:
       return "th";
   }
+};
+
+export const getDraftPickIdFromRaw = (draft_pick: Draftpick) => {
+  return `${draft_pick.season} ${draft_pick.round}.${
+    draft_pick.order?.toLocaleString("en-US", {
+      minimumIntegerDigits: 2,
+    }) || draft_pick.order
+  }`;
 };
 
 export const convertDraftPickName = (pick_id: string) => {

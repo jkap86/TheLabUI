@@ -104,8 +104,7 @@ const Trade = ({
             (r) => r.user_id === user_id
           );
 
-          const league_type =
-            trade.league.settings.type === 2 ? "dynasty" : "redraft";
+          const league_type = "dynasty";
 
           const ktc_current = ktcCurrent?.[league_type];
 
