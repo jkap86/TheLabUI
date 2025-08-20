@@ -92,10 +92,10 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
     );
 
   const recordTable = (
-    <table className="!table-auto !w-[50%] !border-spacing-8 p-4 m-auto text-[3rem] text-center bg-gray-700 shadow-[inset_0_0_25rem_var(--color10)], shadow-[0_0_2rem_goldenrod]">
+    <table className="!table-auto !w-fit !border-spacing-8 p-4 m-auto text-[3rem] text-center bg-gray-700 shadow-[inset_0_0_25rem_var(--color10)], shadow-[0_0_2rem_goldenrod]">
       <tbody>
         <tr>
-          <td colSpan={3} className="font-chill text-[3rem]">
+          <td className="font-chill text-[3rem]" colSpan={3}>
             Projected Record
           </td>
         </tr>
