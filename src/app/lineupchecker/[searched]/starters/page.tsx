@@ -9,6 +9,7 @@ import TableMain from "@/components/table-main/table-main";
 import { colObj } from "@/lib/types/commonTypes";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
 import LineupcheckerLayout from "../lineupchecker-layout";
+import PlayerMatchups from "@/components/player-matchups/player-matchups";
 
 const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
   const { searched } = use(params);
@@ -192,6 +193,8 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
   ];
 
   const data = Object.keys(starters).map((player_id) => {
+    const { start, bench, opp_start, opp_bench } = starters[player_id];
+
     return {
       id: player_id,
       columns: [
@@ -221,6 +224,14 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
           };
         }),
       ],
+      secondary: (
+        <PlayerMatchups
+          start={start}
+          bench={bench}
+          opp_start={opp_start}
+          opp_bench={opp_bench}
+        />
+      ),
     };
   });
 

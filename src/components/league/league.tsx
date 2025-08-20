@@ -241,7 +241,14 @@ const League = ({ league, type }: LeagueProps) => {
     });
 
     return obj;
-  }, [activeRoster, ktcCurrent, league, projections, projectionsObj]);
+  }, [
+    activeRoster,
+    ktcCurrent,
+    league,
+    projections,
+    projectionsObj,
+    allplayers,
+  ]);
 
   return (
     <>
