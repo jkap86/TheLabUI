@@ -177,11 +177,16 @@ const LeaguemateTrades = ({
         })
         .forEach((league_id) => {
           const rosters = leagues[league_id].rosters.filter((r) => {
+            const isNotUserRoster =
+              r.roster_id !== leagues[league_id].user_roster.roster_id;
+
             const lmReceive1 = receive1
               ? rosterIncludesPlayerPick(receive1, r)
               : false;
+
             const lmReceive2 = rosterIncludesPlayerPick(receive2, r);
-            return lmReceive1 && lmReceive2;
+
+            return isNotUserRoster && lmReceive1 && lmReceive2;
           });
 
           rosters.forEach((r) => {

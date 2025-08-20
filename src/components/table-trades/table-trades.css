@@ -137,7 +137,3 @@ table.trades div.nav button {
 table.trades div.nav button.active {
   color: var(--color1);
 }
-
-table.trades table.trade td.content.ktc {
-  font-size: 85%;
-}

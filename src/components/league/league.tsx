@@ -98,69 +98,35 @@ const League = ({ league, type }: LeagueProps) => {
       };
     });
 
-  /*
-  [
-    {
-      abbrev: "Proj S",
-      text: "Proj S",
-      desc: "Proj S",
-    },
-    {
-      abbrev: "Proj B T5",
-      text: "Proj B T5",
-      desc: "Proj B T5",
-    },
-    {
-      abbrev: "KTC S",
-      text: "KTC Dynasty Average Starter Value",
-      desc: "Average KTC Dynasty Value of Optimal Starters. Optimal starters are determined by KTC dynasty values",
-    },
-    {
-      abbrev: "KTC B T5",
-      text: "KTC Dynasty Average of Top 5 Bench Players Value",
-      desc: `Average KTC Dynasty Value of top 5 bench players when optimal starters are set. 
-            Optimal starters and top bench players are determined by KTC dynasty values.`,
-    },
-    {
-      abbrev: "KTC S QB",
-      text: "KTC S D QB",
-      desc: "KTC S D QB",
-    },
-    {
-      abbrev: "KTC B QB",
-      text: "KTC B QB",
-      desc: "KTC B QB",
-    },
-    {
-      abbrev: "KTC S RB",
-      text: "KTC S D RB",
-      desc: "KTC S D RB",
-    },
-    {
-      abbrev: "KTC B RB",
-      text: "KTC B RB",
-      desc: "KTC B RB",
-    },
-  ];
-*/
-
   const teamsObj = useMemo(() => {
     const obj: { [roster_id: number]: { [col: string]: colObj } } = {};
 
-    league.rosters.forEach((roster) => {
-      obj[roster.roster_id] = {};
+    teamsHeaders.forEach((h) => {
+      if (h.key) {
+        const values = league.rosters.map((roster) => roster[h.key] as number);
 
-      teamsHeaders.forEach((h) => {
-        if (h.key) {
+        const minValue = Math.min(...values);
+        const maxValue = Math.max(...values);
+
+        league.rosters.forEach((roster) => {
+          if (!obj[roster.roster_id]) {
+            obj[roster.roster_id] = {};
+          }
+
           const value = roster[h.key] as number;
+
           obj[roster.roster_id][h.abbrev] = {
             sort: value,
             text: Math.round(value).toLocaleString("en-US"),
-            trendColor: getTrendColor_Range(value, 1, league.rosters.length),
-            classname: "",
+            trendColor: getTrendColor_Range(value, minValue, maxValue),
+            classname: h.key.startsWith("ktc")
+              ? "ktc"
+              : h.key.startsWith("ros")
+              ? "font-score"
+              : "font-hugmate",
           };
-        }
-      });
+        });
+      }
     });
 
     return obj;
@@ -213,11 +179,19 @@ const League = ({ league, type }: LeagueProps) => {
 
       const age = allplayers?.[player_id]?.age || 0;
 
+      const draftClass =
+        parseInt(nflState?.season as string) -
+        (allplayers?.[player_id]?.years_exp || 0);
+
       obj[player_id] = {
         "KTC D": {
           sort: ktc_d,
           text: ktc_d.toString(),
-          trendColor: {},
+          trendColor: getTrendColor_Range(
+            ktcCurrent?.dynasty[player_id] || 0,
+            1000,
+            6500
+          ),
           classname: "rank",
         },
         "ROS P": {
@@ -238,7 +212,17 @@ const League = ({ league, type }: LeagueProps) => {
             21,
             getPositionMaxAge(allplayers?.[player_id]?.position)
           ),
-          classname: "stat",
+          classname: "font-hugmate",
+        },
+        "Draft Class": {
+          sort: draftClass,
+          text: draftClass.toString(),
+          trendColor: getTrendColor_Range(
+            draftClass,
+            parseInt(nflState?.season as string) - 10,
+            parseInt(nflState?.season as string)
+          ),
+          classname: "font-hugmate",
         },
       };
     });
