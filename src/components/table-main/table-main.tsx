@@ -147,7 +147,7 @@ const TableMain = ({
               return <span key={index}>{filter}</span>;
             })}
           {
-            <div key={placeholder}>
+            <div className="text-[4rem] w-[40%] m-auto" key={placeholder}>
               <Search
                 searched={
                   data.find((d) => d.id === searched)?.search?.text || ""

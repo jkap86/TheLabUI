@@ -48,84 +48,73 @@ const Trades = () => {
   ];
 
   const searches = (
-    <div className="search-box flex flex-col items-center">
-      <div className="searches-wrapper">
+    <div className="search-box flex flex-col">
+      <div className="searches-wrapper justify-center">
         <div className="searches pc">
-          <p>Team 1</p>
-          <Search
-            searched={
-              allplayers?.[searched_player1_pc]?.full_name ||
-              searched_player1_pc
-            }
-            setSearched={(value) =>
-              dispatch(updateTradesState({ key: "searched_player1_pc", value }))
-            }
-            options={player_pick_options.filter(
-              (o) =>
-                ![
-                  searched_player2_pc,
-                  searched_player3_pc,
-                  searched_player4_pc,
-                ].includes(o.id)
-            )}
-            placeholder="Player"
-          />
-          {searched_player1_pc ? (
+          <p className="text-center !text-[5rem] font-chill text-[var(--color1)]">
+            Team 1
+          </p>
+          <div className="text-[4rem]  m-auto">
             <Search
               searched={
-                allplayers?.[searched_player2_pc]?.full_name ||
-                searched_player2_pc
+                allplayers?.[searched_player1_pc]?.full_name ||
+                searched_player1_pc
               }
               setSearched={(value) =>
                 dispatch(
-                  updateTradesState({ key: "searched_player2_pc", value })
+                  updateTradesState({ key: "searched_player1_pc", value })
                 )
               }
               options={player_pick_options.filter(
                 (o) =>
                   ![
-                    searched_player1_pc,
+                    searched_player2_pc,
                     searched_player3_pc,
                     searched_player4_pc,
                   ].includes(o.id)
               )}
-              placeholder="Player 2"
+              placeholder="Player"
             />
+          </div>
+          {searched_player1_pc ? (
+            <div className="text-[4rem]  m-auto">
+              <Search
+                searched={
+                  allplayers?.[searched_player2_pc]?.full_name ||
+                  searched_player2_pc
+                }
+                setSearched={(value) =>
+                  dispatch(
+                    updateTradesState({ key: "searched_player2_pc", value })
+                  )
+                }
+                options={player_pick_options.filter(
+                  (o) =>
+                    ![
+                      searched_player1_pc,
+                      searched_player3_pc,
+                      searched_player4_pc,
+                    ].includes(o.id)
+                )}
+                placeholder="Player 2"
+              />
+            </div>
           ) : null}
         </div>
         {
           <div className="searches">
-            <p>Team 2</p>
-            <Search
-              searched={
-                allplayers?.[searched_player3_pc]?.full_name ||
-                searched_player3_pc
-              }
-              setSearched={(value) =>
-                dispatch(
-                  updateTradesState({ key: "searched_player3_pc", value })
-                )
-              }
-              options={player_pick_options.filter(
-                (o) =>
-                  ![
-                    searched_player1_pc,
-                    searched_player2_pc,
-                    searched_player4_pc,
-                  ].includes(o.id)
-              )}
-              placeholder="Player"
-              disabled={searched_player1_pc ? false : true}
-            />
-            {searched_player3_pc ? (
+            <p className="text-center !text-[5rem] font-chill text-[var(--color1)]">
+              Team 2
+            </p>
+            <div className="text-[4rem]  m-auto">
               <Search
                 searched={
-                  allplayers?.[searched_player4_pc]?.full_name ||
-                  searched_player4_pc
+                  allplayers?.[searched_player3_pc]?.full_name ||
+                  searched_player3_pc
                 }
                 setSearched={(value) =>
                   dispatch(
-                    updateTradesState({ key: "searched_player4_pc", value })
+                    updateTradesState({ key: "searched_player3_pc", value })
                   )
                 }
                 options={player_pick_options.filter(
@@ -133,11 +122,36 @@ const Trades = () => {
                     ![
                       searched_player1_pc,
                       searched_player2_pc,
-                      searched_player3_pc,
+                      searched_player4_pc,
                     ].includes(o.id)
                 )}
-                placeholder="Player 2"
+                placeholder="Player"
+                disabled={searched_player1_pc ? false : true}
               />
+            </div>
+            {searched_player3_pc ? (
+              <div className="text-[4rem] m-auto">
+                <Search
+                  searched={
+                    allplayers?.[searched_player4_pc]?.full_name ||
+                    searched_player4_pc
+                  }
+                  setSearched={(value) =>
+                    dispatch(
+                      updateTradesState({ key: "searched_player4_pc", value })
+                    )
+                  }
+                  options={player_pick_options.filter(
+                    (o) =>
+                      ![
+                        searched_player1_pc,
+                        searched_player2_pc,
+                        searched_player3_pc,
+                      ].includes(o.id)
+                  )}
+                  placeholder="Player 2"
+                />
+              </div>
             ) : null}
           </div>
         }
@@ -151,7 +165,7 @@ const Trades = () => {
           t.player_id4 === searched_player4_pc
       ) ? null : (
         <button
-          className="text-[2.5rem] px-6 py-3 bg-blue-900"
+          className="text-[2.5rem] px-6 py-3 bg-blue-900 w-fit mx-auto my-8"
           onClick={() =>
             dispatch(
               fetchTrades({

@@ -45,65 +45,69 @@ const LeaguemateTrades = ({
 
   const searches = (
     <div className="searches">
-      <Search
-        searched={allplayers?.[searched_player]?.full_name || searched_player}
-        setSearched={(value) =>
-          dispatch(updatedLmtradesState({ key: "searched_player", value }))
-        }
-        options={[
-          ...Object.keys(playershares || {}).map((player_id) => {
-            return {
-              id: player_id,
-              text: allplayers?.[player_id]?.full_name || player_id,
-              display: (
-                <Avatar
-                  id={player_id}
-                  text={allplayers?.[player_id]?.full_name || player_id}
-                  type="P"
-                />
-              ),
-            };
-          }),
-          ...Object.keys(pickshares || {}).map((pick_id) => {
-            let pick_name = pick_id;
+      <div className="text-[4rem] w-[40%] m-auto">
+        <Search
+          searched={allplayers?.[searched_player]?.full_name || searched_player}
+          setSearched={(value) =>
+            dispatch(updatedLmtradesState({ key: "searched_player", value }))
+          }
+          options={[
+            ...Object.keys(playershares || {}).map((player_id) => {
+              return {
+                id: player_id,
+                text: allplayers?.[player_id]?.full_name || player_id,
+                display: (
+                  <Avatar
+                    id={player_id}
+                    text={allplayers?.[player_id]?.full_name || player_id}
+                    type="P"
+                  />
+                ),
+              };
+            }),
+            ...Object.keys(pickshares || {}).map((pick_id) => {
+              let pick_name = pick_id;
 
-            if (pick_name.includes("null")) {
-              const pick_array = pick_id.split(" ");
-              const season = pick_array[0];
-              const round = pick_array[1].split(".")[0];
-              pick_name = `${season} Round ${round}`;
-            }
-            return {
-              id: pick_name,
-              text: pick_name,
-              display: <>{pick_name}</>,
-            };
-          }),
-        ]}
-        placeholder="Player or Pick"
-      />
-      <Search
-        searched={leaguemates[searched_manager]?.username || searched_manager}
-        setSearched={(value) =>
-          dispatch(updatedLmtradesState({ key: "searched_manager", value }))
-        }
-        options={[
-          ...Object.keys(leaguemates).map((lm_user_id) => {
-            return {
-              id: lm_user_id,
-              text: leaguemates[lm_user_id].username,
-              display: (
-                <Avatar
-                  id={leaguemates[lm_user_id].avatar}
-                  text={leaguemates[lm_user_id].username}
-                  type="U"
-                />
-              ),
-            };
-          }),
-        ]}
-        placeholder="Manager"
-      />
+              if (pick_name.includes("null")) {
+                const pick_array = pick_id.split(" ");
+                const season = pick_array[0];
+                const round = pick_array[1].split(".")[0];
+                pick_name = `${season} Round ${round}`;
+              }
+              return {
+                id: pick_name,
+                text: pick_name,
+                display: <>{pick_name}</>,
+              };
+            }),
+          ]}
+          placeholder="Player or Pick"
+        />
+      </div>
+      <div className="text-[4rem] w-[40%] m-auto">
+        <Search
+          searched={leaguemates[searched_manager]?.username || searched_manager}
+          setSearched={(value) =>
+            dispatch(updatedLmtradesState({ key: "searched_manager", value }))
+          }
+          options={[
+            ...Object.keys(leaguemates).map((lm_user_id) => {
+              return {
+                id: lm_user_id,
+                text: leaguemates[lm_user_id].username,
+                display: (
+                  <Avatar
+                    id={leaguemates[lm_user_id].avatar}
+                    text={leaguemates[lm_user_id].username}
+                    type="U"
+                  />
+                ),
+              };
+            }),
+          ]}
+          placeholder="Manager"
+        />
+      </div>
     </div>
   );
 
@@ -295,6 +299,11 @@ const LeaguemateTrades = ({
     };
   });
 
+  const give1Text = giveOptions.find((o) => o.id === give1)?.text;
+  const give2Text = giveOptions.find((o) => o.id === give2)?.text;
+  const receive1Text = receiveOptions.find((o) => o.id === receive1)?.text;
+  const receive2Text = receiveOptions.find((o) => o.id === receive2)?.text;
+
   const component = (
     <>
       {isLoadingLmTrades ? (
@@ -325,9 +334,7 @@ const LeaguemateTrades = ({
                         Trade Away
                       </label>
                       <Search
-                        searched={
-                          giveOptions.find((o) => o.id === give1)?.text || ""
-                        }
+                        searched={give1Text || ""}
                         setSearched={setGive1}
                         options={giveOptions.filter(
                           (o) => !selected.includes(o.id)
@@ -337,9 +344,7 @@ const LeaguemateTrades = ({
 
                       {give1 ? (
                         <Search
-                          searched={
-                            giveOptions.find((o) => o.id === give2)?.text || ""
-                          }
+                          searched={give2Text || ""}
                           setSearched={setGive2}
                           options={giveOptions.filter(
                             (o) => !selected.includes(o.id)
@@ -353,10 +358,7 @@ const LeaguemateTrades = ({
                         Trade For
                       </label>
                       <Search
-                        searched={
-                          receiveOptions.find((o) => o.id === receive1)?.text ||
-                          ""
-                        }
+                        searched={receive1Text || ""}
                         setSearched={setReceive1}
                         options={receiveOptions.filter(
                           (o) => !selected.includes(o.id)
@@ -365,10 +367,7 @@ const LeaguemateTrades = ({
                       />
                       {receive1 ? (
                         <Search
-                          searched={
-                            receiveOptions.find((o) => o.id === receive2)
-                              ?.text || ""
-                          }
+                          searched={receive2Text || ""}
                           setSearched={setReceive2}
                           options={receiveOptions.filter(
                             (o) => !selected.includes(o.id)
@@ -382,7 +381,7 @@ const LeaguemateTrades = ({
                     type={1}
                     headers={[
                       {
-                        text: allplayers?.[give1]?.full_name || give1,
+                        text: give1Text || give1,
                         colspan: give2 ? 5 : 11,
                         classname: "red !text-[2.5rem]",
                       },

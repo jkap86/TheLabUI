@@ -3,11 +3,6 @@ div.searches-wrapper {
 }
 
 div.searches {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
 }
 
 div.searches > p {
@@ -16,40 +11,47 @@ div.searches > p {
 }
 
 div.search_container {
-  font-size: 3rem;
-  width: fit-content;
+  font-size: inherit;
+  width: 100%;
   position: relative;
 }
 
 input.search {
   color: black;
-  padding: 0 1rem;
-  border: 1rem ridge var(--color2);
+  padding: 0;
+  padding-right: 10%;
+  border: 1cqw ridge var(--color2);
   text-shadow: none;
   background-color: var(--color1);
-  width: 40rem;
-  height: 7rem;
+  width: inherit;
+  height: inherit;
   text-align: center;
-  font-size: 4rem;
+  font-size: inherit;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 ol.options {
   border: 1rem ridge var(--color2);
-  max-height: 30rem;
+  max-height: 500%;
   overflow: auto;
   position: absolute;
+  left: 0;
   z-index: 11;
   width: 100%;
   background-color: var(--color5);
+  box-sizing: border-box;
 }
 
 ol.options > li {
-  padding: 0.5rem 0;
-  box-shadow: inset 0 0 1rem black;
+  padding: 1cqw 0;
+  box-shadow: inset 0 0 5rem black;
   color: white;
   text-shadow: var(--text-shadow1);
-  font-size: 2rem;
+  font-size: inherit;
   list-style: none;
+  display: flex;
+  justify-content: center;
 }
 
 ol.options > li > div.avatar {
@@ -57,23 +59,27 @@ ol.options > li > div.avatar {
 }
 button.clear,
 button.show {
-  width: fit-content;
+  width: 10%;
   height: inherit;
-
+  margin: 1rem;
   position: absolute;
   right: 0;
   top: 0;
   bottom: 0;
-  margin: 1rem;
-  padding: 0 1rem;
   color: white;
-  text-shadow: 0 0 1rem black;
+  text-shadow: 0 0 1cqw black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1cqw solid transparent;
 }
 
 button.clear {
   background-color: red;
+  font-size: 100%;
 }
 
 button.show {
   background-color: var(--color5);
+  font-size: 50%;
 }

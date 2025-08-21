@@ -5,6 +5,7 @@ import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
 import "./logs.css";
 import Link from "next/link";
+import Search from "@/components/search/search";
 
 type LogDb = {
   ip: string;
@@ -173,7 +174,7 @@ const LogsPage = () => {
         Logs - Last 24 hrs
       </h1>
 
-      <div className="filters flex flex-col text-[3rem] items-center mx-auto my-8 bg-gray-700 w-fit p-8 max-w-[100vw]">
+      <div className="filters flex flex-col text-[3rem] mx-auto my-8 bg-gray-700 w-fit p-8 max-w-[100vw]">
         {filters.map((f) => {
           return (
             <div
@@ -181,9 +182,28 @@ const LogsPage = () => {
               className="w-full flex justify-center items-center m-4"
             >
               <label className="w-[35%] text-center">{f.label}</label>
-
+              <div className="text-[3rem] w-[65%] m-auto">
+                <Search
+                  searched={f.state}
+                  setSearched={f.setState}
+                  options={f.list.map((item) => {
+                    return {
+                      id: item,
+                      text: item,
+                      display: (
+                        <div className="flex justify-center font-score text-[3rem] w-full !overflow-hidden text-ellipsis whitespace-nowrap">
+                          {item}
+                        </div>
+                      ),
+                    };
+                  })}
+                  placeholder={f.label}
+                />
+              </div>
+              {/*
               <div className="relative">
                 <input
+                  key={f.label}
                   value={f.state}
                   onChange={(e) => f.setState(e.target.value.trim())}
                   list={f.id}
@@ -205,10 +225,9 @@ const LogsPage = () => {
                 <span
                   className="w-fit text-white-600 font-black text-[3rem] !bg-red-600 absolute right-0 top-0 px-2"
                   onClick={() => f.setState("")}
-                >
-                  {f.state !== "" ? "\u2716\uFE0E" : null}
-                </span>
+                ></span>
               </div>
+              */}
             </div>
           );
         })}

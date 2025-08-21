@@ -86,7 +86,7 @@ const Search = ({
       />
       {(searchText !== "" && (
         <button className="clear" onClick={() => handleSearch("")}>
-          x
+          {"\u2716\uFE0E"}
         </button>
       )) || (
         <button
