@@ -210,7 +210,8 @@ const League = ({ league, type }: LeagueProps) => {
           trendColor: getTrendColor_Range(
             age,
             21,
-            getPositionMaxAge(allplayers?.[player_id]?.position)
+            getPositionMaxAge(allplayers?.[player_id]?.position),
+            true
           ),
           classname: "font-hugmate",
         },

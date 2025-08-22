@@ -161,7 +161,7 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
   );
 
   return (
-    <>
+    <div className="h-screen flex flex-col justify-between">
       <ShNavbar />
       <div className="relative">
         <Link href={"/lineupchecker"} className="home">
@@ -203,8 +203,14 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
           </>
         ) : null}
       </div>
-      {isLoadingMatchups ? <LoadingIcon messages={[]} /> : <>{component}</>}
-    </>
+      {isLoadingMatchups ? (
+        <div className=" flex-1 flex flex-col justify-center items-center">
+          <LoadingIcon messages={[]} />
+        </div>
+      ) : (
+        <>{component}</>
+      )}
+    </div>
   );
 };
 
