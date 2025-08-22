@@ -2,8 +2,7 @@ div.switch_wrapper {
   display: flex;
   width: 100%;
   justify-content: space-evenly;
-  margin: auto;
-  margin-bottom: 5rem;
+  margin: 3rem auto;
   max-width: 100vmin;
 }
 

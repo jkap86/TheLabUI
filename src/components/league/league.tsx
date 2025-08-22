@@ -239,9 +239,9 @@ const League = ({ league, type }: LeagueProps) => {
 
   return (
     <>
-      <div className="nav">
-        <div></div>
-        {!pathname.includes("trades") && (
+      {!pathname.includes("trades") && (
+        <div className="nav">
+          <div></div>
           <div className="sync">
             <i
               className={
@@ -259,9 +259,9 @@ const League = ({ league, type }: LeagueProps) => {
               }
             ></i>
           </div>
-        )}
-        <div></div>
-      </div>
+          <div></div>
+        </div>
+      )}
       <TableMain
         type={type}
         half={true}

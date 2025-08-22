@@ -108,16 +108,6 @@ const Leagues = ({ params }: LeaguesProps) => {
   const current_month_index = new Date().getMonth();
   const component = (
     <>
-      <h3 className="text-[2.5rem]">
-        League Count:{" "}
-        {
-          filterLeagueIds(Object.keys(leagues || {}), {
-            type1,
-            type2,
-            leagues,
-          }).length
-        }
-      </h3>
       {current_month_index >= 7 || current_month_index === 0
         ? recordTable
         : null}

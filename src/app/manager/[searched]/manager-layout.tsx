@@ -22,8 +22,13 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
   const { isLoadingCommon, errorCommon } = useSelector(
     (state: RootState) => state.common
   );
-  const { isLoadingUser, errorUser, isLoadingLeagues, leaguesProgress } =
-    useSelector((state: RootState) => state.manager);
+  const {
+    isLoadingUser,
+    errorUser,
+    isLoadingLeagues,
+    errorLeagues,
+    leaguesProgress,
+  } = useSelector((state: RootState) => state.manager);
 
   useFetchNflState();
   useFetchAllplayers();
@@ -33,7 +38,7 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
   useFetchUserAndLeagues(searched);
   useFetchLmTrades();
 
-  const errors = [...errorCommon, errorUser].filter((e) => e);
+  const errors = [...errorCommon, errorUser, errorLeagues].filter((e) => e);
 
   return (
     <div className="">

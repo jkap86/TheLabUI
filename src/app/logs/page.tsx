@@ -182,7 +182,7 @@ const LogsPage = () => {
               className="w-full flex justify-center items-center m-4"
             >
               <label className="w-[35%] text-center">{f.label}</label>
-              <div className="text-[3rem] w-[65%] m-auto">
+              <div className="text-[4rem] w-[65%] m-auto">
                 <Search
                   searched={f.state}
                   setSearched={f.setState}

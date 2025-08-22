@@ -329,7 +329,7 @@ const LeaguemateTrades = ({
               {findTrades ? (
                 <div>
                   <div className="flex justify-center">
-                    <div className="flex flex-col m-8 items-center">
+                    <div className="flex flex-col m-8 items-center text-[4rem]">
                       <label className="font-pulang bg-[var(--color2)] w-full text-center red">
                         Trade Away
                       </label>
@@ -353,7 +353,7 @@ const LeaguemateTrades = ({
                         />
                       ) : null}
                     </div>
-                    <div className="flex flex-col m-8 items-center">
+                    <div className="flex flex-col m-8 items-center text-[4rem]">
                       <label className="font-pulang bg-[var(--color2)] w-full text-center green">
                         Trade For
                       </label>
