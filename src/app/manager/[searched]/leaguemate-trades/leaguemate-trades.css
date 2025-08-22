@@ -20,16 +20,3 @@ div.nav-buttons > div {
   margin: 2rem;
   justify-content: center;
 }
-
-div.nav-buttons > div > label {
-  color: var(--color7);
-  font-family: var(--fontMetal);
-  font-weight: 900;
-}
-
-div.nav-buttons > div > select {
-  width: 100%;
-  text-align: center;
-  font-weight: 900;
-  font-family: var(--fontScore);
-}

@@ -1,5 +1,6 @@
 import { RootState } from "@/redux/store";
 import { useSelector } from "react-redux";
+import "./players-filters.css";
 
 const PlayersFilters = ({
   filterDraftClass,

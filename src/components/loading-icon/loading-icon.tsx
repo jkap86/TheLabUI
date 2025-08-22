@@ -3,7 +3,7 @@
 import Image from "next/image";
 import LoadingFlask from "../../../public/images/loading_flask.png";
 import bubble from "../../../public/images/bubble1.png";
-//import "./loading-icon.css";
+import "./loading-icon.css";
 import { useEffect, useState } from "react";
 
 interface BubbleConfig {

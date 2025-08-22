@@ -95,45 +95,6 @@ option {
   background-color: black;
   color: white;
 }
-div.nav-buttons-container {
-  position: fixed;
-  top: 0;
-}
-div.nav-buttons {
-  margin: auto;
-  display: flex;
-  justify-content: center;
-  font-size: 3rem;
-  width: 100dvmin;
-}
-
-div.nav-buttons > div {
-  display: flex;
-  flex-direction: column;
-  background-color: maroon;
-  align-items: center;
-  min-width: fit-content;
-  width: 25%;
-  box-shadow: inset 0 0 10rem black;
-  border-radius: 2rem;
-  padding: 1rem;
-  border: 0.5rem double silver;
-  margin: 2rem;
-  justify-content: center;
-}
-
-div.nav-buttons > div > label {
-  color: var(--color7);
-  font-family: var(--fontMetal);
-  font-weight: 900;
-}
-
-div.nav-buttons > div > select {
-  width: 100%;
-  text-align: center;
-  font-weight: 900;
-  font-family: var(--fontScore);
-}
 
 div.nav button.active {
   color: var(--color1);
@@ -158,52 +119,4 @@ input[type="date"] {
   color: gold;
   font-weight: 900;
   letter-spacing: 0.25rem;
-}
-
-div.load-container {
-  width: 50vmin;
-  height: 50vmin;
-  margin: auto;
-  position: relative;
-}
-
-div.load-messages {
-  position: absolute;
-}
-
-div.load-messages > h1.loading {
-  font-size: 10rem;
-}
-
-h2.load-message {
-  font-size: 7rem;
-}
-
-img.bubble1,
-img.bubble2 {
-  position: absolute;
-  bottom: 25%;
-  left: 5%;
-  right: 0;
-  margin: auto;
-  opacity: 0.75;
-}
-
-img.bubble1 {
-  width: 3vmin;
-  animation: bubble 5s ease-in-out infinite;
-}
-
-img.bubble2 {
-  width: 5vmin;
-  animation: bubble 5s ease-in-out infinite;
-}
-
-@keyframes bubble {
-  0% {
-    transform: initial;
-  }
-  50% {
-    transform: translate(3rem, 2rem);
-  }
 }

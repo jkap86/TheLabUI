@@ -19,7 +19,7 @@ export default function Tools() {
         </div>
       </div>
 
-      <div className="h-[100dvh] pt-[20rem] pb-[15rem] flex flex-col justify-between items-center absolute top-0 left-0 right-0 z-2">
+      <div className="h-[100dvh] pt-[5rem]  flex flex-col justify-evenly items-center absolute top-0 left-0 right-0 z-2">
         {links.map((link) => {
           return (
             <Link

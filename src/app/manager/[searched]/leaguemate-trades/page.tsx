@@ -14,6 +14,7 @@ import { convertDraftPickName, getDraftPickIdFromRaw } from "@/utils/getPickId";
 import TableMain from "@/components/table-main/table-main";
 import RostersComparisonPage from "@/components/rosters-comparison/rosters-comparison";
 import { Roster } from "@/lib/types/userTypes";
+import "./leaguemate-trades.css";
 
 const LeaguemateTrades = ({
   params,
