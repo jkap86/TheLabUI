@@ -3,22 +3,42 @@ import {
   Trade as TradeType,
 } from "@/lib/types/userTypes";
 import "./table-trades.css";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Avatar from "../avatar/avatar";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/redux/store";
 import { getDraftPickId } from "@/utils/getPickId";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
 import League from "../league/league";
+import { updatedLmtradesState } from "@/redux/lmtrades/lmtradesSlice";
+import TableMain from "../table-main/table-main";
+import { usePathname } from "next/navigation";
+
+type TradeTip = {
+  player_id: string;
+  type: "acquire" | "trade away";
+  league: {
+    league_id: string;
+    avatar: string | null;
+    name: string;
+  };
+  lm: {
+    user_id: string;
+    avatar: string | null;
+    username: string;
+  };
+};
 
 const Trade = ({
   trade,
   activeTrade,
   setActiveTrade,
+  tradeTips,
 }: {
   trade: TradeType;
   activeTrade: string;
   setActiveTrade: (transaction_id: string) => void;
+  tradeTips: TradeTip[];
 }) => {
   const { ktcCurrent, allplayers } = useSelector(
     (state: RootState) => state.common
@@ -217,16 +237,17 @@ const Trade = ({
                           (ktc_current?.[b] || 0) - (ktc_current?.[a] || 0)
                       )
                       .map((drop, index) => {
+                        const tip = tradeTips.find(
+                          (tip) => tip.player_id === drop
+                        );
                         return (
                           <tr key={`${drop}_${index}`}>
                             <td
                               className={
-                                trade.tips?.for?.some(
-                                  (tip) =>
-                                    tip.player_id === drop &&
-                                    trade.drops[drop] === tip.leaguemate_id
-                                )
-                                  ? "greenb"
+                                tip
+                                  ? tip.type === "acquire"
+                                    ? "greenb"
+                                    : "redb"
                                   : ""
                               }
                             >
@@ -275,7 +296,7 @@ const Trade = ({
         <tbody>
           <tr>
             <td colSpan={18}>
-              <TradeDetail trade={trade} />
+              <TradeDetail trade={trade} tradeTips={tradeTips} />
             </td>
           </tr>
         </tbody>
@@ -284,7 +305,15 @@ const Trade = ({
   );
 };
 
-const TradeDetail = ({ trade }: { trade: TradeType }) => {
+const TradeDetail = ({
+  trade,
+  tradeTips,
+}: {
+  trade: TradeType;
+  tradeTips: TradeTip[];
+}) => {
+  const pathname = usePathname();
+  const dispatch: AppDispatch = useDispatch();
   const { detail_tab } = useSelector((state: RootState) => state.lmtrades);
 
   const tradeLeague: LeagueType = {
@@ -301,12 +330,24 @@ const TradeDetail = ({ trade }: { trade: TradeType }) => {
     user_roster: trade.rosters[0],
   };
 
+  const tabs = pathname.split("/")[3]?.includes("leaguemate")
+    ? ["League", "Tips"]
+    : ["League"];
+
   return (
     <>
       <div className="nav">
-        {["League"].map((text) => {
+        {tabs.map((text) => {
           return (
-            <button key={text} className={detail_tab === text ? "active" : ""}>
+            <button
+              key={text}
+              className={detail_tab === text ? "active" : ""}
+              onClick={() =>
+                dispatch(
+                  updatedLmtradesState({ key: "detail_tab", value: text })
+                )
+              }
+            >
               {text}
             </button>
           );
@@ -314,6 +355,8 @@ const TradeDetail = ({ trade }: { trade: TradeType }) => {
       </div>
       {detail_tab === "League" ? (
         <League type={2} league={tradeLeague} />
+      ) : detail_tab === "Tips" ? (
+        <TradeTips trade={trade} tradeTips={tradeTips} />
       ) : null}
     </>
   );
@@ -328,12 +371,89 @@ const TableTrades = ({
   tradeCount: number;
   fetchMore: () => void;
 }) => {
+  const { leaguemates, leagues } = useSelector(
+    (state: RootState) => state.manager
+  );
   const [activeTrade, setActiveTrade] = useState("");
   const [page, setPage] = useState(1);
 
   useEffect(() => {
     setPage(Math.max(Math.max(Math.ceil((trades.length - 1) / 25), 5) - 4, 1));
   }, [trades]);
+
+  const trade_tips_all = useMemo(() => {
+    const tips: {
+      [transaction_id: string]: TradeTip[];
+    } = {};
+
+    trades.forEach((trade) => {
+      if (!tips[trade.transaction_id]) tips[trade.transaction_id] = [];
+
+      trade.managers
+        .filter((m_user_id) => leaguemates[m_user_id])
+        .forEach((m_user_id) => {
+          const common_league_ids = leaguemates[m_user_id].leagues;
+
+          const adds_lm = Object.keys(trade.adds).filter(
+            (player_id) => trade.adds[player_id] === m_user_id
+          );
+
+          adds_lm.forEach((player_id) => {
+            common_league_ids.forEach((league_id) => {
+              if (
+                leagues?.[league_id]?.user_roster?.players?.includes(player_id)
+              ) {
+                tips[trade.transaction_id].push({
+                  player_id,
+                  type: "trade away",
+                  league: {
+                    league_id,
+                    avatar: leagues[league_id].avatar,
+                    name: leagues[league_id].name,
+                  },
+                  lm: {
+                    user_id: leaguemates[m_user_id].user_id,
+                    avatar: leaguemates[m_user_id].avatar,
+                    username: leaguemates[m_user_id].username,
+                  },
+                });
+              }
+            });
+          });
+
+          const drops_lm = Object.keys(trade.drops).filter(
+            (player_id) => trade.drops[player_id] === m_user_id
+          );
+
+          drops_lm.forEach((player_id) => {
+            common_league_ids.forEach((league_id) => {
+              const lmRoster = leagues?.[league_id]?.rosters?.find(
+                (r) => r.user_id === m_user_id
+              );
+
+              if (leagues && lmRoster?.players?.includes(player_id)) {
+                tips[trade.transaction_id].push({
+                  player_id,
+                  type: "acquire",
+                  league: {
+                    league_id,
+                    avatar: leagues[league_id].avatar,
+                    name: leagues[league_id].name,
+                  },
+                  lm: {
+                    user_id: leaguemates[m_user_id].user_id,
+                    avatar: leaguemates[m_user_id].avatar,
+                    username: leaguemates[m_user_id].username,
+                  },
+                });
+              }
+            });
+          });
+        });
+    });
+
+    return tips;
+  }, []);
 
   const page_numbers = (
     <div className="page_numbers_wrapper">
@@ -369,6 +489,7 @@ const TableTrades = ({
                   trade={trade}
                   activeTrade={activeTrade}
                   setActiveTrade={setActiveTrade}
+                  tradeTips={trade_tips_all[trade.transaction_id]}
                 />
               </td>
             </tr>
@@ -384,6 +505,72 @@ const TableTrades = ({
       {page_numbers}
       {table}
       {page_numbers}
+    </>
+  );
+};
+
+const TradeTips = ({
+  trade,
+  tradeTips,
+}: {
+  trade: TradeType;
+  tradeTips: TradeTip[];
+}) => {
+  const { allplayers } = useSelector((state: RootState) => state.common);
+  const { leaguemates, leagues } = useSelector(
+    (state: RootState) => state.manager
+  );
+
+  return (
+    <>
+      <TableMain
+        type={2}
+        headers={[]}
+        data={tradeTips.map((tip) => {
+          return {
+            id: `${tip.player_id}__${tip.league.league_id}__${tip.lm.user_id}`,
+            columns: [
+              {
+                text: tip.type === "acquire" ? "\u2795\uFE0E" : "\u2796\uFE0E",
+                colspan: 1,
+                classname: tip.type === "acquire" ? "green" : "red",
+              },
+              {
+                text: (
+                  <Avatar
+                    id={tip.player_id}
+                    text={
+                      allplayers?.[tip.player_id]?.full_name || tip.player_id
+                    }
+                    type="P"
+                  />
+                ),
+                colspan: 3,
+                classname: "",
+              },
+              {
+                text: (
+                  <Avatar
+                    id={tip.league.avatar}
+                    text={tip.league.name}
+                    type="L"
+                  />
+                ),
+                colspan: 3,
+                classname: "",
+              },
+              {
+                text: (
+                  <Avatar id={tip.lm.avatar} text={tip.lm.username} type="U" />
+                ),
+                colspan: 2,
+                classname: "",
+              },
+            ],
+          };
+        })}
+        placeholder=""
+      />
     </>
   );
 };
