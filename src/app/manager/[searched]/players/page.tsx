@@ -12,6 +12,8 @@ import PlayerLeagues from "./components/playerLeagues";
 import { colObj } from "@/lib/types/commonTypes";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
 import { getPositionMaxAge } from "@/utils/getPositionMaxAge";
+import PlayersFilters from "@/components/players-filters/players-filters";
+import { filterPlayerIds } from "@/utils/filterPlayers";
 
 interface PlayersProps {
   params: Promise<{ searched: string }>;
@@ -164,89 +166,37 @@ const Players = ({ params }: PlayersProps) => {
     projections,
   ]);
 
-  const draftClasses = Array.from(
-    new Set(
-      Object.values(allplayers || {})
-        .sort((a, b) => (a.years_exp || 0) - (b.years_exp || 0))
-        .map((player) => player.years_exp || 0)
-    )
-  );
-
-  const teams = Array.from(
-    new Set(
-      Object.values(allplayers || {})
-        .filter((player) => player.team)
-        .map((player) => player.team)
-    )
-  ).sort((a, b) => (a > b ? 1 : -1));
-
-  const positions = ["QB", "RB", "WR", "TE", "K", "DEF", "DL", "LB", "DB"];
-
   const component = (
     <>
-      <div className="nav-buttons">
-        <div>
-          <label>Draft Class</label>
-          <select
-            value={filterDraftClass}
-            onChange={(e) =>
-              dispatch(
-                updatePlayersState({
-                  key: "filterDraftClass",
-                  value: e.target.value,
-                })
-              )
-            }
-          >
-            <option>All</option>
-            {draftClasses.map((draftClass) => {
-              return (
-                <option key={draftClass}>
-                  {parseInt(nflState?.season as string) - draftClass}
-                </option>
-              );
-            })}
-          </select>
-        </div>
-        <div>
-          <label>Team</label>
-          <select
-            value={filterTeam}
-            onChange={(e) =>
-              dispatch(
-                updatePlayersState({
-                  key: "filterTeam",
-                  value: e.target.value,
-                })
-              )
-            }
-          >
-            <option>All</option>
-            {teams.map((team) => {
-              return <option key={team}>{team}</option>;
-            })}
-          </select>
-        </div>
-        <div>
-          <label>Position</label>
-          <select
-            value={filterPosition}
-            onChange={(e) =>
-              dispatch(
-                updatePlayersState({
-                  key: "filterPosition",
-                  value: e.target.value,
-                })
-              )
-            }
-          >
-            <option>All</option>
-            {positions.map((position) => {
-              return <option key={position}>{position}</option>;
-            })}
-          </select>
-        </div>
-      </div>
+      <PlayersFilters
+        filterDraftClass={filterDraftClass}
+        setFilterDraftClass={(e) =>
+          dispatch(
+            updatePlayersState({
+              key: "filterDraftClass",
+              value: e.target.value,
+            })
+          )
+        }
+        filterTeam={filterTeam}
+        setFilterTeam={(e) =>
+          dispatch(
+            updatePlayersState({
+              key: "filterTeam",
+              value: e.target.value,
+            })
+          )
+        }
+        filterPosition={filterPosition}
+        setFilterPosition={(e) =>
+          dispatch(
+            updatePlayersState({
+              key: "filterPosition",
+              value: e.target.value,
+            })
+          )
+        }
+      />
       <TableMain
         type={1}
         headers_options={playersHeaders}
@@ -286,90 +236,84 @@ const Players = ({ params }: PlayersProps) => {
         ]}
         headers_sort={[1, 0, 2, 3, 4]}
         data={[
-          ...Object.keys(playershares)
-            .filter(
-              (player_id) =>
-                (filterDraftClass === "All" ||
-                  (
-                    parseInt(nflState?.season as string) -
-                    (allplayers?.[player_id]?.years_exp || 0)
-                  ).toString() === filterDraftClass) &&
-                (filterTeam === "All" ||
-                  allplayers?.[player_id]?.team === filterTeam) &&
-                (filterPosition === "All" ||
-                  allplayers?.[player_id]?.position === filterPosition)
-            )
-            .map((player_id) => {
-              return {
-                id: player_id,
-                search: {
-                  text:
-                    allplayers?.[player_id]?.full_name ||
-                    (parseInt(player_id) && `Inactive Player - ${player_id}`) ||
-                    player_id,
-                  display: (
+          ...filterPlayerIds({
+            player_ids: Object.keys(playershares),
+            nflState,
+            allplayers,
+            filterDraftClass,
+            filterTeam,
+            filterPosition,
+          }).map((player_id) => {
+            return {
+              id: player_id,
+              search: {
+                text:
+                  allplayers?.[player_id]?.full_name ||
+                  (parseInt(player_id) && `Inactive Player - ${player_id}`) ||
+                  player_id,
+                display: (
+                  <Avatar
+                    id={player_id}
+                    text={
+                      allplayers?.[player_id]?.full_name ||
+                      (parseInt(player_id) &&
+                        `Inactive Player - ${player_id}`) ||
+                      player_id
+                    }
+                    type="P"
+                  />
+                ),
+              },
+              columns: [
+                {
+                  text: (
                     <Avatar
                       id={player_id}
-                      text={
-                        allplayers?.[player_id]?.full_name ||
-                        (parseInt(player_id) &&
-                          `Inactive Player - ${player_id}`) ||
-                        player_id
-                      }
+                      text={allplayers?.[player_id]?.full_name || player_id}
                       type="P"
                     />
                   ),
+                  colspan: 2,
+                  classname: "",
+                  sort: allplayers?.[player_id]?.full_name || player_id,
                 },
-                columns: [
-                  {
-                    text: (
-                      <Avatar
-                        id={player_id}
-                        text={allplayers?.[player_id]?.full_name || player_id}
-                        type="P"
-                      />
-                    ),
-                    colspan: 2,
-                    classname: "",
-                    sort: allplayers?.[player_id]?.full_name || player_id,
-                  },
-                  {
-                    text: playersObj?.[player_id]?.[column1]?.text || "-",
-                    sort: playersObj?.[player_id]?.[column1]?.sort || 0,
-                    style: playersObj?.[player_id]?.[column1]?.trendColor,
-                    colspan: 1,
-                    classname: playersObj?.[player_id]?.[column1]?.classname,
-                  },
-                  {
-                    text: playersObj?.[player_id]?.[column2]?.text || "-",
-                    sort: playersObj?.[player_id]?.[column2]?.sort || 0,
-                    colspan: 1,
-                    classname: playersObj?.[player_id]?.[column2]?.classname,
-                    style: playersObj?.[player_id]?.[column2]?.trendColor,
-                  },
-                  {
-                    text: playersObj?.[player_id]?.[column3]?.text || "-",
-                    sort: playersObj?.[player_id]?.[column3]?.sort || 0,
-                    colspan: 1,
-                    classname: playersObj?.[player_id]?.[column3]?.classname,
-                    style: playersObj?.[player_id]?.[column3]?.trendColor,
-                  },
-                  {
-                    text: playersObj?.[player_id]?.[column4]?.text || "-",
-                    sort: playersObj?.[player_id]?.[column4]?.sort || 0,
-                    colspan: 1,
-                    classname: playersObj?.[player_id]?.[column4]?.classname,
-                    style: playersObj?.[player_id]?.[column4]?.trendColor,
-                  },
-                ],
-                secondary: (
-                  <PlayerLeagues
-                    player_id={player_id}
-                    player_leagues={playershares[player_id]}
-                  />
-                ),
-              };
-            }),
+                {
+                  text: playersObj?.[player_id]?.[column1]?.text || "-",
+                  sort: playersObj?.[player_id]?.[column1]?.sort || 0,
+                  style: playersObj?.[player_id]?.[column1]?.trendColor,
+                  colspan: 1,
+                  classname: playersObj?.[player_id]?.[column1]?.classname,
+                },
+                {
+                  text: playersObj?.[player_id]?.[column2]?.text || "-",
+                  sort: playersObj?.[player_id]?.[column2]?.sort || 0,
+                  colspan: 1,
+                  classname: playersObj?.[player_id]?.[column2]?.classname,
+                  style: playersObj?.[player_id]?.[column2]?.trendColor,
+                },
+                {
+                  text: playersObj?.[player_id]?.[column3]?.text || "-",
+                  sort: playersObj?.[player_id]?.[column3]?.sort || 0,
+                  colspan: 1,
+                  classname: playersObj?.[player_id]?.[column3]?.classname,
+                  style: playersObj?.[player_id]?.[column3]?.trendColor,
+                },
+                {
+                  text: playersObj?.[player_id]?.[column4]?.text || "-",
+                  sort: playersObj?.[player_id]?.[column4]?.sort || 0,
+                  colspan: 1,
+                  classname: playersObj?.[player_id]?.[column4]?.classname,
+                  style: playersObj?.[player_id]?.[column4]?.trendColor,
+                },
+              ],
+              secondary: (
+                <PlayerLeagues
+                  player_id={player_id}
+                  player_leagues={playershares[player_id]}
+                />
+              ),
+            };
+          }),
         ]}
         placeholder="Players"
         sortBy={sortBy}

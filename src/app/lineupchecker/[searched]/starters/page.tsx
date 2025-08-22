@@ -10,10 +10,14 @@ import { colObj } from "@/lib/types/commonTypes";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
 import LineupcheckerLayout from "../lineupchecker-layout";
 import PlayerMatchups from "@/components/player-matchups/player-matchups";
+import PlayersFilters from "@/components/players-filters/players-filters";
+import { filterPlayerIds } from "@/utils/filterPlayers";
 
 const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
   const { searched } = use(params);
-  const { allplayers } = useSelector((state: RootState) => state.common);
+  const { allplayers, nflState } = useSelector(
+    (state: RootState) => state.common
+  );
   const { type1, type2 } = useSelector((state: RootState) => state.manager);
   const { matchups } = useSelector((state: RootState) => state.lineupchecker);
   const [sortBy, setSortBy] = useState<{
@@ -24,6 +28,9 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
   const [col2, setCol2] = useState("Bench");
   const [col3, setCol3] = useState("Opp Start");
   const [col4, setCol4] = useState("Opp Bench");
+  const [filterDraftClass, setFilterDraftClass] = useState("All");
+  const [filterTeam, setFilterTeam] = useState("All");
+  const [filterPosition, setFilterPosition] = useState("All");
 
   const filterLeagueIds = useCallback(
     (league_ids: string[]) => {
@@ -192,7 +199,14 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
     },
   ];
 
-  const data = Object.keys(starters).map((player_id) => {
+  const data = filterPlayerIds({
+    player_ids: Object.keys(starters),
+    nflState,
+    allplayers,
+    filterDraftClass,
+    filterTeam,
+    filterPosition,
+  }).map((player_id) => {
     const { start, bench, opp_start, opp_bench } = starters[player_id];
 
     return {
@@ -236,16 +250,32 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
   });
 
   const component = (
-    <TableMain
-      type={1}
-      headers_sort={[1, 0, 2, 3, 4]}
-      headers_options={[]}
-      headers={headers}
-      data={data}
-      placeholder=""
-      sortBy={sortBy}
-      setSortBy={setSortBy}
-    />
+    <>
+      <PlayersFilters
+        filterDraftClass={filterDraftClass}
+        setFilterDraftClass={(e: { target: { value: string } }) =>
+          setFilterDraftClass(e.target.value)
+        }
+        filterTeam={filterTeam}
+        setFilterTeam={(e: { target: { value: string } }) =>
+          setFilterTeam(e.target.value)
+        }
+        filterPosition={filterPosition}
+        setFilterPosition={(e: { target: { value: string } }) =>
+          setFilterPosition(e.target.value)
+        }
+      />
+      <TableMain
+        type={1}
+        headers_sort={[1, 0, 2, 3, 4]}
+        headers_options={[]}
+        headers={headers}
+        data={data}
+        placeholder=""
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+      />
+    </>
   );
 
   return <LineupcheckerLayout searched={searched} component={component} />;

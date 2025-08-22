@@ -235,6 +235,7 @@ const League = ({ league, type }: LeagueProps) => {
     projections,
     projectionsObj,
     allplayers,
+    nflState,
   ]);
 
   return (

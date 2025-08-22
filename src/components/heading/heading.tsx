@@ -36,7 +36,7 @@ const Heading = () => {
   return (
     <>
       <div className="heading relative">
-        <Link href={"/"} className="home">
+        <Link href={"/manager"} className="home">
           Manager Home
         </Link>
 
