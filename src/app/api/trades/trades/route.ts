@@ -7,8 +7,8 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
 
   const player_id1 = searchParams.get("player_id1");
-  const player_id2 = searchParams.get("player_id2");
-  const player_id3 = searchParams.get("player_id3");
+  const player_id3 = searchParams.get("player_id2");
+  const player_id2 = searchParams.get("player_id3");
   const player_id4 = searchParams.get("player_id4");
   const limit = searchParams.get("limit");
   const offset = searchParams.get("offset");
