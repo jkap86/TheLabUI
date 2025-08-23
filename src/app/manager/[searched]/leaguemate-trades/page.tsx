@@ -44,68 +44,83 @@ const LeaguemateTrades = ({
   const [give2, setGive2] = useState("");
   const [receive2, setReceive2] = useState("");
 
+  const playerOptions = [
+    ...Object.keys(playershares || {}).map((player_id) => {
+      return {
+        id: player_id,
+        text:
+          allplayers?.[player_id]?.full_name ||
+          (parseInt(player_id) && `Inactive - ${player_id}`) ||
+          player_id,
+        display: (
+          <Avatar
+            id={player_id}
+            text={
+              allplayers?.[player_id]?.full_name ||
+              (parseInt(player_id) && `Inactive - ${player_id}`) ||
+              player_id
+            }
+            type="P"
+          />
+        ),
+      };
+    }),
+    ...Object.keys(pickshares || {}).map((pick_id) => {
+      let pick_name = pick_id;
+
+      if (pick_name.includes("null")) {
+        const pick_array = pick_id.split(" ");
+        const season = pick_array[0];
+        const round = pick_array[1].split(".")[0];
+        pick_name = `${season} Round ${round}`;
+      }
+      return {
+        id: pick_id,
+        text: pick_name,
+        display: <>{pick_name}</>,
+      };
+    }),
+  ];
+
+  const managerOptions = [
+    ...Object.keys(leaguemates).map((lm_user_id) => {
+      return {
+        id: lm_user_id,
+        text: leaguemates[lm_user_id].username,
+        display: (
+          <Avatar
+            id={leaguemates[lm_user_id].avatar}
+            text={leaguemates[lm_user_id].username}
+            type="U"
+          />
+        ),
+      };
+    }),
+  ];
+
   const searches = (
-    <div className="searches">
-      <div className="text-[4rem] w-[40%] m-auto">
+    <div className="flex flex-col searches">
+      <div className="text-[4rem] w-[40%] h-[10rem] m-auto">
         <Search
-          searched={allplayers?.[searched_player]?.full_name || searched_player}
+          searched={
+            playerOptions.find((o) => o.id === searched_player)?.text || ""
+          }
           setSearched={(value) =>
             dispatch(updatedLmtradesState({ key: "searched_player", value }))
           }
-          options={[
-            ...Object.keys(playershares || {}).map((player_id) => {
-              return {
-                id: player_id,
-                text: allplayers?.[player_id]?.full_name || player_id,
-                display: (
-                  <Avatar
-                    id={player_id}
-                    text={allplayers?.[player_id]?.full_name || player_id}
-                    type="P"
-                  />
-                ),
-              };
-            }),
-            ...Object.keys(pickshares || {}).map((pick_id) => {
-              let pick_name = pick_id;
-
-              if (pick_name.includes("null")) {
-                const pick_array = pick_id.split(" ");
-                const season = pick_array[0];
-                const round = pick_array[1].split(".")[0];
-                pick_name = `${season} Round ${round}`;
-              }
-              return {
-                id: pick_name,
-                text: pick_name,
-                display: <>{pick_name}</>,
-              };
-            }),
-          ]}
+          options={playerOptions}
           placeholder="Player or Pick"
         />
       </div>
-      <div className="text-[4rem] w-[40%] m-auto">
+      <div className="text-[4rem] w-[40%] h-[10rem] m-auto">
         <Search
-          searched={leaguemates[searched_manager]?.username || searched_manager}
+          searched={
+            managerOptions.find((m) => m.id === searched_manager)?.text || ""
+          }
           setSearched={(value) =>
             dispatch(updatedLmtradesState({ key: "searched_manager", value }))
           }
-          options={[
-            ...Object.keys(leaguemates).map((lm_user_id) => {
-              return {
-                id: lm_user_id,
-                text: leaguemates[lm_user_id].username,
-                display: (
-                  <Avatar
-                    id={leaguemates[lm_user_id].avatar}
-                    text={leaguemates[lm_user_id].username}
-                    type="U"
-                  />
-                ),
-              };
-            }),
-          ]}
+          options={managerOptions}
           placeholder="Manager"
         />
       </div>
@@ -125,6 +140,8 @@ const LeaguemateTrades = ({
           (s) => s.manager === searched_manager && s.player === searched_player
         )?.count || 0
       : lmTrades.count;
+
+  console.log({ tradesDisplay, tradeCount, lmTradeSearches });
 
   const rosterIncludesPlayerPick = (id: string, roster: Roster) => {
     return id
@@ -290,6 +307,7 @@ const LeaguemateTrades = ({
       ],
       secondary: leagues ? (
         <RostersComparisonPage
+          type={2}
           league={leagues[pt.league.league_id]}
           roster_id1={pt.league.user_roster_id}
           roster_id2={pt.lm.roster_id}

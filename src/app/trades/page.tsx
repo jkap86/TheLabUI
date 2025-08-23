@@ -14,10 +14,14 @@ import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import thelablogo from "../../../public/images/thelab.png";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
+import { useEffect, useMemo } from "react";
+import useFetchNflState from "@/hooks/useFetchNflState";
 
 const Trades = () => {
   const dispatch: AppDispatch = useDispatch();
-  const { allplayers } = useSelector((state: RootState) => state.common);
+  const { allplayers, nflState } = useSelector(
+    (state: RootState) => state.common
+  );
   const {
     searched_player1_pc,
     searched_player2_pc,
@@ -28,37 +32,100 @@ const Trades = () => {
   } = useSelector((state: RootState) => state.trades);
   const { user } = useSelector((state: RootState) => state.manager);
 
+  useFetchNflState();
   useFetchAllplayers();
   useFetchKtcCurrent();
 
-  const player_pick_options = [
-    ...Object.keys(allplayers || {}).map((player_id) => {
-      return {
-        id: player_id,
-        text: allplayers?.[player_id]?.full_name || player_id,
-        display: (
-          <Avatar
-            id={player_id}
-            text={allplayers?.[player_id]?.full_name || player_id}
-            type="P"
-          />
-        ),
-      };
-    }),
-  ];
+  console.log({ searched_player2_pc });
+
+  useEffect(() => {
+    if (!searched_player1_pc) {
+      dispatch(updateTradesState({ key: "searched_player2_pc", value: "" }));
+      dispatch(updateTradesState({ key: "searched_player3_pc", value: "" }));
+    }
+  }, [searched_player1_pc]);
+
+  useEffect(() => {
+    if (!searched_player2_pc) {
+      dispatch(updateTradesState({ key: "searched_player4_pc", value: "" }));
+    }
+  }, [searched_player2_pc]);
+
+  const player_pick_options = useMemo(() => {
+    const pick_seasons =
+      (nflState?.season &&
+        Array.from(Array(4).keys()).map(
+          (key) => parseInt(nflState.season as string) + key
+        )) ||
+      [];
+
+    const pick_rounds = Array.from(Array(4).keys()).map((key) => key + 1);
+
+    const pick_orders = Array.from(Array(12).keys()).map((key) => key + 1);
+
+    const current_season_picks = !["regular", "post"].includes(
+      (nflState?.season_type as string) || ""
+    )
+      ? pick_rounds.flatMap((round) => {
+          const season = nflState?.season as string;
+          return pick_orders.map((order) => {
+            const order_formatted = order.toString().padStart(2, "0");
+            const pick = `${season} ${round}.${order_formatted}`;
+            return {
+              id: pick,
+              text: pick,
+              display: <div>{pick}</div>,
+            };
+          });
+        })
+      : [];
+
+    const pick_options = [
+      ...pick_seasons.flatMap((season) => {
+        return pick_rounds.map((round) => {
+          return {
+            id: `${season} ${round}.null`,
+            text: `${season} Round ${round}`,
+            display: (
+              <div>
+                {season} Round {round}
+              </div>
+            ),
+          };
+        });
+      }),
+      ...current_season_picks,
+    ];
+
+    return [
+      ...Object.keys(allplayers || {}).map((player_id) => {
+        return {
+          id: player_id,
+          text:
+            allplayers?.[player_id]?.full_name ||
+            (parseInt(player_id) ? "Inactive - " + player_id : player_id),
+          display: (
+            <Avatar
+              id={player_id}
+              text={allplayers?.[player_id]?.full_name || player_id}
+              type="P"
+            />
+          ),
+        };
+      }),
+      ...pick_options,
+    ];
+  }, [allplayers, nflState]);
 
   const searches = (
-    <div className="search-box flex flex-col">
-      <div className="searches-wrapper justify-center">
-        <div className="searches pc">
-          <p className="text-center !text-[5rem] font-chill text-[var(--color1)]">
-            Team 1
-          </p>
-          <div className="text-[4rem]  m-auto">
+    <div className="flex-1 search-box flex flex-col justify-between">
+      <div className="flex-1 searches-wrapper">
+        <div className="searches">
+          <div className="text-[4rem] w-[100%] m-auto">
             <Search
               searched={
-                allplayers?.[searched_player1_pc]?.full_name ||
-                searched_player1_pc
+                player_pick_options.find((o) => o.id === searched_player1_pc)
+                  ?.text || ""
               }
               setSearched={(value) =>
                 dispatch(
@@ -77,40 +144,11 @@ const Trades = () => {
             />
           </div>
           {searched_player1_pc ? (
-            <div className="text-[4rem]  m-auto">
+            <div className="text-[4rem] w-[100%] m-auto">
               <Search
                 searched={
-                  allplayers?.[searched_player2_pc]?.full_name ||
-                  searched_player2_pc
-                }
-                setSearched={(value) =>
-                  dispatch(
-                    updateTradesState({ key: "searched_player2_pc", value })
-                  )
-                }
-                options={player_pick_options.filter(
-                  (o) =>
-                    ![
-                      searched_player1_pc,
-                      searched_player3_pc,
-                      searched_player4_pc,
-                    ].includes(o.id)
-                )}
-                placeholder="Player 2"
-              />
-            </div>
-          ) : null}
-        </div>
-        {
-          <div className="searches">
-            <p className="text-center !text-[5rem] font-chill text-[var(--color1)]">
-              Team 2
-            </p>
-            <div className="text-[4rem]  m-auto">
-              <Search
-                searched={
-                  allplayers?.[searched_player3_pc]?.full_name ||
-                  searched_player3_pc
+                  player_pick_options.find((o) => o.id === searched_player3_pc)
+                    ?.text || ""
                 }
                 setSearched={(value) =>
                   dispatch(
@@ -125,36 +163,61 @@ const Trades = () => {
                       searched_player4_pc,
                     ].includes(o.id)
                 )}
-                placeholder="Player"
-                disabled={searched_player1_pc ? false : true}
+                placeholder="Player 2"
               />
             </div>
-            {searched_player3_pc ? (
-              <div className="text-[4rem] m-auto">
-                <Search
-                  searched={
-                    allplayers?.[searched_player4_pc]?.full_name ||
-                    searched_player4_pc
-                  }
-                  setSearched={(value) =>
-                    dispatch(
-                      updateTradesState({ key: "searched_player4_pc", value })
-                    )
-                  }
-                  options={player_pick_options.filter(
-                    (o) =>
-                      ![
-                        searched_player1_pc,
-                        searched_player2_pc,
-                        searched_player3_pc,
-                      ].includes(o.id)
-                  )}
-                  placeholder="Player 2"
-                />
-              </div>
-            ) : null}
+          ) : null}
+        </div>
+
+        <div className="searches">
+          <div className="text-[4rem] w-[100%] m-auto">
+            <Search
+              searched={
+                player_pick_options.find((o) => o.id === searched_player2_pc)
+                  ?.text || ""
+              }
+              setSearched={(value) =>
+                dispatch(
+                  updateTradesState({ key: "searched_player2_pc", value })
+                )
+              }
+              options={player_pick_options.filter(
+                (o) =>
+                  ![
+                    searched_player1_pc,
+                    searched_player3_pc,
+                    searched_player4_pc,
+                  ].includes(o.id)
+              )}
+              placeholder="Player"
+              disabled={searched_player1_pc ? false : true}
+            />
           </div>
-        }
+          {searched_player2_pc ? (
+            <div className="text-[4rem] w-[100%] m-auto">
+              <Search
+                searched={
+                  player_pick_options.find((o) => o.id === searched_player4_pc)
+                    ?.text || ""
+                }
+                setSearched={(value) =>
+                  dispatch(
+                    updateTradesState({ key: "searched_player4_pc", value })
+                  )
+                }
+                options={player_pick_options.filter(
+                  (o) =>
+                    ![
+                      searched_player1_pc,
+                      searched_player2_pc,
+                      searched_player3_pc,
+                    ].includes(o.id)
+                )}
+                placeholder="Player 2"
+              />
+            </div>
+          ) : null}
+        </div>
       </div>
       {isLoadingTrades ||
       trades.some(
@@ -194,43 +257,47 @@ const Trades = () => {
   );
 
   return (
-    <>
+    <div className="h-[100dvh] flex flex-col justify-between">
       <ShNavbar />
-      <div className="relative">
+      <div className="flex-1 flex flex-col justify-between relative ">
         <Link href={"/tools"} className="home !p-8">
           Tools
         </Link>
-        {isLoadingTrades ? (
-          <LoadingIcon messages={[]} />
-        ) : (
-          <>
-            <div className="flex justify-center text-[2.5rem] !p-8 text-orange-600 font-score absolute right-0">
-              <Link
-                href={
-                  user?.user_id
-                    ? `/manager/${user?.username}/leaguemate-trades`
-                    : "/manager"
-                }
-                onClick={() => localStorage.setItem("tab", "leaguemate-trades")}
-              >
-                Leaguemate Trades
-              </Link>
-            </div>
 
-            <div className="flex justify-center items-center p-8 w-fit m-auto relative">
-              <Image
-                src={thelablogo}
-                alt="logo"
-                className="w-[25rem] m-8 opacity-[.35] drop-shadow-[0_0_1rem_white]"
-              />
-              <h1 className="absolute !text-[15rem] font-metal !text-[var(--color7)] ![text-shadow:0_0_.5rem_red] drop-shadow-[0_0_1rem_black]">
-                Trades
-              </h1>
-            </div>
-            {searches}
+        <div className="flex justify-center text-[2.5rem] !p-8 text-orange-600 font-score absolute right-0">
+          <Link
+            href={
+              user?.user_id
+                ? `/manager/${user?.username}/leaguemate-trades`
+                : "/manager"
+            }
+            onClick={() => localStorage.setItem("tab", "leaguemate-trades")}
+          >
+            Leaguemate Trades
+          </Link>
+        </div>
+
+        <div className="flex justify-center items-center p-8 w-fit m-auto relative">
+          <Image
+            src={thelablogo}
+            alt="logo"
+            className="w-[25rem] m-8 opacity-[.35] drop-shadow-[0_0_1rem_white]"
+          />
+          <h1 className="absolute !text-[15rem] font-metal !text-[var(--color7)] ![text-shadow:0_0_.5rem_red] drop-shadow-[0_0_1rem_black]">
+            Trades
+          </h1>
+        </div>
+        <div className="flex flex-col flex-1">{searches}</div>
+        {isLoadingTrades ? (
+          <div className="flex-1 flex items-center">
+            {" "}
+            <LoadingIcon messages={[]} />{" "}
+          </div>
+        ) : (
+          <div className="flex-1">
             <TableTrades
               trades={tradeObj?.trades || []}
-              tradeCount={tradeObj?.count || 0}
+              tradeCount={tradeObj?.count}
               fetchMore={() =>
                 dispatch(
                   fetchTrades({
@@ -244,10 +311,10 @@ const Trades = () => {
                 )
               }
             />
-          </>
+          </div>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

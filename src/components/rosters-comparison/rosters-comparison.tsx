@@ -10,10 +10,12 @@ import { getDraftPickId } from "@/utils/getPickId";
 import "./rosters-comparison.css";
 
 const RostersComparisonPage = ({
+  type,
   league,
   roster_id1,
   roster_id2,
 }: {
+  type: number;
   league: League;
   roster_id1: number;
   roster_id2: number;
@@ -25,7 +27,7 @@ const RostersComparisonPage = ({
   const getRosterTable = (roster: Roster | undefined) => {
     return (
       <TableMain
-        type={2}
+        type={type}
         half={true}
         headers={[
           { text: "", colspan: 1 },

@@ -59,20 +59,23 @@ const Trade = ({
         className={activeTrade === trade.transaction_id ? "active" : ""}
       >
         <tr>
-          <td colSpan={6} className="timestamp">
-            <div>
+          <td colSpan={7} className="timestamp">
+            <div className="flex justify-evenly">
               {new Date(trade.status_updated).toLocaleDateString("en-US")}
-            </div>
-            <div>
-              {new Date(trade.status_updated).toLocaleTimeString("en-US")}
+
+              <em>
+                {new Date(trade.status_updated).toLocaleTimeString("en-US")}
+              </em>
             </div>
           </td>
           <td colSpan={12}>
-            <Avatar
-              id={trade.league?.avatar}
-              text={trade.league?.name}
-              type="L"
-            />
+            <div className="flex justify-evenly">
+              <Avatar
+                id={trade.league?.avatar}
+                text={trade.league?.name}
+                type="L"
+              />
+            </div>
           </td>
         </tr>
         <tr>
@@ -90,9 +93,12 @@ const Trade = ({
               {trade.league.settings.best_ball === 1 ? "Bestball" : "Lineup"}
             </div>
           </td>
-          <td colSpan={3}>
+          <td colSpan={2}>
+            <div>{trade.league.rosters.length} Tm</div>
+          </td>
+          <td colSpan={2}>
             <div>
-              Start{" "}
+              S{" "}
               {trade.league.roster_positions.filter((rp) => rp !== "BN").length}
             </div>
           </td>
@@ -113,7 +119,11 @@ const Trade = ({
               {trade.league.roster_positions
                 .filter((rp) => rp === "TE")
                 .length.toString()}{" "}
-              TE {trade.league.scoring_settings.bonus_rec_te || "0"}
+              TE{" "}
+              {trade.league.scoring_settings.bonus_rec_te?.toLocaleString(
+                "en-US",
+                { maximumFractionDigits: 2 }
+              ) || "0"}
               {"pt "}
               Prem
             </div>
@@ -131,13 +141,15 @@ const Trade = ({
           return (
             <tr key={`${user_id}_${index}`}>
               <td colSpan={5}>
-                <Avatar
-                  id={manager_roster?.avatar || null}
-                  type={"U"}
-                  text={manager_roster?.username || "Orphan"}
-                />
+                <div>
+                  <Avatar
+                    id={manager_roster?.avatar || null}
+                    type={"U"}
+                    text={manager_roster?.username || "Orphan"}
+                  />
+                </div>
               </td>
-              <td colSpan={7} className="adds">
+              <td colSpan={8} className="adds">
                 <table className="adds">
                   <tbody>
                     {Object.keys(trade.adds)
@@ -150,20 +162,13 @@ const Trade = ({
                           (ktcCurrent?.[league_type]?.[a] || 0)
                       )
                       .map((add, index) => {
+                        const tip = tradeTips?.find(
+                          (tip) =>
+                            tip.player_id === add && tip.type === "trade away"
+                        );
                         return (
                           <tr key={`${add}_${index}`}>
-                            <td
-                              colSpan={2}
-                              className={
-                                trade.tips?.away.some(
-                                  (tip) =>
-                                    tip.player_id === add &&
-                                    tip.leaguemate_id === trade.adds[add]
-                                )
-                                  ? "redb"
-                                  : ""
-                              }
-                            >
+                            <td colSpan={2} className={tip ? "redb" : ""}>
                               <div>
                                 {allplayers && allplayers[add]?.full_name}
                               </div>
@@ -237,20 +242,13 @@ const Trade = ({
                           (ktc_current?.[b] || 0) - (ktc_current?.[a] || 0)
                       )
                       .map((drop, index) => {
-                        const tip = tradeTips.find(
-                          (tip) => tip.player_id === drop
+                        const tip = tradeTips?.find(
+                          (tip) =>
+                            tip.player_id === drop && tip.type === "acquire"
                         );
                         return (
                           <tr key={`${drop}_${index}`}>
-                            <td
-                              className={
-                                tip
-                                  ? tip.type === "acquire"
-                                    ? "greenb"
-                                    : "redb"
-                                  : ""
-                              }
-                            >
+                            <td className={tip ? "greenb" : ""}>
                               <div>
                                 {allplayers && allplayers[drop]?.full_name}
                               </div>
@@ -295,7 +293,7 @@ const Trade = ({
       {activeTrade === trade.transaction_id && (
         <tbody>
           <tr>
-            <td colSpan={18}>
+            <td colSpan={19}>
               <TradeDetail trade={trade} tradeTips={tradeTips} />
             </td>
           </tr>
@@ -356,7 +354,7 @@ const TradeDetail = ({
       {detail_tab === "League" ? (
         <League type={2} league={tradeLeague} />
       ) : detail_tab === "Tips" ? (
-        <TradeTips trade={trade} tradeTips={tradeTips} />
+        <TradeTips tradeTips={tradeTips} />
       ) : null}
     </>
   );
@@ -368,7 +366,7 @@ const TableTrades = ({
   fetchMore,
 }: {
   trades: TradeType[];
-  tradeCount: number;
+  tradeCount: number | undefined;
   fetchMore: () => void;
 }) => {
   const { leaguemates, leagues } = useSelector(
@@ -392,7 +390,9 @@ const TableTrades = ({
       trade.managers
         .filter((m_user_id) => leaguemates[m_user_id])
         .forEach((m_user_id) => {
-          const common_league_ids = leaguemates[m_user_id].leagues;
+          const common_league_ids = leaguemates[m_user_id].leagues.filter(
+            (league_id) => leagues?.[league_id]?.settings?.disable_trades !== 1
+          );
 
           const adds_lm = Object.keys(trade.adds).filter(
             (player_id) => trade.adds[player_id] === m_user_id
@@ -471,7 +471,7 @@ const TableTrades = ({
             );
           }
         )}
-        {(trades?.length || 0) < tradeCount ? (
+        {(trades?.length || 0) < (tradeCount || 0) ? (
           <li onClick={fetchMore}>...</li>
         ) : null}
       </ol>
@@ -501,7 +501,9 @@ const TableTrades = ({
 
   return (
     <>
-      <h2>{tradeCount} Trades</h2>
+      {tradeCount ? (
+        <h2>{Number(tradeCount).toLocaleString("en-US")} Trades</h2>
+      ) : null}
       {page_numbers}
       {table}
       {page_numbers}
@@ -509,17 +511,8 @@ const TableTrades = ({
   );
 };
 
-const TradeTips = ({
-  trade,
-  tradeTips,
-}: {
-  trade: TradeType;
-  tradeTips: TradeTip[];
-}) => {
+const TradeTips = ({ tradeTips }: { tradeTips: TradeTip[] }) => {
   const { allplayers } = useSelector((state: RootState) => state.common);
-  const { leaguemates, leagues } = useSelector(
-    (state: RootState) => state.manager
-  );
 
   return (
     <>
@@ -531,9 +524,10 @@ const TradeTips = ({
             id: `${tip.player_id}__${tip.league.league_id}__${tip.lm.user_id}`,
             columns: [
               {
-                text: tip.type === "acquire" ? "\u2795\uFE0E" : "\u2796\uFE0E",
+                text: tip.type === "acquire" ? <>&#65291;</> : <>&#8722;</>,
                 colspan: 1,
-                classname: tip.type === "acquire" ? "green" : "red",
+                classname:
+                  (tip.type === "acquire" ? "green" : "red") + " font-black",
               },
               {
                 text: (

@@ -74,9 +74,11 @@ export async function POST(req: NextRequest) {
       const result = await pool.query(getLmTradesQuery, [
         player,
         [manager],
-        offset,
         limit,
+        offset,
       ]);
+
+      console.log({ tradesLen: result.rows.length });
 
       const count = await pool.query(countLmTradesQuery, [player, [manager]]);
 

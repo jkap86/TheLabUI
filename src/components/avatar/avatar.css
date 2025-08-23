@@ -1,5 +1,5 @@
 div.avatar {
-  width: inherit;
+  width: fit-content;
   font-weight: 400;
   margin: 0, auto;
   color: inherit;
@@ -8,7 +8,7 @@ div.avatar {
   font-size: 2.5rem;
 }
 
-table.trades div.avatar {
+table.trade div.avatar {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -16,20 +16,20 @@ table.trades div.avatar {
   align-items: center;
 }
 
-table.trades td div.avatar span {
+table.trade td div.avatar span {
   height: inherit;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-table.trades td:hover > div > div.avatar,
-table.trades td:hover > div > div.avatar span {
+table.trade td:hover > div > div.avatar,
+table.trade td:hover > div > div.avatar span {
   overflow: visible;
   z-index: 1;
 }
 
-table.trades td:hover > div.avatar span {
+table.trade td:hover > div.avatar span {
   box-shadow: 0 0 2.5rem white;
 }
 

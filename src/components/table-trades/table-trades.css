@@ -42,7 +42,7 @@ table.trades table td.timestamp {
 }
 
 table.trades table td.timestamp > div {
-  font-size: 50%;
+  font-size: 2.5rem;
 }
 
 table.trades table tr:first-of-type td div.avatar {

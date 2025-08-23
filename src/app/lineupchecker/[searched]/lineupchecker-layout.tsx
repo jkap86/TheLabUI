@@ -161,55 +161,58 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
   );
 
   return (
-    <div className="h-screen flex flex-col justify-between">
+    <div className="h-[100dvh] flex flex-col justify-between">
       <ShNavbar />
-      <div className="relative">
-        <Link href={"/lineupchecker"} className="home">
-          Lineup Checker Home
-        </Link>
-        {Object.values(matchups)[0]?.user_matchup?.username ? (
-          <>
-            <div className="heading pt-[5rem]">
-              <h1 className="tool-title !text-[5rem] ![text-shadow:0_0_.5rem_red]">
-                Lineup Checker
-              </h1>
 
-              <h1>
-                <Avatar
-                  id={Object.values(matchups)[0]?.user_matchup?.avatar}
-                  type="U"
-                  text={Object.values(matchups)[0]?.user_matchup?.username}
-                />
-              </h1>
-            </div>
+      <div className="flex-1 flex flex-col">
+        <div className="relative">
+          <Link href={"/lineupchecker"} className="home">
+            Lineup Checker Home
+          </Link>
+          {Object.values(matchups)[0]?.user_matchup?.username ? (
+            <>
+              <div className="heading pt-[5rem]">
+                <h1 className="tool-title !text-[5rem] ![text-shadow:0_0_.5rem_red]">
+                  Lineup Checker
+                </h1>
 
-            <LeagueTypeSwitch />
-            {recordTable}
-            <br />
-            <h2>
-              <select
-                onChange={(e) =>
-                  router.push(
-                    pathname.replace(pathname.split("/")[3], e.target.value)
-                  )
-                }
-                value={pathname.split("/")[3]}
-                className="font-metal text-[var(--color1)] p-8 text-[4rem]"
-              >
-                <option>matchups</option>
-                <option>starters</option>
-              </select>
-            </h2>
-          </>
-        ) : null}
-      </div>
-      {isLoadingMatchups ? (
-        <div className=" flex-1 flex flex-col justify-center items-center">
-          <LoadingIcon messages={[]} />
+                <h1>
+                  <Avatar
+                    id={Object.values(matchups)[0]?.user_matchup?.avatar}
+                    type="U"
+                    text={Object.values(matchups)[0]?.user_matchup?.username}
+                  />
+                </h1>
+              </div>
+
+              <LeagueTypeSwitch />
+              {recordTable}
+              <br />
+              <h2>
+                <select
+                  onChange={(e) =>
+                    router.push(
+                      pathname.replace(pathname.split("/")[3], e.target.value)
+                    )
+                  }
+                  value={pathname.split("/")[3]}
+                  className="font-metal text-[var(--color1)] p-8 text-[4rem]"
+                >
+                  <option>matchups</option>
+                  <option>starters</option>
+                </select>
+              </h2>
+            </>
+          ) : null}
         </div>
-      ) : (
-        <>{component}</>
-      )}
+        {isLoadingMatchups ? (
+          <div className="flex-1 flex flex-col justify-center items-center">
+            <LoadingIcon messages={[]} />
+          </div>
+        ) : (
+          <div className="flex-1">{component}</div>
+        )}
+      </div>
     </div>
   );
 };

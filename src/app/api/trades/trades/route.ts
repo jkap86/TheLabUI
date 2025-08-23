@@ -28,22 +28,32 @@ export async function GET(req: NextRequest) {
   if (player_id2) {
     if (player_id2?.includes(".")) {
       if (player_id1?.includes(".")) {
-        conditions.push(
-          `
-          ((SELECT dp->>'new' FROM jsonb_array_elements(t.draft_picks) AS dp WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') =$1 )
-          = (SELECT dp->>'new' FROM jsonb_array_elements(t.draft_picks) AS dp WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') = $${
+        conditions.push(`
+  (
+    SELECT dp1->>'new'
+    FROM jsonb_array_elements(t.draft_picks) AS dp1
+    WHERE (dp1->>'season') || ' ' || (dp1->>'round') || '.' ||
+          COALESCE(LPAD((dp1->>'order')::text, 2, '0'), 'null') = $1
+    LIMIT 1
+  ) IS DISTINCT FROM (
+    SELECT dp2->>'new'
+    FROM jsonb_array_elements(t.draft_picks) AS dp2
+    WHERE (dp2->>'season') || ' ' || (dp2->>'round') || '.' ||
+          COALESCE(LPAD((dp2->>'order')::text, 2, '0'), 'null') = $${
             values.length + 1
-          }))
-          `
-        );
+          }
+    LIMIT 1
+  )
+`);
       } else {
         conditions.push(`
-          (
-            SELECT dp->>'new' 
+          EXISTS (
+            SELECT 1
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
               = $${values.length + 1}
-          ) = t.adds ->> $1
+              AND dp->>'new' IS DISTINCT FROM t.adds ->> $1
+          ) 
           `);
       }
     } else {
@@ -88,16 +98,18 @@ export async function GET(req: NextRequest) {
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
               = $${values.length + 1}
-        ) != t.adds ->> $1`);
+            LIMIT 1
+        ) IS DISTINCT FROM t.adds ->> $1`);
       }
     } else {
       if (player_id1?.includes(".")) {
         conditions.push(
-          `t.adds ->> $${values.length + 1} != (
+          `t.adds ->> $${values.length + 1} IS DISTINCT FROM (
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
               = $1
+            LIMIT 1
           )`
         );
       } else {

@@ -41,7 +41,7 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
   const errors = [...errorCommon, errorUser, errorLeagues].filter((e) => e);
 
   return (
-    <div className="h-screen flex flex-col justify-between">
+    <div className="h-[100dvh] flex flex-col justify-between">
       <ShNavbar />
       {errors.length > 0 ? (
         <div className="h-screen flex-1 overflow-auto flex flex-col justify-center items-center">
@@ -57,11 +57,11 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
           })}
         </div>
       ) : isLoadingCommon.length > 0 || isLoadingUser ? (
-        <div className=" flex-1 flex flex-col justify-center items-center">
+        <div className="flex-1 flex flex-col justify-center items-center">
           <LoadingIcon messages={[]} />
         </div>
       ) : (
-        <>
+        <div className="flex-1 flex flex-col">
           <Heading />
           {isLoadingCommon.length > 0 ||
           isLoadingUser ? null : isLoadingLeagues ? (
@@ -69,7 +69,7 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
           ) : (
             component
           )}
-        </>
+        </div>
       )}
     </div>
   );

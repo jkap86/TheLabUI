@@ -19,8 +19,8 @@ export interface PlayersState {
 
 const initialState: PlayersState = {
   column1: "# Own",
-  column2: "% Own",
-  column3: "KTC D",
+  column2: "KTC D",
+  column3: "Age",
   column4: "Ppr Proj",
   filterPosition: "All",
   filterTeam: "All",
