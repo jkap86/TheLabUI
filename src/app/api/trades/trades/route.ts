@@ -13,7 +13,9 @@ export async function GET(req: NextRequest) {
   const limit = searchParams.get("limit");
   const offset = searchParams.get("offset");
 
-  const conditions: string[] = [];
+  const conditions: string[] = [
+    `(SELECT count(*) FROM jsonb_each(t.adds)) <= 10`,
+  ];
 
   if (player_id1?.includes(".")) {
     conditions.push(

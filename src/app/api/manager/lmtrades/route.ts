@@ -42,7 +42,9 @@ export async function POST(req: NextRequest) {
     redraft: {},
   };
 
-  const conditions: string[] = [];
+  const conditions: string[] = [
+    `(SELECT count(*) FROM jsonb_each(t.adds)) <= 10`,
+  ];
 
   if (manager || player) {
     if (manager && player) {
@@ -195,19 +197,20 @@ export async function POST(req: NextRequest) {
       );
     }
   } else {
+    conditions.push(`t.managers && $1`);
     const getLmTradesQuery = ` 
         SELECT t.*, to_jsonb(l) AS league
         FROM trades t
         JOIN leagues l ON t.league_id = l.league_id
-        WHERE t.managers && $1
+        WHERE ${conditions.join(" AND ")}
         ORDER BY t.status_updated DESC
         LIMIT $2 OFFSET $3
       `;
 
     const countLmTradesQuery = `
           SELECT COUNT(*) 
-          FROM trades
-          WHERE managers && $1
+          FROM trades t
+          WHERE ${conditions.join(" AND ")}
         `;
 
     const result = await pool.query(getLmTradesQuery, [

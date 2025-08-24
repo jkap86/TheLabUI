@@ -170,7 +170,10 @@ const Trade = ({
                           <tr key={`${add}_${index}`}>
                             <td colSpan={2} className={tip ? "redb" : ""}>
                               <div>
-                                {allplayers && allplayers[add]?.full_name}
+                                {allplayers &&
+                                  (allplayers[add]?.full_name ||
+                                    (parseInt(add) && "Inactive - " + add) ||
+                                    add)}
                               </div>
                             </td>
                             <td
@@ -250,7 +253,10 @@ const Trade = ({
                           <tr key={`${drop}_${index}`}>
                             <td className={tip ? "greenb" : ""}>
                               <div>
-                                {allplayers && allplayers[drop]?.full_name}
+                                {allplayers &&
+                                  (allplayers[drop]?.full_name ||
+                                    (parseInt(drop) && "Inactive - " + drop) ||
+                                    drop)}
                               </div>
                             </td>
                           </tr>
