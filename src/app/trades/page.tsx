@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import thelablogo from "../../../public/images/thelab.png";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import useFetchNflState from "@/hooks/useFetchNflState";
 
 const Trades = () => {
