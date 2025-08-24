@@ -57,15 +57,13 @@ div.options > div > li {
   box-shadow: inset 0 0 5rem black;
   color: white;
   text-shadow: var(--text-shadow1);
-  font-size: inherit;
+
   list-style: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 div.options > div > li > div.avatar {
   margin: 0;
+  font-size: 50% !important;
 }
 button.clear,
 button.show {

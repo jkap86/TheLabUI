@@ -82,10 +82,51 @@ export async function GET(req: NextRequest) {
   }
 
   if (player_id3) {
-    if (player_id3?.includes(".")) {
+    if (player_id3 === "Price Check") {
       if (player_id1?.includes(".")) {
-        conditions.push(
-          `(
+        conditions.push(`
+          (
+            WITH pick(new_val) AS (
+              SELECT dp->>'new'
+              FROM jsonb_array_elements(t.draft_picks) dp
+              WHERE (dp->>'season') || ' ' || (dp->>'round') || '.' ||
+                    COALESCE(LPAD(dp->>'order', 2, '0'), 'null') = $1
+              LIMIT 1
+            )
+            SELECT
+              (SELECT count(*) FROM jsonb_array_elements(t.draft_picks) dp2
+              WHERE dp2->>'new' IS NOT DISTINCT FROM (SELECT new_val FROM pick)
+              ) = 1
+              AND NOT EXISTS (
+                SELECT 1
+                FROM jsonb_each_text(t.adds) e(k, v)
+                WHERE v IS NOT DISTINCT FROM (SELECT new_val FROM pick)
+              )
+          )
+        `);
+      } else {
+        conditions.push(`
+          NOT EXISTS (
+            SELECT 1 
+            FROM jsonb_each_text(t.adds) AS e(k, v)
+            WHERE e.k != $1
+              AND v = t.adds->>$1
+          )
+      `);
+
+        conditions.push(`
+          NOT EXISTS (
+            SELECT 1 
+            FROM jsonb_array_elements(t.draft_picks) dp
+            WHERE dp->>'new' = t.adds->>$1
+          )
+      `);
+      }
+    } else {
+      if (player_id3?.includes(".")) {
+        if (player_id1?.includes(".")) {
+          conditions.push(
+            `(
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
@@ -95,42 +136,84 @@ export async function GET(req: NextRequest) {
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
-              = $${values.length + 1}
+              = $1
             LIMIT 1
           )`
-        );
-      } else {
-        conditions.push(`(
+          );
+        } else {
+          conditions.push(`(
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
               = $${values.length + 1}
             LIMIT 1
         ) != t.adds ->> $1`);
-      }
-    } else {
-      if (player_id1?.includes(".")) {
-        conditions.push(
-          `t.adds ->> $${values.length + 1} != (
+        }
+      } else {
+        if (player_id1?.includes(".")) {
+          conditions.push(
+            `t.adds ->> $${values.length + 1} != (
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
               = $1
             LIMIT 1
           )`
-        );
-      } else {
-        conditions.push(`t.adds ->> $1 = t.adds ->> $${values.length + 1}`);
+          );
+        } else {
+          conditions.push(`t.adds ->> $1 = t.adds ->> $${values.length + 1}`);
+        }
       }
+      values.push(player_id3);
     }
-    values.push(player_id3);
   }
 
   if (player_id4) {
-    if (player_id4?.includes(".")) {
+    if (player_id4 === "Price Check") {
       if (player_id2?.includes(".")) {
-        conditions.push(
-          `(
+        conditions.push(`
+          (
+            WITH pick(new_val) AS (
+              SELECT dp->>'new'
+              FROM jsonb_array_elements(t.draft_picks) dp
+              WHERE (dp->>'season') || ' ' || (dp->>'round') || '.' ||
+                    COALESCE(LPAD(dp->>'order', 2, '0'), 'null') = $2
+              LIMIT 1
+            )
+            SELECT
+              (SELECT count(*) FROM jsonb_array_elements(t.draft_picks) dp2
+              WHERE dp2->>'new' IS NOT DISTINCT FROM (SELECT new_val FROM pick)
+              ) = 1
+              AND NOT EXISTS (
+                SELECT 1
+                FROM jsonb_each_text(t.adds) e(k, v)
+                WHERE v IS NOT DISTINCT FROM (SELECT new_val FROM pick)
+              )
+          )
+        `);
+      } else {
+        conditions.push(`
+          NOT EXISTS (
+            SELECT 1 
+            FROM jsonb_each_text(t.adds) AS e(k, v)
+            WHERE e.k != $2
+              AND v = t.adds->>$2
+          )
+      `);
+
+        conditions.push(`
+          NOT EXISTS (
+            SELECT 1 
+            FROM jsonb_array_elements(t.draft_picks) dp
+            WHERE dp->>'new' = t.adds->>$2
+          )
+      `);
+      }
+    } else {
+      if (player_id4?.includes(".")) {
+        if (player_id2?.includes(".")) {
+          conditions.push(
+            `(
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
@@ -143,9 +226,9 @@ export async function GET(req: NextRequest) {
               = $${values.length + 1}
             LIMIT 1
           )`
-        );
-      } else {
-        conditions.push(`
+          );
+        } else {
+          conditions.push(`
           (
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
@@ -153,22 +236,22 @@ export async function GET(req: NextRequest) {
               = $${values.length + 1}
             LIMIT 1
           ) = t.adds ->> $2`);
-      }
-    } else {
-      if (player_id2?.includes(".")) {
-        conditions.push(`t.adds ->> $${values.length + 1} = (
+        }
+      } else {
+        if (player_id2?.includes(".")) {
+          conditions.push(`t.adds ->> $${values.length + 1} = (
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
               = $2
             LIMIT 1
           )`);
-      } else {
-        conditions.push(`t.adds ->> $2 = t.adds ->> $${values.length + 1}`);
+        } else {
+          conditions.push(`t.adds ->> $2 = t.adds ->> $${values.length + 1}`);
+        }
       }
+      values.push(player_id4);
     }
-
-    values.push(player_id4);
   }
 
   const getPcTradesQuery = `

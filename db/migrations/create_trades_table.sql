@@ -19,3 +19,7 @@ CREATE INDEX IF NOT EXISTS idx_trades_managers_gin ON trades USING gin (managers
 CREATE INDEX IF NOT EXISTS idx_trades_managers_adds_gin ON trades USING gin (managers, adds);
 
 CREATE INDEX IF NOT EXISTS idx_trades_managers_draft_picks_gin ON trades USING gin (managers, draft_picks);
+
+CREATE INDEX IF NOT EXISTS idx_trades_adds_gin ON trades USING gin (adds);
+
+CREATE INDEX IF NOT EXISTS idx_trades_draft_picks_gin ON trades USING gin (draft_picks);

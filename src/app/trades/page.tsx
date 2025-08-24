@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import thelablogo from "../../../public/images/thelab.png";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import useFetchNflState from "@/hooks/useFetchNflState";
 
 const Trades = () => {
@@ -36,18 +36,41 @@ const Trades = () => {
   useFetchAllplayers();
   useFetchKtcCurrent();
 
-  useEffect(() => {
-    if (!searched_player1_pc) {
-      dispatch(updateTradesState({ key: "searched_player2_pc", value: "" }));
-      dispatch(updateTradesState({ key: "searched_player3_pc", value: "" }));
-    }
-  }, [searched_player1_pc, dispatch]);
+  const setSearchedPlayer1 = useCallback(
+    (value: string) => {
+      if (!value) {
+        dispatch(
+          updateTradesState({
+            key: "searched_player1_pc",
+            value: searched_player3_pc,
+          })
+        );
 
-  useEffect(() => {
-    if (!searched_player2_pc) {
-      dispatch(updateTradesState({ key: "searched_player4_pc", value: "" }));
-    }
-  }, [searched_player2_pc, dispatch]);
+        dispatch(updateTradesState({ key: "searched_player3_pc", value: "" }));
+      } else {
+        dispatch(updateTradesState({ key: "searched_player1_pc", value }));
+      }
+    },
+    [dispatch, searched_player3_pc]
+  );
+
+  const setSearchedPlayer2 = useCallback(
+    (value: string) => {
+      if (!value) {
+        dispatch(
+          updateTradesState({
+            key: "searched_player2_pc",
+            value: searched_player4_pc,
+          })
+        );
+
+        dispatch(updateTradesState({ key: "searched_player4_pc", value: "" }));
+      } else {
+        dispatch(updateTradesState({ key: "searched_player2_pc", value }));
+      }
+    },
+    [dispatch, searched_player4_pc]
+  );
 
   const player_pick_options = useMemo(() => {
     const pick_seasons =
@@ -61,22 +84,18 @@ const Trades = () => {
 
     const pick_orders = Array.from(Array(12).keys()).map((key) => key + 1);
 
-    const current_season_picks = !["regular", "post"].includes(
-      (nflState?.season_type as string) || ""
-    )
-      ? pick_rounds.flatMap((round) => {
-          const season = nflState?.season as string;
-          return pick_orders.map((order) => {
-            const order_formatted = order.toString().padStart(2, "0");
-            const pick = `${season} ${round}.${order_formatted}`;
-            return {
-              id: pick,
-              text: pick,
-              display: <div>{pick}</div>,
-            };
-          });
-        })
-      : [];
+    const current_season_picks = pick_rounds.flatMap((round) => {
+      const season = nflState?.season as string;
+      return pick_orders.map((order) => {
+        const order_formatted = order.toString().padStart(2, "0");
+        const pick = `${season} ${round}.${order_formatted}`;
+        return {
+          id: pick,
+          text: pick,
+          display: <div>{pick}</div>,
+        };
+      });
+    });
 
     const pick_options = [
       ...pick_seasons.flatMap((season) => {
@@ -125,11 +144,7 @@ const Trades = () => {
                 player_pick_options.find((o) => o.id === searched_player1_pc)
                   ?.text || ""
               }
-              setSearched={(value) =>
-                dispatch(
-                  updateTradesState({ key: "searched_player1_pc", value })
-                )
-              }
+              setSearched={(value) => setSearchedPlayer1(value)}
               options={player_pick_options.filter(
                 (o) =>
                   ![
@@ -153,14 +168,21 @@ const Trades = () => {
                     updateTradesState({ key: "searched_player3_pc", value })
                   )
                 }
-                options={player_pick_options.filter(
-                  (o) =>
-                    ![
-                      searched_player1_pc,
-                      searched_player2_pc,
-                      searched_player4_pc,
-                    ].includes(o.id)
-                )}
+                options={[
+                  {
+                    id: "Price Check",
+                    text: "$$ Price Check",
+                    display: <>$$ Price Check</>,
+                  },
+                  ...player_pick_options.filter(
+                    (o) =>
+                      ![
+                        searched_player1_pc,
+                        searched_player2_pc,
+                        searched_player4_pc,
+                      ].includes(o.id)
+                  ),
+                ]}
                 placeholder="Player 2"
               />
             </div>
@@ -174,11 +196,7 @@ const Trades = () => {
                 player_pick_options.find((o) => o.id === searched_player2_pc)
                   ?.text || ""
               }
-              setSearched={(value) =>
-                dispatch(
-                  updateTradesState({ key: "searched_player2_pc", value })
-                )
-              }
+              setSearched={(value) => setSearchedPlayer2(value)}
               options={player_pick_options.filter(
                 (o) =>
                   ![
@@ -203,14 +221,21 @@ const Trades = () => {
                     updateTradesState({ key: "searched_player4_pc", value })
                   )
                 }
-                options={player_pick_options.filter(
-                  (o) =>
-                    ![
-                      searched_player1_pc,
-                      searched_player2_pc,
-                      searched_player3_pc,
-                    ].includes(o.id)
-                )}
+                options={[
+                  {
+                    id: "Price Check",
+                    text: "**Price Check**",
+                    display: <>**Price Check**</>,
+                  },
+                  ...player_pick_options.filter(
+                    (o) =>
+                      ![
+                        searched_player1_pc,
+                        searched_player2_pc,
+                        searched_player3_pc,
+                      ].includes(o.id)
+                  ),
+                ]}
                 placeholder="Player 2"
               />
             </div>

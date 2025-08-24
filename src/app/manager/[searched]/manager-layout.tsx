@@ -61,7 +61,7 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
           <LoadingIcon messages={[]} />
         </div>
       ) : (
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1">
           <Heading />
           {isLoadingCommon.length > 0 ||
           isLoadingUser ? null : isLoadingLeagues ? (

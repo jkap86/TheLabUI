@@ -8,14 +8,14 @@ div.avatar {
   font-size: 2.5rem;
 }
 
+div.options div.avatar,
 table.trade div.avatar {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: flex;
-  align-items: center;
 }
 
+div.options div.avatar,
 table.trade td div.avatar span {
   height: inherit;
   white-space: nowrap;

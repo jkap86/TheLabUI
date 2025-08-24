@@ -2,7 +2,7 @@ import { JSX, useEffect, useMemo, useRef, useState } from "react";
 import "./search.css";
 import { FixedSizeList as List } from "react-window";
 
-const ROW_HEIGHT = 36;
+const ROW_HEIGHT = 30;
 const MAX_MENU_HEIGHT = 240;
 
 interface Option {
