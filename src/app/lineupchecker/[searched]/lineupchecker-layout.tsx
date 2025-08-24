@@ -186,22 +186,6 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
               </div>
 
               <LeagueTypeSwitch />
-              {recordTable}
-              <br />
-              <h2>
-                <select
-                  onChange={(e) =>
-                    router.push(
-                      pathname.replace(pathname.split("/")[3], e.target.value)
-                    )
-                  }
-                  value={pathname.split("/")[3]}
-                  className="font-metal text-[var(--color1)] p-8 text-[4rem]"
-                >
-                  <option>matchups</option>
-                  <option>starters</option>
-                </select>
-              </h2>
             </>
           ) : null}
         </div>
@@ -210,7 +194,25 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
             <LoadingIcon messages={[]} />
           </div>
         ) : (
-          <div className="flex-1">{component}</div>
+          <div className="flex-1">
+            {recordTable}
+            <br />
+            <h2>
+              <select
+                onChange={(e) =>
+                  router.push(
+                    pathname.replace(pathname.split("/")[3], e.target.value)
+                  )
+                }
+                value={pathname.split("/")[3]}
+                className="font-metal text-[var(--color1)] p-8 text-[4rem]"
+              >
+                <option>matchups</option>
+                <option>starters</option>
+              </select>
+            </h2>
+            {component}
+          </div>
         )}
       </div>
     </div>
