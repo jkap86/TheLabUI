@@ -116,8 +116,8 @@ const Trades = () => {
   }, [allplayers, nflState]);
 
   const searches = (
-    <div className="flex-1 search-box flex flex-col justify-between">
-      <div className="flex-1 searches-wrapper">
+    <div className="flex-1 search-box flex flex-col">
+      <div className=" searches-wrapper my-8">
         <div className="searches">
           <div className="text-[4rem] w-[100%] m-auto">
             <Search
@@ -286,12 +286,11 @@ const Trades = () => {
           </h1>
         </div>
         {isLoadingCommon.length > 0 ? null : (
-          <div className="flex flex-col flex-1">{searches}</div>
+          <div className="flex flex-col ">{searches}</div>
         )}
         {isLoadingTrades ? (
-          <div className="flex-1 flex items-center">
-            {" "}
-            <LoadingIcon messages={[]} />{" "}
+          <div className="flex-1 flex">
+            <LoadingIcon messages={[]} />
           </div>
         ) : (
           <div className="flex-1">

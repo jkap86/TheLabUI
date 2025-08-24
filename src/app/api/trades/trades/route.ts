@@ -149,20 +149,20 @@ export async function GET(req: NextRequest) {
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
               = $${values.length + 1}
-          ) = t.adds ->> $${values.length}`);
+            LIMIT 1
+          ) = t.adds ->> $2`);
       }
     } else {
-      if (player_id3?.includes(".")) {
+      if (player_id2?.includes(".")) {
         conditions.push(`t.adds ->> $${values.length + 1} = (
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
-              = $${values.length}
+              = $2
+            LIMIT 1
           )`);
       } else {
-        conditions.push(
-          `t.adds ->> ${values.length} = t.adds ->> $${values.length + 1}`
-        );
+        conditions.push(`t.adds ->> $2 = t.adds ->> $${values.length + 1}`);
       }
     }
 
@@ -247,6 +247,7 @@ export async function GET(req: NextRequest) {
         rows: trades,
         ktcCurrent,
         projections,
+        getPcTradesQuery,
       },
       { status: 200 }
     );
