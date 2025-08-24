@@ -118,7 +118,7 @@ const Search = ({
           )) || (
             <button
               className="show"
-              onClick={(e) => !disabled && setIsOpen(true)}
+              onClick={() => !disabled && setIsOpen(true)}
             >
               <i className="fa-solid fa-caret-down"></i>
             </button>

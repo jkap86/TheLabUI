@@ -7,8 +7,8 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
 
   const player_id1 = searchParams.get("player_id1");
-  const player_id3 = searchParams.get("player_id2");
-  const player_id2 = searchParams.get("player_id3");
+  const player_id2 = searchParams.get("player_id2");
+  const player_id3 = searchParams.get("player_id3");
   const player_id4 = searchParams.get("player_id4");
   const limit = searchParams.get("limit");
   const offset = searchParams.get("offset");
@@ -29,48 +29,51 @@ export async function GET(req: NextRequest) {
     if (player_id2?.includes(".")) {
       if (player_id1?.includes(".")) {
         conditions.push(`
-  (
-    SELECT dp1->>'new'
-    FROM jsonb_array_elements(t.draft_picks) AS dp1
-    WHERE (dp1->>'season') || ' ' || (dp1->>'round') || '.' ||
-          COALESCE(LPAD((dp1->>'order')::text, 2, '0'), 'null') = $1
-    LIMIT 1
-  ) IS DISTINCT FROM (
-    SELECT dp2->>'new'
-    FROM jsonb_array_elements(t.draft_picks) AS dp2
-    WHERE (dp2->>'season') || ' ' || (dp2->>'round') || '.' ||
-          COALESCE(LPAD((dp2->>'order')::text, 2, '0'), 'null') = $${
-            values.length + 1
-          }
-    LIMIT 1
-  )
+          (
+            SELECT dp1->>'new'
+            FROM jsonb_array_elements(t.draft_picks) AS dp1
+            WHERE (dp1->>'season') || ' ' || (dp1->>'round') || '.' ||
+                  COALESCE(LPAD((dp1->>'order')::text, 2, '0'), 'null') = $1
+            LIMIT 1
+          ) != (
+            SELECT dp2->>'new'
+            FROM jsonb_array_elements(t.draft_picks) AS dp2
+            WHERE (dp2->>'season') || ' ' || (dp2->>'round') || '.' ||
+                  COALESCE(LPAD((dp2->>'order')::text, 2, '0'), 'null') = $${
+                    values.length + 1
+                  }
+            LIMIT 1
+          )
 `);
       } else {
-        conditions.push(`
-          EXISTS (
-            SELECT 1
-            FROM jsonb_array_elements(t.draft_picks) AS dp 
-            WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
-              = $${values.length + 1}
-              AND dp->>'new' IS DISTINCT FROM t.adds ->> $1
-          ) 
-          `);
+        conditions.push(
+          `(
+              t.adds ->> $1
+            ) != (
+              SELECT dp->>'new' 
+              FROM jsonb_array_elements(t.draft_picks) AS dp 
+              WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
+                = $${values.length + 1}
+              LIMIT 1
+            )`
+        );
       }
     } else {
       if (player_id1?.includes(".")) {
         conditions.push(
           `(
               t.adds ->> $${values.length + 1}
-            ) = (
+            ) != (
               SELECT dp->>'new' 
               FROM jsonb_array_elements(t.draft_picks) AS dp 
               WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
                 = $1
+              LIMIT 1
             )`
         );
       } else {
         conditions.push(`t.adds ? $${values.length + 1}`);
-        conditions.push(`t.adds ->> $1 = t.adds ->> $${values.length + 1}`);
+        conditions.push(`t.adds ->> $1 != t.adds ->> $${values.length + 1}`);
       }
     }
     values.push(player_id2);
@@ -85,11 +88,13 @@ export async function GET(req: NextRequest) {
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
               = $1
-        ) != (
+            LIMIT 1
+        ) = (
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
               = $${values.length + 1}
+            LIMIT 1
           )`
         );
       } else {
@@ -99,12 +104,12 @@ export async function GET(req: NextRequest) {
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
               = $${values.length + 1}
             LIMIT 1
-        ) IS DISTINCT FROM t.adds ->> $1`);
+        ) != t.adds ->> $1`);
       }
     } else {
       if (player_id1?.includes(".")) {
         conditions.push(
-          `t.adds ->> $${values.length + 1} IS DISTINCT FROM (
+          `t.adds ->> $${values.length + 1} != (
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
@@ -113,7 +118,7 @@ export async function GET(req: NextRequest) {
           )`
         );
       } else {
-        conditions.push(`t.adds ->> $1 != t.adds ->> $${values.length + 1}`);
+        conditions.push(`t.adds ->> $1 = t.adds ->> $${values.length + 1}`);
       }
     }
     values.push(player_id3);
@@ -121,18 +126,20 @@ export async function GET(req: NextRequest) {
 
   if (player_id4) {
     if (player_id4?.includes(".")) {
-      if (player_id3?.includes(".")) {
+      if (player_id2?.includes(".")) {
         conditions.push(
           `(
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
-              = $${values.length}
+              = $2
+            LIMIT 1
           ) = (
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
               = $${values.length + 1}
+            LIMIT 1
           )`
         );
       } else {

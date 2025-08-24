@@ -453,7 +453,7 @@ const TableTrades = ({
     });
 
     return tips;
-  }, []);
+  }, [leaguemates, leagues, trades]);
 
   const page_numbers = (
     <div className="page_numbers_wrapper">

@@ -19,7 +19,7 @@ import useFetchNflState from "@/hooks/useFetchNflState";
 
 const Trades = () => {
   const dispatch: AppDispatch = useDispatch();
-  const { allplayers, nflState } = useSelector(
+  const { allplayers, nflState, isLoadingCommon } = useSelector(
     (state: RootState) => state.common
   );
   const {
@@ -36,20 +36,18 @@ const Trades = () => {
   useFetchAllplayers();
   useFetchKtcCurrent();
 
-  console.log({ searched_player2_pc });
-
   useEffect(() => {
     if (!searched_player1_pc) {
       dispatch(updateTradesState({ key: "searched_player2_pc", value: "" }));
       dispatch(updateTradesState({ key: "searched_player3_pc", value: "" }));
     }
-  }, [searched_player1_pc]);
+  }, [searched_player1_pc, dispatch]);
 
   useEffect(() => {
     if (!searched_player2_pc) {
       dispatch(updateTradesState({ key: "searched_player4_pc", value: "" }));
     }
-  }, [searched_player2_pc]);
+  }, [searched_player2_pc, dispatch]);
 
   const player_pick_options = useMemo(() => {
     const pick_seasons =
@@ -287,7 +285,9 @@ const Trades = () => {
             Trades
           </h1>
         </div>
-        <div className="flex flex-col flex-1">{searches}</div>
+        {isLoadingCommon.length > 0 ? null : (
+          <div className="flex flex-col flex-1">{searches}</div>
+        )}
         {isLoadingTrades ? (
           <div className="flex-1 flex items-center">
             {" "}
