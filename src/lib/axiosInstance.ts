@@ -17,7 +17,7 @@ axiosRetry(axiosInstance, {
       );
     }
     console.log(`Retrying (retryCount: ${retryCount})`);
-    return retryCount * 1000;
+    return 3000 + retryCount * 1000;
   },
   retryCondition: (error) => {
     return axiosRetry.isNetworkOrIdempotentRequestError(error);

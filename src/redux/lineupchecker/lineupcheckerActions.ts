@@ -1,136 +1,140 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { RootState } from "../store";
 import axios from "axios";
-import { Matchup } from "@/lib/types/userTypes";
+import { League, Matchup, ProjectionEdits, User } from "@/lib/types/userTypes";
+import {
+  getPlayerTotal,
+  ppr_scoring_settings,
+} from "@/utils/getOptimalStarters";
+
+export const fetchUserLeagueIds = createAsyncThunk(
+  "fetchUserLeagueIds",
+  async ({ searched }: { searched: string }) => {
+    const res: { data: { user: User; league_ids: string[] } } = await axios.get(
+      "/api/lineupchecker/user",
+      {
+        params: { searched },
+      }
+    );
+
+    return res.data;
+  }
+);
 
 export const fetchMatchups = createAsyncThunk(
   "fetchMatchups",
-  async ({ searched }: { searched: string }, { getState }) => {
-    const state = getState() as RootState;
-    const { nflState } = state.common;
-
-    const matchups: {
+  async ({
+    user_id,
+    league_ids,
+    week,
+    edits,
+  }: {
+    user_id: string;
+    league_ids: string[];
+    week: number;
+    edits?: ProjectionEdits;
+    initial?: true;
+  }) => {
+    const response: {
       data: {
-        matchups: Matchup[];
+        matchups: { league_id: string; league: League; matchups: Matchup[] }[];
         schedule_week: { [team: string]: { kickoff: number; opp: string } };
         projections_week: { [player_id: string]: { [cat: string]: number } };
       };
-    } = await axios.get("/api/lineupchecker", {
-      params: {
-        searched,
-        week: Math.max(1, nflState?.leg as number),
-      },
+    } = await axios.post("/api/lineupchecker/matchups", {
+      user_id,
+      league_ids,
+      week,
+      edits,
     });
 
     const matchups_obj: {
       [league_id: string]: {
         user_matchup: Matchup;
-        opp_matchup: Matchup;
+        opp_matchup?: Matchup;
         league_matchups: Matchup[];
-        league_index: number;
-        league_name: string;
-        league_avatar: string | null;
-        settings: {
-          best_ball: number;
-          type: number;
-        };
+        league: League;
       };
     } = {};
 
-    const league_ids = Array.from(
-      new Set(matchups.data.matchups.map((matchup) => matchup.league_id))
-    );
-
-    league_ids.forEach((league_id) => {
-      const matchups_league = matchups.data.matchups.filter(
-        (matchup) => matchup.league_id === league_id
+    response.data.matchups.forEach((r) => {
+      const user_matchup = r.matchups.find(
+        (m) => m.roster_id === m.roster_id_user
+      );
+      const opp_matchup = r.matchups.find(
+        (m) => m.roster_id === m.roster_id_opp
       );
 
-      const matchup_user = matchups_league.find(
-        (matchup) => matchup.roster_id === matchup.roster_id_user
-      );
-
-      const matchup_opp = matchups_league.find(
-        (matchup) => matchup.roster_id === matchup.roster_id_opp
-      );
-
-      if (matchup_user && matchup_opp) {
-        matchups_obj[league_id] = {
-          user_matchup: matchup_user,
-          opp_matchup: matchup_opp,
-          league_matchups: matchups_league,
-          league_index: matchup_user.league.index,
-          league_name: matchup_user.league.name,
-          league_avatar: matchup_user.league.avatar,
-          settings: {
-            best_ball: matchup_user.league.settings.best_ball,
-            type: matchup_user.league.settings.type,
-          },
+      if (user_matchup)
+        matchups_obj[r.league_id] = {
+          user_matchup,
+          opp_matchup,
+          league_matchups: r.matchups,
+          league: r.league,
         };
-      }
     });
 
+    const projections = Object.fromEntries(
+      Object.keys(response.data.projections_week).map((player_id) => {
+        return [
+          player_id,
+          {
+            ...response.data.projections_week[player_id],
+            pts_ppr: getPlayerTotal(
+              ppr_scoring_settings,
+              response.data.projections_week[player_id]
+            ),
+          },
+        ];
+      })
+    );
+
     return {
-      searched,
       matchups: matchups_obj,
-      schedule: matchups.data.schedule_week,
-      projections: matchups.data.projections_week,
+      schedule: response.data.schedule_week,
+      projections,
     };
   }
 );
 
 export const syncMatchup = createAsyncThunk(
   "syncMatchup",
-  async (
-    {
-      league_id,
-      user_id,
-      index,
-    }: {
-      league_id: string;
-      user_id: string;
-      index: number;
-    },
-    { getState }
-  ) => {
-    const state = getState() as RootState;
-    const { nflState } = state.common;
-    const { matchups } = state.lineupchecker;
-
-    const league_matchups: { data: Matchup[] } = await axios.get(
+  async ({
+    league_id,
+    user_id,
+    week,
+    best_ball,
+    edits,
+  }: {
+    league_id: string;
+    user_id: string;
+    index: number;
+    week: number;
+    best_ball: number;
+    edits: ProjectionEdits;
+  }) => {
+    const league_matchups: { data: Matchup[] } = await axios.post(
       "/api/lineupchecker/sync",
       {
-        params: {
-          league_id,
-          week: Math.max(1, nflState?.leg as number),
-          user_id,
-          index,
-          best_ball: matchups?.[league_id]?.settings?.best_ball,
-        },
+        league_id,
+        week,
+        user_id,
+        best_ball,
+        edits,
       }
     );
 
-    const matchup_user = league_matchups.data.find(
+    const user_matchup = league_matchups.data.find(
       (matchup) => matchup.roster_id === matchup.roster_id_user
     );
 
-    const matchup_opp = league_matchups.data.find(
+    const opp_matchup = league_matchups.data.find(
       (matchup) => matchup.roster_id === matchup.roster_id_opp
     );
 
-    if (matchup_user && matchup_opp) {
-      return {
-        user_matchup: matchup_user as Matchup,
-        opp_matchup: matchup_opp as Matchup,
-        league_matchups: league_matchups.data,
-        league_index: matchup_user?.league.index,
-        league_name: matchup_user?.league.name,
-        league_avatar: matchup_user?.league.avatar,
-        settings: {
-          best_ball: matchup_user.league.settings.best_ball,
-          type: matchup_user.league.settings.type,
-        },
-      };
-    }
+    return {
+      user_matchup,
+      opp_matchup,
+      league_matchups: league_matchups.data,
+    };
   }
 );

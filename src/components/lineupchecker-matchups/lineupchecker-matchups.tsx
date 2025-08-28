@@ -1,6 +1,6 @@
 "use client";
 
-import { Matchup } from "@/lib/types/userTypes";
+import { League, Matchup } from "@/lib/types/userTypes";
 import { RootState } from "@/redux/store";
 import { position_map } from "@/utils/getOptimalStarters";
 import { useSelector } from "react-redux";
@@ -14,17 +14,10 @@ const LineupcheckerMatchups = ({
 }: {
   type: number;
   league_matchups: {
-    league_id: string;
     user_matchup: Matchup;
-    opp_matchup: Matchup;
+    opp_matchup?: Matchup;
     league_matchups: Matchup[];
-    league_index: number;
-    league_name: string;
-    league_avatar: string | null;
-    settings: {
-      best_ball: number;
-      type: number;
-    };
+    league: League;
   }[];
 }) => {
   const { allplayers } = useSelector((state: RootState) => state.common);
@@ -62,16 +55,16 @@ const LineupcheckerMatchups = ({
     .filter(
       (lm) =>
         (type1 === "All" ||
-          (type1 === "Redraft" && lm.settings.type !== 2) ||
-          (type1 === "Dynasty" && lm.settings.type === 2)) &&
+          (type1 === "Redraft" && lm.league.settings.type !== 2) ||
+          (type1 === "Dynasty" && lm.league.settings.type === 2)) &&
         (type2 === "All" ||
           (type2 === "Bestball" &&
             type1 === "Redraft" &&
-            lm.settings.type !== 2) ||
-          lm.settings.best_ball === 1 ||
-          (type2 === "Lineup" && lm.settings.best_ball !== 1))
+            lm.league.settings.type !== 2) ||
+          lm.league.settings.best_ball === 1 ||
+          (type2 === "Lineup" && lm.league.settings.best_ball !== 1))
     )
-    .sort((a, b) => a.league_index - b.league_index)
+    .sort((a, b) => a.league.index - b.league.index)
     .map((matchup) => {
       const { text, classname } =
         !matchup.user_matchup.starters.some(
@@ -93,7 +86,7 @@ const LineupcheckerMatchups = ({
             };
 
       const inOrder =
-        matchup.settings.best_ball === 1 ||
+        matchup.league.settings.best_ball === 1 ||
         !matchup.user_matchup.starters_optimal?.some(
           (so) => so.earlyInFlex || so.lateNotInFlex
         )
@@ -107,42 +100,30 @@ const LineupcheckerMatchups = ({
       const nonQbInSf = matchup.user_matchup.starters
         .filter(
           (s, index) =>
-            position_map[
-              matchup.user_matchup.league.roster_positions[index]
-            ].includes("QB") &&
-            !allplayers?.[s]?.fantasy_positions?.includes("QB")
+            position_map[matchup.league.roster_positions[index]].includes(
+              "QB"
+            ) && !allplayers?.[s]?.fantasy_positions?.includes("QB")
         )
         .length.toString()
         .replace("0", "\u2714\uFE0E");
 
-      const matchupVsOpp =
-        matchup.user_matchup.projection_current >
-        matchup.opp_matchup.projection_current
+      const matchupVsOpp = matchup.opp_matchup
+        ? matchup.user_matchup.projection_current >
+          matchup.opp_matchup.projection_current
           ? "W"
           : matchup.user_matchup.projection_current <
             matchup.opp_matchup.projection_current
           ? "L"
-          : matchup.user_matchup.projection_current ===
-            matchup.opp_matchup.projection_current
-          ? "T"
-          : "-";
+          : "T"
+        : "-";
 
-      const median_current = matchup.user_matchup.league.settings
-        .league_average_match
+      const median_current = matchup.league.settings.league_average_match
         ? matchup.league_matchups.reduce(
             (acc, cur) => acc + (cur.projection_current || 0),
             0
           ) / matchup.league_matchups.length
         : false;
-      /*
-      const median_optimal = matchup.user_matchup.league.settings
-        .league_average_match
-        ? matchup.league_matchups.reduce(
-            (acc, cur) => acc + (cur.projection_optimal || 0),
-            0
-          ) / matchup.league_matchups.length
-        : false;
-*/
+
       const matchupVsMed = median_current
         ? matchup.user_matchup.projection_current < median_current
           ? "L"
@@ -154,19 +135,29 @@ const LineupcheckerMatchups = ({
         : "";
 
       return {
-        id: matchup.league_id,
+        id: matchup.league.league_id,
+        search: {
+          text: matchup.league.name,
+          display: (
+            <Avatar
+              id={matchup.league.avatar}
+              text={matchup.league.name}
+              type="L"
+            />
+          ),
+        },
         columns: [
           {
             text: (
               <Avatar
-                id={matchup.league_avatar}
-                text={matchup.league_name}
+                id={matchup.league.avatar}
+                text={matchup.league.name}
                 type="L"
               />
             ),
             colspan: 2,
             classname: "",
-            sort: -matchup.league_index,
+            sort: -matchup.league.index,
           },
           {
             text: text,
@@ -217,7 +208,7 @@ const LineupcheckerMatchups = ({
     });
 
   const component = (
-    <TableMain type={type} headers={headers} data={data} placeholder="" />
+    <TableMain type={type} headers={headers} data={data} placeholder="League" />
   );
 
   return component;

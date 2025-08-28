@@ -1,90 +1,165 @@
 import { createSlice, Draft, PayloadAction } from "@reduxjs/toolkit";
-import { fetchMatchups, syncMatchup } from "./lineupcheckerActions";
-import { Matchup } from "@/lib/types/userTypes";
+import { League, Matchup, ProjectionEdits, User } from "@/lib/types/userTypes";
+import {
+  fetchMatchups,
+  fetchUserLeagueIds,
+  syncMatchup,
+} from "./lineupcheckerActions";
 
 export interface LineupcheckerState {
+  isLoadingUserLeagueIds: boolean;
+  user: User | null;
+  league_ids: string[];
+  errorLoadingUserLeagueIds: string | null;
+
   isLoadingMatchups: boolean;
   matchups: {
     [league_id: string]: {
       user_matchup: Matchup;
-      opp_matchup: Matchup;
+      opp_matchup?: Matchup;
       league_matchups: Matchup[];
-      league_index: number;
-      league_name: string;
-      league_avatar: string | null;
-      settings: {
-        best_ball: number;
-        type: number;
-      };
+      league: League;
     };
   };
-  searchedName: string;
+  isUpdatingMatchups: boolean;
+  updateMatchupsAvailable: boolean;
+
   schedule: { [team: string]: { kickoff: number; opp: string } };
   projections: { [player_id: string]: { [cat: string]: number } };
+  edits: ProjectionEdits;
   errorMatchups: string | null;
 
   isSyncingMatchup: string;
+  errorSyncing: string[];
 }
 
 const initialState: LineupcheckerState = {
+  isLoadingUserLeagueIds: false,
+  user: null,
+  league_ids: [],
+  errorLoadingUserLeagueIds: null,
+
   isLoadingMatchups: false,
   matchups: {},
-  searchedName: "",
+  isUpdatingMatchups: false,
+  updateMatchupsAvailable: true,
+
   schedule: {},
   projections: {},
+  edits: {},
   errorMatchups: null,
   isSyncingMatchup: "",
+  errorSyncing: [],
 };
 
 const lineupcheckerSlice = createSlice({
   name: "lineupchecker",
   initialState,
   reducers: {
+    resetLineupcheckerState() {
+      return initialState;
+    },
     updateLineupcheckerState<K extends keyof LineupcheckerState>(
       state: Draft<LineupcheckerState>,
       action: PayloadAction<{ key: K; value: LineupcheckerState[K] }>
     ) {
       state[action.payload.key] = action.payload.value;
     },
+    updateLineupcheckerEdits(
+      state: Draft<LineupcheckerState>,
+      action: PayloadAction<ProjectionEdits>
+    ) {
+      state.edits = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchMatchups.pending, (state) => {
-        state.isLoadingMatchups = true;
+      .addCase(fetchUserLeagueIds.pending, (state) => {
+        state.isLoadingUserLeagueIds = true;
+        state.errorLoadingUserLeagueIds = null;
+      })
+      .addCase(fetchUserLeagueIds.fulfilled, (state, action) => {
+        state.isLoadingUserLeagueIds = false;
+        state.user = action.payload.user;
+        state.league_ids = action.payload.league_ids;
+      })
+      .addCase(fetchUserLeagueIds.rejected, (state, action) => {
+        state.isLoadingUserLeagueIds = false;
+        state.errorLoadingUserLeagueIds = action.error.message || "";
+      });
+
+    builder
+      .addCase(fetchMatchups.pending, (state, action) => {
+        const initial = action.meta.arg.initial;
+        if (!initial) {
+          state.isUpdatingMatchups = true;
+          state.updateMatchupsAvailable = false;
+        } else {
+          state.isLoadingMatchups = true;
+        }
+
+        state.errorMatchups = null;
       })
       .addCase(fetchMatchups.fulfilled, (state, action) => {
-        state.isLoadingMatchups = false;
+        const initial = action.meta.arg.initial;
+
         state.matchups = action.payload.matchups;
         state.schedule = action.payload.schedule;
         state.projections = action.payload.projections;
-        state.searchedName = action.payload.searched;
+
+        if (!initial) {
+          state.isUpdatingMatchups = false;
+        } else {
+          state.isLoadingMatchups = false;
+        }
       })
       .addCase(fetchMatchups.rejected, (state, action) => {
-        state.isLoadingMatchups = false;
+        const initial = action.meta.arg.initial;
         state.errorMatchups = action.error.message || "";
+        if (!initial) {
+          state.isUpdatingMatchups = false;
+        } else {
+          state.isLoadingMatchups = false;
+        }
       });
 
     builder
       .addCase(syncMatchup.pending, (state, action) => {
         state.isSyncingMatchup = action.meta.arg.league_id;
+        state.errorSyncing = state.errorSyncing.filter(
+          (league_id) => league_id !== action.meta.arg.league_id
+        );
       })
       .addCase(syncMatchup.fulfilled, (state, action) => {
         const league_id = action.meta.arg.league_id;
         state.isSyncingMatchup = "";
-        if (action.payload) {
+        if (action.payload.user_matchup) {
           state.matchups = {
             ...state.matchups,
-            [league_id]: action.payload,
+            [league_id]: {
+              user_matchup: action.payload.user_matchup,
+              opp_matchup: action.payload.opp_matchup,
+              league_matchups: action.payload.league_matchups,
+              league: state.matchups[league_id].league,
+            },
           };
         } else {
           state.matchups = Object.fromEntries(
             Object.entries(state.matchups).filter((m) => m[0] !== league_id)
           );
         }
+      })
+      .addCase(syncMatchup.rejected, (state, action) => {
+        state.isLoadingMatchups = false;
+        state.errorSyncing.push(action.meta.arg.league_id);
       });
   },
 });
 
-export const { updateLineupcheckerState } = lineupcheckerSlice.actions;
+export const {
+  resetLineupcheckerState,
+  updateLineupcheckerState,
+  updateLineupcheckerEdits,
+} = lineupcheckerSlice.actions;
 
 export default lineupcheckerSlice.reducer;

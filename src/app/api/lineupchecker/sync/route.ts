@@ -13,14 +13,10 @@ import { getSchedule } from "../helpers/getSchedule";
 import { getProjections } from "../helpers/getProjections";
 import { getAllplayers } from "../helpers/getAllplayers";
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
+export async function POST(req: NextRequest) {
+  const formData = await req.json();
 
-  const league_id = searchParams.get("league_id") as string;
-  const user_id = searchParams.get("user_id") as string;
-  const week = searchParams.get("week") as string;
-  const index = searchParams.get("index") as string;
-  const best_ball = searchParams.get("best_ball") as string;
+  const { league_id, user_id, week, best_ball, edits } = formData;
 
   const schedule_week = await getSchedule(week);
   const projections_week = await getProjections(week);
@@ -83,7 +79,8 @@ export async function GET(req: NextRequest) {
         m.starters,
         projections_week,
         league.data.scoring_settings,
-        schedule_week
+        schedule_week,
+        edits
       );
 
     updated_matchups.push({
@@ -100,14 +97,6 @@ export async function GET(req: NextRequest) {
       username: user?.display_name || "Orphan",
       user_id: user?.user_id || "0",
       avatar: user?.avatar || null,
-      league: {
-        index: parseInt(index),
-        name: league.data.name,
-        avatar: league.data.avatar,
-        settings: league.data.settings,
-        scoring_settings: league.data.scoring_settings,
-        roster_positions: league.data.roster_positions,
-      },
       starters_optimal,
       projection_current:
         best_ball === "1" ? projection_optimal : projection_current,

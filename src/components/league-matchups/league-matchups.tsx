@@ -1,6 +1,6 @@
 "use client";
 
-import { Matchup } from "@/lib/types/userTypes";
+import { League, Matchup } from "@/lib/types/userTypes";
 import TableMain from "../table-main/table-main";
 import Avatar from "../avatar/avatar";
 import {
@@ -13,32 +13,29 @@ import { AppDispatch, RootState } from "@/redux/store";
 import { useEffect, useState } from "react";
 import { syncMatchup } from "@/redux/lineupchecker/lineupcheckerActions";
 import "./league-matchups.css";
+import PprPointsEdit from "@/app/lineupchecker/[searched]/projections/components/ppr-points-edit";
 
 const LeagueMatchups = ({
   matchup,
 }: {
   matchup: {
     user_matchup: Matchup;
-    opp_matchup: Matchup;
+    opp_matchup?: Matchup;
     league_matchups: Matchup[];
-    league_index: number;
-    league_name: string;
-    league_avatar: string | null;
+    league: League;
   };
 }) => {
   const dispatch: AppDispatch = useDispatch();
-  const { allplayers } = useSelector((state: RootState) => state.common);
-  const { schedule, projections, isSyncingMatchup } = useSelector(
+  const { allplayers, nflState } = useSelector(
+    (state: RootState) => state.common
+  );
+  const { schedule, projections, isSyncingMatchup, edits } = useSelector(
     (state: RootState) => state.lineupchecker
   );
   const [activeIndexUser, setActiveIndexUser] = useState<string | false>(false);
   const [activeIndexOpp, setActiveIndexOpp] = useState<string | false>(false);
   const [table1, setTable1] = useState(`Lineup`);
   const [table2, setTable2] = useState(`Lineup`);
-
-  useEffect(() => {}, [table1]);
-
-  useEffect(() => {}, [table2]);
 
   useEffect(() => {
     if (activeIndexUser) {
@@ -56,8 +53,7 @@ const LeagueMatchups = ({
     }
   }, [activeIndexOpp]);
 
-  const median_current = matchup.user_matchup.league.settings
-    .league_average_match
+  const median_current = matchup.league.settings.league_average_match
     ? (
         matchup.league_matchups.reduce(
           (acc, cur) => acc + (cur.projection_current || 0),
@@ -69,8 +65,7 @@ const LeagueMatchups = ({
       })
     : false;
 
-  const median_optimal = matchup.user_matchup.league.settings
-    .league_average_match
+  const median_optimal = matchup.league.settings.league_average_match
     ? (
         matchup.league_matchups.reduce(
           (acc, cur) => acc + (cur.projection_optimal || 0),
@@ -82,20 +77,20 @@ const LeagueMatchups = ({
       })
     : false;
 
-  const getLineupTable = (matchupLocal: Matchup) => {
-    const data = matchupLocal.starters.map((player_id, index) => {
-      const so = matchupLocal.starters_optimal?.find(
+  const getLineupTable = (matchupLocal?: Matchup) => {
+    const data = (matchupLocal?.starters || []).map((player_id, index) => {
+      const so = matchupLocal?.starters_optimal?.find(
         (so) => so.index === index
       );
       const classname = `${
-        matchupLocal.starters_optimal?.some(
+        matchupLocal?.starters_optimal?.some(
           (os) => os.optimal_player_id === player_id
         )
           ? "green"
           : "red"
       } ${
         (so?.earlyInFlex || so?.lateNotInFlex) &&
-        matchup.user_matchup.league.settings.best_ball !== 1
+        matchup.league.settings.best_ball !== 1
           ? "yellowb"
           : ""
       }`;
@@ -103,7 +98,7 @@ const LeagueMatchups = ({
         id: index.toString(),
         columns: [
           {
-            text: getSlotAbbrev(matchupLocal.league.roster_positions[index]),
+            text: getSlotAbbrev(matchup.league.roster_positions[index]),
             colspan: 1,
             classname,
           },
@@ -127,10 +122,13 @@ const LeagueMatchups = ({
             classname,
           },
           {
-            text: getPlayerTotal(
-              matchupLocal.league.scoring_settings,
-              projections[player_id] || {}
-            ).toLocaleString("en-US", { maximumFractionDigits: 1 }),
+            text: (
+              <PprPointsEdit
+                player_id={player_id}
+                scoring_settings={matchup.league.scoring_settings}
+                className={classname}
+              />
+            ),
             colspan: 2,
             classname,
           },
@@ -141,12 +139,12 @@ const LeagueMatchups = ({
     let total_cols;
 
     if (
-      matchupLocal.user_id === matchup.opp_matchup.user_id &&
+      matchupLocal?.user_id === matchup.opp_matchup?.user_id &&
       median_current
     ) {
       total_cols = [
         {
-          text: matchupLocal[`projection_current`].toFixed(1),
+          text: matchupLocal?.[`projection_current`].toFixed(1) || "-",
           colspan: 2,
           classname: "highlight",
         },
@@ -159,7 +157,7 @@ const LeagueMatchups = ({
     } else {
       total_cols = [
         {
-          text: matchupLocal[`projection_current`].toFixed(1),
+          text: matchupLocal?.[`projection_current`]?.toFixed(1) || "-",
           colspan: 4,
           classname: "highlight",
         },
@@ -168,12 +166,12 @@ const LeagueMatchups = ({
 
     return (
       <TableMain
-        key={`Lineup__${matchupLocal.user_id}`}
+        key={`Lineup__${matchupLocal?.user_id}`}
         type={2}
         half={true}
         headers={[
           {
-            text: matchupLocal.username,
+            text: matchupLocal?.username || "No Opp",
             colspan: 6,
             classname: "highlight",
           },
@@ -182,7 +180,7 @@ const LeagueMatchups = ({
         data={data}
         placeholder=""
         sendActive={(active: string | false) => {
-          if (matchupLocal.user_id === matchup.opp_matchup.user_id) {
+          if (matchupLocal?.user_id === matchup.opp_matchup?.user_id) {
             if (active !== activeIndexOpp) {
               setActiveIndexOpp(active);
             }
@@ -196,12 +194,13 @@ const LeagueMatchups = ({
     );
   };
 
-  const getOptimalTable = (matchupLocal: Matchup) => {
+  const getOptimalTable = (matchupLocal?: Matchup) => {
     const total_cols = [
       {
-        text: matchupLocal.projection_optimal.toFixed(1),
+        text: matchupLocal?.projection_optimal.toFixed(1) || "-",
         colspan:
-          matchupLocal.user_id === matchup.opp_matchup.user_id && median_optimal
+          matchupLocal?.user_id === matchup.opp_matchup?.user_id &&
+          median_optimal
             ? 2
             : 4,
         classname: "highlight",
@@ -209,7 +208,7 @@ const LeagueMatchups = ({
     ];
 
     if (
-      matchupLocal.user_id === matchup.opp_matchup.user_id &&
+      matchupLocal?.user_id === matchup.opp_matchup?.user_id &&
       median_optimal
     ) {
       total_cols.push({
@@ -220,14 +219,18 @@ const LeagueMatchups = ({
     }
     return (
       <TableMain
-        key={`Optimal__${matchupLocal.user_id}`}
+        key={`Optimal__${matchupLocal?.user_id}`}
         type={2}
         half={true}
         headers={[
-          { text: matchupLocal.username, colspan: 6, classname: "highlight" },
+          {
+            text: matchupLocal?.username || "-",
+            colspan: 6,
+            classname: "highlight",
+          },
           ...total_cols,
         ]}
-        data={(matchupLocal.starters_optimal || []).map((so, index) => {
+        data={(matchupLocal?.starters_optimal || []).map((so, index) => {
           const player_id = so.optimal_player_id;
 
           const classname = `green`;
@@ -235,9 +238,7 @@ const LeagueMatchups = ({
             id: index.toString(),
             columns: [
               {
-                text: getSlotAbbrev(
-                  matchupLocal.league.roster_positions[index]
-                ),
+                text: getSlotAbbrev(matchup.league.roster_positions[index]),
                 colspan: 1,
                 classname,
               },
@@ -258,10 +259,13 @@ const LeagueMatchups = ({
                 classname,
               },
               {
-                text: getPlayerTotal(
-                  matchupLocal.league.scoring_settings,
-                  projections[player_id] || {}
-                ).toLocaleString("en-US", { maximumFractionDigits: 1 }),
+                text: (
+                  <PprPointsEdit
+                    player_id={player_id}
+                    scoring_settings={matchup.league.scoring_settings}
+                    className={classname}
+                  />
+                ),
                 colspan: 2,
                 classname,
               },
@@ -273,57 +277,80 @@ const LeagueMatchups = ({
     );
   };
 
-  const getSlotOptionsTable = (matchupLocal: Matchup) => {
+  const getSlotOptionsTable = (matchupLocal?: Matchup) => {
     const activeIndex =
-      matchupLocal.user_id === matchup.opp_matchup.user_id
+      matchupLocal?.user_id === matchup.opp_matchup?.user_id
         ? activeIndexOpp
         : activeIndexUser;
     const slot_options =
       (activeIndex &&
-        matchupLocal.players.filter(
+        matchupLocal?.players.filter(
           (player_id) =>
             !matchupLocal.starters.includes(player_id) &&
             position_map[
-              matchupLocal.league.roster_positions[parseInt(activeIndex)]
+              matchup.league.roster_positions[parseInt(activeIndex)]
             ]?.includes(allplayers?.[player_id]?.position || "")
         )) ||
       [];
 
     return (
       <TableMain
-        key={`Options__${matchupLocal.user_id}`}
+        key={`Options__${matchupLocal?.user_id}`}
         type={2}
         half={true}
         headers={[]}
         data={slot_options
           .sort(
             (a, b) =>
-              getPlayerTotal(
-                matchupLocal.league.scoring_settings,
-                projections[b] || {}
-              ) -
-              getPlayerTotal(
-                matchupLocal.league.scoring_settings,
-                projections[a] || {}
-              )
+              getPlayerTotal(matchup.league.scoring_settings, {
+                ...(projections[b] || {}),
+                ...Object.fromEntries(
+                  Object.keys(edits[b] || {}).map((cat) => {
+                    return [cat, Number(edits[b][cat].update)];
+                  })
+                ),
+              }) -
+              getPlayerTotal(matchup.league.scoring_settings, {
+                ...(projections[a] || {}),
+                ...Object.fromEntries(
+                  Object.keys(edits[a] || {}).map((cat) => {
+                    return [cat, Number(edits[a][cat].update)];
+                  })
+                ),
+              })
           )
           .map((so) => {
-            const classname = matchupLocal.starters_optimal?.some(
+            const current_player_id =
+              matchupLocal?.starters[
+                (activeIndex && parseInt(activeIndex)) || 0
+              ];
+            const classname = matchupLocal?.starters_optimal?.some(
               (so2) => so2.optimal_player_id === so
             )
               ? "green"
-              : getPlayerTotal(
-                  matchupLocal.league.scoring_settings,
-                  projections[so]
-                ) >
-                getPlayerTotal(
-                  matchupLocal.league.scoring_settings,
-                  projections[
-                    matchupLocal.starters[
-                      (activeIndex && parseInt(activeIndex)) || 0
-                    ]
-                  ]
-                )
+              : getPlayerTotal(matchup.league.scoring_settings, {
+                  ...projections[so],
+                  ...Object.fromEntries(
+                    Object.keys(edits[so] || {}).map((cat) => {
+                      return [cat, Number(edits[so][cat].update)];
+                    })
+                  ),
+                }) >
+                (current_player_id
+                  ? getPlayerTotal(matchup.league.scoring_settings, {
+                      ...projections[current_player_id],
+                      ...Object.fromEntries(
+                        Object.keys(edits[current_player_id] || {}).map(
+                          (cat) => {
+                            return [
+                              cat,
+                              Number(edits[current_player_id][cat].update),
+                            ];
+                          }
+                        )
+                      ),
+                    })
+                  : 0)
               ? "yellow"
               : "red";
             return {
@@ -351,10 +378,13 @@ const LeagueMatchups = ({
                   classname,
                 },
                 {
-                  text: getPlayerTotal(
-                    matchupLocal.league.scoring_settings,
-                    projections[so] || {}
-                  ).toLocaleString("en-US", { maximumFractionDigits: 1 }),
+                  text: (
+                    <PprPointsEdit
+                      player_id={so}
+                      scoring_settings={matchup.league.scoring_settings}
+                      className={classname}
+                    />
+                  ),
                   colspan: 2,
                   classname,
                 },
@@ -371,7 +401,7 @@ const LeagueMatchups = ({
   const getTableComponent = (table: string, num: 1 | 2) => {
     const m = num === 1 ? matchup.user_matchup : matchup.opp_matchup;
     const opp =
-      m.user_id === matchup.user_matchup.user_id
+      m?.user_id === matchup.user_matchup.user_id
         ? matchup.opp_matchup
         : matchup.user_matchup;
 
@@ -405,25 +435,6 @@ const LeagueMatchups = ({
               );
             })
           )}
-          {/* 
-          <select
-            value={table1}
-            className={select_classname}
-            onChange={(e) => setTable1(e.target.value)}
-          >
-            {tableOptions.map((to) => {
-              return (
-                <option
-                  key={to}
-                  value={to}
-                  disabled={to === "Options" && !activeIndexOpp}
-                >
-                  {to}
-                </option>
-              );
-            })}
-          </select>
-          */}
         </div>
         <div className="sync">
           <i
@@ -438,7 +449,10 @@ const LeagueMatchups = ({
                 syncMatchup({
                   league_id: matchup.user_matchup.league_id,
                   user_id: matchup.user_matchup.user_id,
-                  index: matchup.user_matchup.league.index,
+                  index: matchup.league.index,
+                  week: Math.max(1, nflState?.leg as number),
+                  best_ball: matchup.league.settings.best_ball,
+                  edits,
                 })
               )
             }
@@ -460,25 +474,6 @@ const LeagueMatchups = ({
               );
             })
           )}
-          {/* 
-          <select
-            value={table2}
-            className={select_classname}
-            onChange={(e) => setTable2(e.target.value)}
-          >
-            {tableOptions.map((to) => {
-              return (
-                <option
-                  key={to}
-                  value={to}
-                  disabled={to === "Options" && !activeIndexUser}
-                >
-                  {to}
-                </option>
-              );
-            })}
-          </select>
-            */}
         </div>
       </div>
       <div className="relative z-0">

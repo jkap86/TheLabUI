@@ -37,13 +37,15 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
       return league_ids.filter(
         (league_id) =>
           (type1 === "All" ||
-            (type1 === "Redraft" && matchups[league_id].settings.type !== 2) ||
-            (type1 === "Dynasty" && matchups[league_id].settings.type === 2)) &&
+            (type1 === "Redraft" &&
+              matchups[league_id].league.settings.type !== 2) ||
+            (type1 === "Dynasty" &&
+              matchups[league_id].league.settings.type === 2)) &&
           (type2 === "All" ||
             (type2 === "Bestball" &&
-              matchups[league_id].settings.best_ball === 1) ||
+              matchups[league_id].league.settings.best_ball === 1) ||
             (type2 === "Lineup" &&
-              matchups[league_id].settings.best_ball !== 1))
+              matchups[league_id].league.settings.best_ball !== 1))
       );
     },
     [type1, type2, matchups]
@@ -77,7 +79,7 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
         }
       });
 
-      matchups[league_id].opp_matchup.players.forEach((player_id) => {
+      matchups[league_id].opp_matchup?.players?.forEach((player_id) => {
         if (!obj[player_id]) {
           obj[player_id] = {
             start: [],
@@ -87,7 +89,7 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
           };
         }
 
-        if (matchups[league_id].opp_matchup.starters.includes(player_id)) {
+        if (matchups[league_id].opp_matchup?.starters.includes(player_id)) {
           obj[player_id].opp_start.push(league_id);
         } else {
           obj[player_id].opp_bench.push(league_id);
@@ -209,8 +211,16 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
   }).map((player_id) => {
     const { start, bench, opp_start, opp_bench } = starters[player_id];
 
+    const text =
+      allplayers?.[player_id]?.full_name ||
+      (parseInt(player_id) ? "Inactive " + player_id : player_id);
+
     return {
       id: player_id,
+      search: {
+        text: text,
+        display: <Avatar id={player_id} text={text} type="P" />,
+      },
       columns: [
         {
           text: (
@@ -271,7 +281,7 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
         headers_options={[]}
         headers={headers}
         data={data}
-        placeholder=""
+        placeholder="Player"
         sortBy={sortBy}
         setSortBy={setSortBy}
       />

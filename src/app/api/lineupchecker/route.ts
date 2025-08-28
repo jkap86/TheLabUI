@@ -6,7 +6,7 @@ import {
   SleeperRoster,
   SleeperUser,
 } from "@/lib/types/sleeperApiTypes";
-import { Matchup, Roster } from "@/lib/types/userTypes";
+import { Matchup, ProjectionEdits, Roster } from "@/lib/types/userTypes";
 import { getOptimalStartersLineupCheck } from "@/utils/getOptimalStarters";
 import { NextRequest, NextResponse } from "next/server";
 import { upsertMatchups } from "./helpers/upsertMatchups";
@@ -14,11 +14,14 @@ import { getSchedule } from "./helpers/getSchedule";
 import { getProjections } from "./helpers/getProjections";
 import { getAllplayers } from "./helpers/getAllplayers";
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
+export async function POST(req: NextRequest) {
+  const formData = await req.json();
 
-  const searched = searchParams.get("searched");
-  const week = searchParams.get("week") as string;
+  const {
+    searched,
+    week,
+    edits,
+  }: { searched: string; week: string; edits?: ProjectionEdits } = formData;
 
   let user_id;
 
@@ -57,8 +60,9 @@ export async function GET(req: NextRequest) {
 
   try {
     const findMatchupsQuery = `
-      SELECT m.*, l.name, l.avatar, l.scoring_settings, l.settings, l.rosters, l.roster_positions FROM matchups m 
-      JOIN leagues AS l
+      SELECT m.*, to_jsonb(l) AS league
+      FROM matchups m 
+      JOIN leagues  l
       ON m.league_id = l.league_id
       WHERE m.league_id = ANY($1)
       AND week = $2;
@@ -104,7 +108,8 @@ export async function GET(req: NextRequest) {
             m.starters,
             projections_week,
             m.scoring_settings,
-            schedule_week
+            schedule_week,
+            edits
           );
         const { ...up_to_date_matchup } = {
           ...m,
@@ -204,7 +209,8 @@ export async function GET(req: NextRequest) {
                   m.starters,
                   projections_week,
                   league.scoring_settings,
-                  schedule_week
+                  schedule_week,
+                  edits
                 );
 
                 updated_matchups.push({
@@ -221,16 +227,6 @@ export async function GET(req: NextRequest) {
                   username: user?.display_name || "Orphan",
                   avatar: user?.avatar || null,
                   user_id: user?.user_id || "0",
-                  league: {
-                    index: leagues.data.findIndex(
-                      (l) => l.league_id === league_id
-                    ),
-                    name: league.name,
-                    avatar: league.avatar,
-                    settings: league.settings,
-                    scoring_settings: league.scoring_settings,
-                    roster_positions: league.roster_positions,
-                  },
                   starters_optimal,
                   projection_current:
                     league.settings.best_ball === 1

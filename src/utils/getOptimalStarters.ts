@@ -1,4 +1,5 @@
 import { Allplayer } from "@/lib/types/commonTypes";
+import { ProjectionEdits } from "@/lib/types/userTypes";
 
 export const position_map: { [key: string]: string[] } = {
   QB: ["QB"],
@@ -104,14 +105,16 @@ export const getOptimalStartersLineupCheck = (
   starters: string[],
   stat_obj: { [player_id: string]: { [key: string]: number } },
   scoring_settings: { [cat: string]: number },
-  schedule: { [team: string]: { kickoff: number; opp: string } }
+  schedule: { [team: string]: { kickoff: number; opp: string } },
+  edits?: ProjectionEdits
 ) => {
   const values: { [player_id: string]: number } = {};
 
   players.forEach((player_id) => {
     values[player_id] = getPlayerTotal(
       scoring_settings,
-      stat_obj[player_id] || {}
+      stat_obj[player_id] || {},
+      edits?.[player_id]
     );
   });
 
@@ -283,11 +286,35 @@ export const getOptimalStartersLineupCheck = (
 
 export const getPlayerTotal = (
   scoring_settings: { [key: string]: number },
-  stat_obj: { [key: string]: number }
+  stat_obj: { [key: string]: number },
+  edits?: { [cat: string]: { update: number | ""; sleeper_value: number } }
 ) => {
   const projection = Object.keys(stat_obj || {})
     .filter((key) => Object.keys(scoring_settings).includes(key))
-    .reduce((acc, cur) => acc + scoring_settings[cur] * stat_obj[cur], 0);
+    .reduce(
+      (acc, cur) =>
+        acc +
+        scoring_settings[cur] *
+          ((edits?.[cur]?.update === "" ? -1 : edits?.[cur]?.update) ??
+            stat_obj[cur]),
+      0
+    );
 
   return projection;
+};
+
+export const ppr_scoring_settings = {
+  pass_yd: 0.04,
+  pass_td: 5,
+  pass_int: -1,
+  pass_2pt: 2,
+
+  rec_yd: 0.1,
+  rec: 1,
+  rec_2pt: 2,
+  rec_td: 6,
+
+  rush_yd: 0.1,
+  rush_2pt: 2,
+  rush_td: 6,
 };

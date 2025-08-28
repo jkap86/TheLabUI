@@ -3,7 +3,6 @@
 import { RootState } from "@/redux/store";
 import { use } from "react";
 import { useSelector } from "react-redux";
-import "../../../../components/heading/heading.css";
 import LineupcheckerLayout from "../lineupchecker-layout";
 import LineupcheckerMatchups from "@/components/lineupchecker-matchups/lineupchecker-matchups";
 

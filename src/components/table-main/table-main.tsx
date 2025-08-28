@@ -44,7 +44,7 @@ type TableMainProps = {
   half?: boolean;
   filters1?: JSX.Element[];
   filters2?: JSX.Element[];
-  placeholder: string;
+  placeholder?: string;
   sendActive?: (active: false | string) => void;
 };
 
@@ -163,7 +163,7 @@ const TableMain = ({
                     text: d.search?.text || "",
                     display: d.search?.display || <></>,
                   }))}
-                placeholder={placeholder}
+                placeholder={placeholder || ""}
               />
             </div>
           }
@@ -264,7 +264,7 @@ const TableMain = ({
                           <tr
                             className={active === row.id ? "active" : ""}
                             onClick={() =>
-                              setActive &&
+                              (row.secondary || half) &&
                               (active === row.id
                                 ? setActive(false)
                                 : setActive(row.id))

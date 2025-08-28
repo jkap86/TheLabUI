@@ -315,7 +315,7 @@ const Players = ({ params }: PlayersProps) => {
             };
           }),
         ]}
-        placeholder="Players"
+        placeholder="Player"
         sortBy={sortBy}
         setSortBy={setSortBy}
       />

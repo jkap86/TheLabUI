@@ -12,6 +12,7 @@ import { RootState } from "@/redux/store";
 import LeagueTypeSwitch from "@/components/leagueTypeSwitch/leagueTypeSwitch";
 import { usePathname, useRouter } from "next/navigation";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
+import "../../../components/heading/heading.css";
 
 interface LayoutProps {
   searched: string;
@@ -22,9 +23,12 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const { type1, type2 } = useSelector((state: RootState) => state.manager);
-  const { isLoadingMatchups, matchups } = useSelector(
-    (state: RootState) => state.lineupchecker
-  );
+  const {
+    isLoadingUserLeagueIds,
+    isLoadingMatchups,
+    matchups,
+    isUpdatingMatchups,
+  } = useSelector((state: RootState) => state.lineupchecker);
 
   useFetchNflState();
   useFetchAllplayers();
@@ -34,28 +38,28 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
     .filter(
       (m) =>
         (type1 === "All" ||
-          (type1 === "Redraft" && m.settings.type !== 2) ||
-          (type1 === "Dynasty" && m.settings.type === 2)) &&
+          (type1 === "Redraft" && m.league.settings.type !== 2) ||
+          (type1 === "Dynasty" && m.league.settings.type === 2)) &&
         (type2 === "All" ||
-          (type2 === "Bestball" && m.settings.best_ball === 1) ||
-          (type2 === "Lineup" && m.settings.best_ball !== 1))
+          (type2 === "Bestball" && m.league.settings.best_ball === 1) ||
+          (type2 === "Lineup" && m.league.settings.best_ball !== 1))
     )
     .reduce(
       (acc, cur) => {
         const key = "projection_current";
         const user_proj = cur.user_matchup[key];
-        const opp_proj = cur.opp_matchup[key];
+        const opp_proj = cur.opp_matchup?.[key];
 
         const resultOpp =
-          user_proj > opp_proj
-            ? "W"
-            : user_proj < opp_proj
-            ? "L"
-            : user_proj === opp_proj
-            ? "T"
+          user_proj && opp_proj
+            ? user_proj > opp_proj
+              ? "W"
+              : user_proj < opp_proj
+              ? "L"
+              : "T"
             : "-";
 
-        const median = cur.user_matchup.league.settings.league_average_match
+        const median = cur.league.settings.league_average_match
           ? cur.league_matchups.reduce(
               (acc, cur2) => acc + (cur2[key] || 0),
               0
@@ -67,9 +71,7 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
             ? "L"
             : user_proj > median
             ? "W"
-            : user_proj === median
-            ? "T"
-            : ""
+            : "T"
           : "";
 
         return {
@@ -92,7 +94,7 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
     );
 
   const recordTable = (
-    <table className="!table-auto !w-fit !border-spacing-8 p-4 m-auto text-[3rem] text-center bg-gray-700 shadow-[inset_0_0_25rem_var(--color10)], shadow-[0_0_2rem_goldenrod]">
+    <table className="!table-auto !w-[75rem] !border-spacing-8 p-4 m-auto text-[3rem] text-center bg-gray-700 shadow-[inset_0_0_25rem_var(--color10)], shadow-[0_0_2rem_goldenrod]">
       <tbody>
         <tr>
           <td className="font-chill text-[3rem]" colSpan={3}>
@@ -102,57 +104,89 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
         <tr className="shadow-[inset_0_0_5rem_var(--color10)]">
           <td className="font-metal px-8 py-4">vs Opponent</td>
           <td className="font-pulang px-8 py-4">
-            {proj_record.wins_opp} - {proj_record.losses_opp}
-            {proj_record.ties_opp ? ` - ${proj_record.ties_opp}` : ""}
+            {isUpdatingMatchups ? (
+              <i className="fa-solid fa-spinner fa-spin text-[var(--color1)]"></i>
+            ) : (
+              <>
+                {proj_record.wins_opp} - {proj_record.losses_opp}
+                {proj_record.ties_opp ? ` - ${proj_record.ties_opp}` : ""}
+              </>
+            )}
           </td>
           <td className="px-8 py-4">
             <em className="font-pulang">
-              {(
-                proj_record.wins_opp /
-                (proj_record.wins_opp +
-                  proj_record.losses_opp +
-                  proj_record.ties_opp)
-              ).toFixed(4)}
+              {isUpdatingMatchups ? (
+                <i className="fa-solid fa-spinner fa-spin text-[var(--color1)]"></i>
+              ) : (
+                <>
+                  {(
+                    proj_record.wins_opp /
+                    (proj_record.wins_opp +
+                      proj_record.losses_opp +
+                      proj_record.ties_opp)
+                  ).toFixed(4)}
+                </>
+              )}
             </em>
           </td>
         </tr>
         <tr className="shadow-[inset_0_0_5rem_var(--color10)]">
           <td className="font-metal px-8 py-4">vs Median</td>
           <td className="font-pulang px-8 py-4">
-            {proj_record.wins_med} - {proj_record.losses_med}
-            {proj_record.ties_med ? ` - ${proj_record.ties_med}` : ""}
+            {isUpdatingMatchups ? (
+              <i className="fa-solid fa-spinner fa-spin text-[var(--color1)]"></i>
+            ) : (
+              <>
+                {proj_record.wins_med} - {proj_record.losses_med}
+                {proj_record.ties_med ? ` - ${proj_record.ties_med}` : ""}
+              </>
+            )}
           </td>
           <td>
             <em className="font-pulang px-8 py-4">
-              {(
-                proj_record.wins_med /
-                (proj_record.wins_med +
-                  proj_record.losses_med +
-                  proj_record.ties_med)
-              ).toFixed(4)}
+              {isUpdatingMatchups ? (
+                <i className="fa-solid fa-spinner fa-spin text-[var(--color1)]"></i>
+              ) : (
+                (
+                  proj_record.wins_med /
+                  (proj_record.wins_med +
+                    proj_record.losses_med +
+                    proj_record.ties_med)
+                ).toFixed(4)
+              )}
             </em>
           </td>
         </tr>
         <tr className="shadow-[inset_0_0_5rem_var(--color10)]">
           <td className="font-metal px-8 py-4">Total</td>
           <td className="font-pulang px-8 py-4">
-            {proj_record.wins_opp + proj_record.wins_med} -{" "}
-            {proj_record.losses_opp + proj_record.losses_med}
-            {proj_record.ties_opp + proj_record.ties_med
-              ? ` - ${proj_record.ties_opp + proj_record.ties_med}`
-              : ""}
+            {isUpdatingMatchups ? (
+              <i className="fa-solid fa-spinner fa-spin text-[var(--color1)]"></i>
+            ) : (
+              <>
+                {proj_record.wins_opp + proj_record.wins_med} -{" "}
+                {proj_record.losses_opp + proj_record.losses_med}
+                {proj_record.ties_opp + proj_record.ties_med
+                  ? ` - ${proj_record.ties_opp + proj_record.ties_med}`
+                  : ""}
+              </>
+            )}
           </td>
           <td className="px-8 py-4">
             <em className="font-pulang">
-              {(
-                (proj_record.wins_opp + proj_record.wins_med) /
-                (proj_record.wins_opp +
-                  proj_record.wins_med +
-                  proj_record.losses_opp +
-                  proj_record.losses_med +
-                  proj_record.ties_opp +
-                  proj_record.ties_med)
-              ).toFixed(4)}
+              {isUpdatingMatchups ? (
+                <i className="fa-solid fa-spinner fa-spin text-[var(--color1)]"></i>
+              ) : (
+                (
+                  (proj_record.wins_opp + proj_record.wins_med) /
+                  (proj_record.wins_opp +
+                    proj_record.wins_med +
+                    proj_record.losses_opp +
+                    proj_record.losses_med +
+                    proj_record.ties_opp +
+                    proj_record.ties_med)
+                ).toFixed(4)
+              )}
             </em>
           </td>
         </tr>
@@ -189,7 +223,7 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
             </>
           ) : null}
         </div>
-        {isLoadingMatchups ? (
+        {isLoadingUserLeagueIds || isLoadingMatchups ? (
           <div className="flex-1 flex flex-col justify-center items-center">
             <LoadingIcon messages={[]} />
           </div>
@@ -209,6 +243,7 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
               >
                 <option>matchups</option>
                 <option>starters</option>
+                <option>projections</option>
               </select>
             </h2>
             {component}
