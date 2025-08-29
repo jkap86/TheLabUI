@@ -113,9 +113,13 @@ export type Matchup = {
     index: number;
     slot__index: string;
     optimal_player_id: string;
-    player_position: string;
-    value: number;
-    kickoff: number;
+    optimal_player_position: string;
+    optimal_player_value: number;
+    optimal_player_kickoff: number;
+    current_player_id: string;
+    current_player_position: string;
+    current_player_value: number;
+    current_player_kickoff: number;
     earlyInFlex: boolean;
     lateNotInFlex: boolean;
   }[];

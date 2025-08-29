@@ -1,17 +1,14 @@
-//import { fetchMatchups } from "@/redux/lineupchecker/lineupcheckerActions";
-import { ProjectionEdits } from "@/lib/types/userTypes";
 import {
   fetchMatchups,
   fetchUserLeagueIds,
 } from "@/redux/lineupchecker/lineupcheckerActions";
 import {
   resetLineupcheckerState,
-  updateLineupcheckerEdits,
   updateLineupcheckerState,
 } from "@/redux/lineupchecker/lineupcheckerSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function useFetchMatchups({ searched }: { searched: string }) {
@@ -28,7 +25,6 @@ export default function useFetchMatchups({ searched }: { searched: string }) {
     isUpdatingMatchups,
     edits,
   } = useSelector((state: RootState) => state.lineupchecker);
-  const [editsLoaded, setEditsLoaded] = useState(false);
 
   useEffect(() => {
     if (user && user.username.toLowerCase() !== searched?.toLowerCase()) {
@@ -56,8 +52,7 @@ export default function useFetchMatchups({ searched }: { searched: string }) {
       league_ids.length > 0 &&
       !isLoadingMatchups &&
       !errorMatchups &&
-      !isUpdatingMatchups &&
-      editsLoaded
+      !isUpdatingMatchups
     ) {
       dispatch(
         fetchMatchups({
@@ -77,7 +72,6 @@ export default function useFetchMatchups({ searched }: { searched: string }) {
     isLoadingMatchups,
     errorMatchups,
     isUpdatingMatchups,
-    editsLoaded,
     matchups,
     edits,
     dispatch,
@@ -100,6 +94,8 @@ export default function useFetchMatchups({ searched }: { searched: string }) {
     user && nflState
       ? `edits__${Math.max(1, Number(nflState.leg))}__${user?.user_id}`
       : null;
+
+  /*
   useEffect(() => {
     if (typeof window === "undefined" || !editString) return;
 
@@ -119,6 +115,7 @@ export default function useFetchMatchups({ searched }: { searched: string }) {
     dispatch(updateLineupcheckerEdits(editsLocalParsed));
     setEditsLoaded(true);
   }, [editString, dispatch]);
+  */
 
   useEffect(() => {
     if (typeof window === "undefined" || !editString) return;

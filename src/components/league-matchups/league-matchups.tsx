@@ -94,6 +94,11 @@ const LeagueMatchups = ({
           ? "yellowb"
           : ""
       }`;
+
+      const initialValue = getPlayerTotal(
+        matchup.league.scoring_settings,
+        projections[player_id]
+      );
       return {
         id: index.toString(),
         columns: [
@@ -122,15 +127,12 @@ const LeagueMatchups = ({
             classname,
           },
           {
-            text: (
-              <PprPointsEdit
-                player_id={player_id}
-                scoring_settings={matchup.league.scoring_settings}
-                className={classname}
-              />
-            ),
+            text: (so?.current_player_value ?? 0).toFixed(1),
             colspan: 2,
-            classname,
+            classname:
+              initialValue !== so?.current_player_value
+                ? "text-yellow-600"
+                : classname,
           },
         ],
       };
