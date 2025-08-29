@@ -130,6 +130,7 @@ export type Matchup = {
   username: string;
   avatar: string | null;
   user_id: string;
+  values: { [player_id: string]: number };
   projection_current: number;
   projection_optimal: number;
 };

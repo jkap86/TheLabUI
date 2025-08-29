@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
           ?.owner_id
     );
 
-    const { starters_optimal, projection_current, projection_optimal } =
+    const { starters_optimal, values, projection_current, projection_optimal } =
       getOptimalStartersLineupCheck(
         allplayers,
         league.data.roster_positions,
@@ -98,6 +98,7 @@ export async function POST(req: NextRequest) {
       user_id: user?.user_id || "0",
       avatar: user?.avatar || null,
       starters_optimal,
+      values,
       projection_current:
         best_ball === "1" ? projection_optimal : projection_current,
       projection_optimal,

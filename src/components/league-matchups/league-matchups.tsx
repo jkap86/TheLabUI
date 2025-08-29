@@ -13,7 +13,6 @@ import { AppDispatch, RootState } from "@/redux/store";
 import { useEffect, useState } from "react";
 import { syncMatchup } from "@/redux/lineupchecker/lineupcheckerActions";
 import "./league-matchups.css";
-import PprPointsEdit from "@/app/lineupchecker/[searched]/projections/components/ppr-points-edit";
 
 const LeagueMatchups = ({
   matchup,
@@ -37,6 +36,7 @@ const LeagueMatchups = ({
   const [table1, setTable1] = useState(`Lineup`);
   const [table2, setTable2] = useState(`Lineup`);
 
+  console.log({ matchup });
   useEffect(() => {
     if (activeIndexUser) {
       setTable2("Options");
@@ -235,6 +235,11 @@ const LeagueMatchups = ({
         data={(matchupLocal?.starters_optimal || []).map((so, index) => {
           const player_id = so.optimal_player_id;
 
+          const initialValue = getPlayerTotal(
+            matchup.league.scoring_settings,
+            projections[player_id]
+          );
+
           const classname = `green`;
           return {
             id: index.toString(),
@@ -261,15 +266,13 @@ const LeagueMatchups = ({
                 classname,
               },
               {
-                text: (
-                  <PprPointsEdit
-                    player_id={player_id}
-                    scoring_settings={matchup.league.scoring_settings}
-                    className={classname}
-                  />
-                ),
+                text: (matchupLocal?.values[player_id] ?? 0).toFixed(1),
                 colspan: 2,
-                classname,
+                classname:
+                  initialValue.toFixed() !==
+                  matchupLocal?.values[player_id]?.toFixed()
+                    ? "text-yellow-600"
+                    : classname,
               },
             ],
           };
@@ -355,6 +358,12 @@ const LeagueMatchups = ({
                   : 0)
               ? "yellow"
               : "red";
+
+            const initialValue = getPlayerTotal(
+              matchup.league.scoring_settings,
+              projections[so]
+            );
+
             return {
               id: so,
               columns: [
@@ -380,15 +389,13 @@ const LeagueMatchups = ({
                   classname,
                 },
                 {
-                  text: (
-                    <PprPointsEdit
-                      player_id={so}
-                      scoring_settings={matchup.league.scoring_settings}
-                      className={classname}
-                    />
-                  ),
+                  text: (matchupLocal?.values?.[so] ?? 0).toFixed(1),
                   colspan: 2,
-                  classname,
+                  classname:
+                    initialValue.toFixed() !==
+                    matchupLocal?.values[so]?.toFixed()
+                      ? "text-yellow-600"
+                      : classname,
                 },
               ],
             };

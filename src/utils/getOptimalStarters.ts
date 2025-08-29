@@ -294,6 +294,7 @@ export const getOptimalStartersLineupCheck = (
 
   return {
     starters_optimal: optimal_starters_ordered,
+    values,
     projection_current,
     projection_optimal,
   };

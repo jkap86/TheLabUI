@@ -122,6 +122,7 @@ export async function POST(req: NextRequest) {
 
                 const {
                   starters_optimal,
+                  values,
                   projection_current,
                   projection_optimal,
                 } = getOptimalStartersLineupCheck(
@@ -150,6 +151,7 @@ export async function POST(req: NextRequest) {
                   avatar: user?.avatar || null,
                   user_id: user?.user_id || "0",
                   starters_optimal,
+                  values,
                   projection_current:
                     league.settings.best_ball === 1
                       ? projection_optimal
@@ -194,17 +196,21 @@ export async function POST(req: NextRequest) {
           index: league_ids.indexOf(mobj.league.league_id),
         },
         matchups: mobj.matchups.map((m) => {
-          const { starters_optimal, projection_current, projection_optimal } =
-            getOptimalStartersLineupCheck(
-              allplayers,
-              mobj.league.roster_positions,
-              m.players,
-              m.starters,
-              projections_week,
-              mobj.league.scoring_settings,
-              schedule_week,
-              edits
-            );
+          const {
+            starters_optimal,
+            values,
+            projection_current,
+            projection_optimal,
+          } = getOptimalStartersLineupCheck(
+            allplayers,
+            mobj.league.roster_positions,
+            m.players,
+            m.starters,
+            projections_week,
+            mobj.league.scoring_settings,
+            schedule_week,
+            edits
+          );
           return {
             ...m,
             starters:
@@ -214,6 +220,7 @@ export async function POST(req: NextRequest) {
             roster_id_user,
             roster_id_opp,
             starters_optimal,
+            values,
             projection_current:
               mobj.league.settings.best_ball === 1
                 ? projection_optimal
