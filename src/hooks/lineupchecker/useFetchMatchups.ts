@@ -1,4 +1,5 @@
 //import { fetchMatchups } from "@/redux/lineupchecker/lineupcheckerActions";
+import { ProjectionEdits } from "@/lib/types/userTypes";
 import {
   fetchMatchups,
   fetchUserLeagueIds,
@@ -97,23 +98,33 @@ export default function useFetchMatchups({ searched }: { searched: string }) {
 
   const editString =
     user && nflState
-      ? `edits__${Math.max(1, nflState?.leg as number)}__${user?.user_id}`
-      : "";
+      ? `edits__${Math.max(1, Number(nflState.leg))}__${user?.user_id}`
+      : null;
   useEffect(() => {
+    if (typeof window === "undefined" || !editString) return;
+
     const editsLocalString = localStorage.getItem(editString);
 
-    try {
-      const editsLocalParsed = editsLocalString && JSON.parse(editsLocalString);
+    let editsLocalParsed: ProjectionEdits = {};
 
-      dispatch(updateLineupcheckerEdits(editsLocalParsed));
+    try {
+      if (editsLocalString) {
+        const parsed = JSON.parse(editsLocalString);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          editsLocalParsed = parsed;
+        }
+      }
     } catch {}
+
+    dispatch(updateLineupcheckerEdits(editsLocalParsed));
+    setEditsLoaded(true);
   }, [editString, dispatch]);
 
   useEffect(() => {
-    if (editString && Object.keys(edits || {}).length > 0) {
+    if (typeof window === "undefined" || !editString) return;
+
+    if (edits && Object.keys(edits).length > 0) {
       localStorage.setItem(editString, JSON.stringify(edits));
     }
-
-    setEditsLoaded(true);
   }, [edits, editString]);
 }
