@@ -231,22 +231,19 @@ export const getOptimalStartersLineupCheck = (
   }[] = [];
 
   optimal_starters
-    .filter((os) => position_map[os.slot__index.split("__")[0]])
     .sort(
       (a, b) =>
         position_map[a.slot__index.split("__")[0]].length -
         position_map[b.slot__index.split("__")[0]].length
     )
     .forEach((os) => {
-      const slot = os.slot__index.split("__")[0];
-
       const slot_options_optimal = playersWithValues
         .filter(
           (player) =>
             optimal_starters.some(
               (os) => os.optimal_player_id === player.player_id
             ) &&
-            position_map[slot].includes(player.position) &&
+            position_map[os.slot].includes(player.position) &&
             !optimal_starters_ordered.find(
               (os) => os.optimal_player_id === player.player_id
             )
@@ -265,26 +262,26 @@ export const getOptimalStartersLineupCheck = (
             60 * 60 * 1000 <
             (schedule[allplayers?.[s]?.team || ""]?.kickoff || 0) &&
           position_map[roster_positions[index]].length <
-            position_map[slot].length &&
+            position_map[os.slot].length &&
           position_map[roster_positions[index]]?.includes(
             allplayers[os.current_player_id]?.position || ""
           ) &&
-          position_map[slot]?.includes(allplayers[s]?.position || "")
+          position_map[os.slot]?.includes(allplayers[s]?.position || "")
         );
       });
 
       const lateNotInFlex = starters.some((s, index) => {
         return (
           (schedule[allplayers?.[os.current_player_id]?.team || ""]?.kickoff ||
-            0) >
-            (schedule[allplayers?.[s]?.team || ""]?.kickoff || 0) +
-              60 * 60 * 1000 &&
+            0) -
+            60 * 60 * 1000 >
+            (schedule[allplayers?.[s]?.team || ""]?.kickoff || 0) &&
           position_map[roster_positions[index]].length >
-            position_map[slot].length &&
+            position_map[os.slot].length &&
           position_map[roster_positions[index]]?.includes(
             allplayers[os.current_player_id]?.position || ""
           ) &&
-          position_map[slot]?.includes(allplayers[s]?.position || "")
+          position_map[os.slot]?.includes(allplayers[s]?.position || "")
         );
       });
 
@@ -306,7 +303,9 @@ export const getOptimalStartersLineupCheck = (
   );
 
   return {
-    starters_optimal: optimal_starters_ordered,
+    starters_optimal: optimal_starters_ordered.sort(
+      (a, b) => a.index - b.index
+    ),
     values,
     projection_current,
     projection_optimal,
