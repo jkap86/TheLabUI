@@ -153,6 +153,7 @@ export const getOptimalStartersLineupCheck = (
 
   (roster_positions || [])
     .filter((slot) => position_map[slot])
+    .sort((a, b) => position_map[a].length - position_map[b].length)
     .forEach((slot, index) => {
       const current_player_id = starters[index];
 
@@ -323,8 +324,9 @@ export const getPlayerTotal = (
       (acc, cur) =>
         acc +
         scoring_settings[cur] *
-          ((edits?.[cur]?.update === "" ? -1 : edits?.[cur]?.update) ??
-            stat_obj[cur]),
+          ((edits?.[cur]?.update === ""
+            ? stat_obj[cur]
+            : edits?.[cur]?.update) ?? stat_obj[cur]),
       0
     );
 
