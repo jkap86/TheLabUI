@@ -71,106 +71,111 @@ export async function POST(req: NextRequest) {
       league_ids_to_update
         .slice(i, i + batchSize)
         .map(async (league_id: string) => {
-          const league = matchups_update.rows.find(
+          let league = matchups_update.rows.find(
             (r) => r.league_id === league_id
           )?.league;
 
-          if (league) {
-            const [matchups, rosters, users]: [
-              { data: SleeperMatchup[] },
-              { data: SleeperRoster[] },
-              { data: SleeperUser[] }
-            ] = await Promise.all([
-              await axiosInstance.get(
-                `https://api.sleeper.app/v1/league/${league_id}/matchups/${week}`
-              ),
-              await axiosInstance.get(
-                `https://api.sleeper.app/v1/league/${league_id}/rosters`
-              ),
-              await axiosInstance.get(
-                `https://api.sleeper.app/v1/league/${league_id}/users`
-              ),
-            ]);
+          if (!league) {
+            const leagueSleeper = await axiosInstance.get(
+              `https://api.sleeper.app/v1/league/${league_id}`
+            );
+            league = leagueSleeper.data as League;
+          }
 
-            const roster_user = rosters.data.find(
-              (r: SleeperRoster) => r.owner_id === user_id
+          const [matchups, rosters, users]: [
+            { data: SleeperMatchup[] },
+            { data: SleeperRoster[] },
+            { data: SleeperUser[] }
+          ] = await Promise.all([
+            await axiosInstance.get(
+              `https://api.sleeper.app/v1/league/${league_id}/matchups/${week}`
+            ),
+            await axiosInstance.get(
+              `https://api.sleeper.app/v1/league/${league_id}/rosters`
+            ),
+            await axiosInstance.get(
+              `https://api.sleeper.app/v1/league/${league_id}/users`
+            ),
+          ]);
+
+          const roster_user = rosters.data.find(
+            (r: SleeperRoster) => r.owner_id === user_id
+          );
+
+          if (roster_user) {
+            const roster_id_user = roster_user.roster_id;
+
+            const matchup_user = matchups.data.find(
+              (m: SleeperMatchup) => m.roster_id === roster_id_user
             );
 
-            if (roster_user) {
-              const roster_id_user = roster_user.roster_id;
+            const roster_id_opp = matchups.data.find(
+              (m: SleeperMatchup) =>
+                m.matchup_id === matchup_user?.matchup_id &&
+                m.roster_id !== roster_id_user
+            )?.roster_id;
 
-              const matchup_user = matchups.data.find(
-                (m: SleeperMatchup) => m.roster_id === roster_id_user
+            const updated_matchups_league: Matchup[] = [];
+
+            matchups.data.forEach((m: SleeperMatchup) => {
+              const user = users.data.find(
+                (u: SleeperUser) =>
+                  u.user_id ===
+                  rosters.data.find(
+                    (r: SleeperRoster) => r.roster_id === m.roster_id
+                  )?.owner_id
               );
 
-              const roster_id_opp = matchups.data.find(
-                (m: SleeperMatchup) =>
-                  m.matchup_id === matchup_user?.matchup_id &&
-                  m.roster_id !== roster_id_user
-              )?.roster_id;
+              const {
+                starters_optimal,
+                values,
+                projection_current,
+                projection_optimal,
+              } = getOptimalStartersLineupCheck(
+                allplayers,
+                league.roster_positions,
+                m.players,
+                m.starters,
+                projections_week,
+                league.scoring_settings,
+                schedule_week,
+                edits
+              );
 
-              const updated_matchups_league: Matchup[] = [];
-
-              matchups.data.forEach((m: SleeperMatchup) => {
-                const user = users.data.find(
-                  (u: SleeperUser) =>
-                    u.user_id ===
-                    rosters.data.find(
-                      (r: SleeperRoster) => r.roster_id === m.roster_id
-                    )?.owner_id
-                );
-
-                const {
-                  starters_optimal,
-                  values,
-                  projection_current,
-                  projection_optimal,
-                } = getOptimalStartersLineupCheck(
-                  allplayers,
-                  league.roster_positions,
-                  m.players,
-                  m.starters,
-                  projections_week,
-                  league.scoring_settings,
-                  schedule_week,
-                  edits
-                );
-
-                updated_matchups_league.push({
-                  ...m,
-                  starters:
-                    league.settings.best_ball === 1
-                      ? starters_optimal.map((so) => so.optimal_player_id)
-                      : m.starters,
-                  week: parseInt(week as string),
-                  updated_at: new Date(),
-                  league_id,
-                  roster_id_user,
-                  roster_id_opp,
-                  username: user?.display_name || "Orphan",
-                  avatar: user?.avatar || null,
-                  user_id: user?.user_id || "0",
-                  starters_optimal,
-                  values,
-                  projection_current:
-                    league.settings.best_ball === 1
-                      ? projection_optimal
-                      : projection_current,
-                  projection_optimal,
-                });
-              });
-
-              await upsertMatchups(updated_matchups_league);
-
-              updated_matchups.push({
+              updated_matchups_league.push({
+                ...m,
+                starters:
+                  league.settings.best_ball === 1
+                    ? starters_optimal.map((so) => so.optimal_player_id)
+                    : m.starters,
+                week: parseInt(week as string),
+                updated_at: new Date(),
                 league_id,
-                league: {
-                  ...league,
-                  index: league_ids.indexOf(league.league_id),
-                },
-                matchups: updated_matchups_league,
+                roster_id_user,
+                roster_id_opp,
+                username: user?.display_name || "Orphan",
+                avatar: user?.avatar || null,
+                user_id: user?.user_id || "0",
+                starters_optimal,
+                values,
+                projection_current:
+                  league.settings.best_ball === 1
+                    ? projection_optimal
+                    : projection_current,
+                projection_optimal,
               });
-            }
+            });
+
+            await upsertMatchups(updated_matchups_league);
+
+            updated_matchups.push({
+              league_id,
+              league: {
+                ...league,
+                index: league_ids.indexOf(league.league_id),
+              },
+              matchups: updated_matchups_league,
+            });
           }
         })
     );

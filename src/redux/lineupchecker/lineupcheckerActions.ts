@@ -32,7 +32,6 @@ export const fetchMatchups = createAsyncThunk(
     league_ids: string[];
     week: number;
     edits?: ProjectionEdits;
-    initial?: true;
   }) => {
     const response: {
       data: {
