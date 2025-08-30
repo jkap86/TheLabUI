@@ -59,6 +59,7 @@ export default function useFetchMatchups({ searched }: { searched: string }) {
           user_id: user.user_id,
           league_ids,
           week: Math.max(1, nflState?.leg as number),
+          initial: true,
         })
       );
     }
