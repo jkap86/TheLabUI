@@ -143,7 +143,7 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
             if (
               position_map[slot]?.includes(
                 allplayers?.[player_id].position ?? ""
-              ) ||
+              ) &&
               matchups[league_id].league.roster_positions.some(
                 (slot2, slot_index) => {
                   return (
