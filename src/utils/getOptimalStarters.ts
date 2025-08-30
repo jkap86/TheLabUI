@@ -154,7 +154,11 @@ export const getOptimalStartersLineupCheck = (
   (roster_positions || [])
     .filter((slot) => position_map[slot])
     .sort((a, b) => position_map[a].length - position_map[b].length)
-    .forEach((slot, index) => {
+    .forEach((slot) => {
+      const index =
+        roster_positions.indexOf(slot) +
+        optimal_starters.filter((os) => os.slot === slot).length;
+
       const current_player_id = starters[index];
 
       if (position_map[slot]) {
