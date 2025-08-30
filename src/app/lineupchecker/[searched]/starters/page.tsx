@@ -12,6 +12,7 @@ import LineupcheckerLayout from "../lineupchecker-layout";
 import PlayerMatchups from "@/components/player-matchups/player-matchups";
 import PlayersFilters from "@/components/players-filters/players-filters";
 import { filterPlayerIds } from "@/utils/filterPlayers";
+import { position_map } from "@/utils/getOptimalStarters";
 
 const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
   const { searched } = use(params);
@@ -58,24 +59,116 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
         bench: string[];
         opp_start: string[];
         opp_bench: string[];
+        started_over: {
+          [player_id: string]: {
+            league_id: string;
+            starter_proj: number;
+            bench_proj: number;
+          }[];
+        };
+        benched_for: {
+          [player_id: string]: {
+            league_id: string;
+            starter_proj: number;
+            bench_proj: number;
+          }[];
+        };
       };
     } = {};
 
-    Object.keys(matchups).forEach((league_id) => {
-      matchups[league_id].user_matchup.players.forEach((player_id) => {
+    filterLeagueIds(Object.keys(matchups)).forEach((league_id) => {
+      const user_matchup = matchups[league_id].user_matchup;
+
+      user_matchup.players.forEach((player_id) => {
         if (!obj[player_id]) {
           obj[player_id] = {
             start: [],
             bench: [],
             opp_start: [],
             opp_bench: [],
+            started_over: {},
+            benched_for: {},
           };
         }
 
-        if (matchups[league_id].user_matchup.starters.includes(player_id)) {
+        if (user_matchup.starters.includes(player_id)) {
           obj[player_id].start.push(league_id);
+
+          const indexStarter = user_matchup.starters.indexOf(player_id);
+
+          const cur_slot =
+            matchups[league_id].league.roster_positions[indexStarter];
+
+          const alt_slots = matchups[league_id].league.roster_positions.filter(
+            (slot, indexSlot) =>
+              position_map[slot]?.includes(
+                allplayers?.[player_id]?.position ?? ""
+              ) &&
+              position_map[cur_slot].includes(
+                allplayers?.[user_matchup.starters[indexSlot]]?.position ?? ""
+              )
+          );
+
+          const slot_options = Array.from(
+            new Set(
+              [cur_slot, ...alt_slots].flatMap((slot) => {
+                return user_matchup.players.filter(
+                  (player_id2) =>
+                    !user_matchup.starters.includes(player_id2) &&
+                    position_map[slot].includes(
+                      allplayers?.[player_id2].position ?? ""
+                    )
+                );
+              })
+            )
+          );
+
+          slot_options.forEach((player_id2) => {
+            if (!obj[player_id].started_over[player_id2]) {
+              obj[player_id].started_over[player_id2] = [];
+            }
+
+            obj[player_id].started_over[player_id2].push({
+              league_id,
+              starter_proj: user_matchup.values[player_id],
+              bench_proj: user_matchup.values[player_id2],
+            });
+          });
         } else {
           obj[player_id].bench.push(league_id);
+
+          user_matchup.starters.forEach((player_id2, index2) => {
+            const slot = matchups[league_id].league.roster_positions[index2];
+
+            if (
+              position_map[slot]?.includes(
+                allplayers?.[player_id].position ?? ""
+              ) ||
+              matchups[league_id].league.roster_positions.some(
+                (slot2, slot_index) => {
+                  return (
+                    position_map[slot].includes(
+                      allplayers?.[user_matchup.starters[slot_index]]
+                        .position || ""
+                    ) &&
+                    position_map[slot2].includes(
+                      allplayers?.[player_id2]?.position || ""
+                    )
+                  );
+                }
+              )
+            ) {
+              if (!obj[player_id].benched_for[player_id2]) {
+                obj[player_id].benched_for[player_id2] = [];
+              }
+
+              obj[player_id].benched_for[player_id2].push({
+                league_id,
+                starter_proj: user_matchup.values[player_id2],
+                bench_proj: user_matchup.values[player_id],
+              });
+            }
+          });
         }
       });
 
@@ -86,6 +179,8 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
             bench: [],
             opp_start: [],
             opp_bench: [],
+            started_over: {},
+            benched_for: {},
           };
         }
 
@@ -98,7 +193,7 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
     });
 
     return obj;
-  }, [matchups]);
+  }, [matchups, filterLeagueIds, allplayers]);
 
   const startersObj = useMemo(() => {
     const obj: { [player_id: string]: { [col_abbrev: string]: colObj } } = {};
@@ -209,7 +304,8 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
     filterTeam,
     filterPosition,
   }).map((player_id) => {
-    const { start, bench, opp_start, opp_bench } = starters[player_id];
+    const { start, bench, opp_start, opp_bench, started_over, benched_for } =
+      starters[player_id];
 
     const text =
       allplayers?.[player_id]?.full_name ||
@@ -250,10 +346,13 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
       ],
       secondary: (
         <PlayerMatchups
+          player_id1={player_id}
           start={filterLeagueIds(start)}
           bench={filterLeagueIds(bench)}
           opp_start={filterLeagueIds(opp_start)}
           opp_bench={filterLeagueIds(opp_bench)}
+          started_over={started_over}
+          benched_for={benched_for}
         />
       ),
     };

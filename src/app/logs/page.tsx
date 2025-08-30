@@ -20,7 +20,7 @@ type Log = {
   tool: string;
   username: string;
   league_id: string;
-  manager_tab: string;
+  tab: string;
 };
 
 const LogsPage = () => {
@@ -29,7 +29,7 @@ const LogsPage = () => {
   const [tool, setTool] = useState("");
   const [username, setUsername] = useState("");
   const [league_id, setLeague_id] = useState("");
-  const [manager_tab, setManager_tab] = useState("");
+  const [tab, setTab] = useState("");
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -43,13 +43,13 @@ const LogsPage = () => {
 
           let username = "";
           let league_id = "";
-          let manager_tab = "";
+          let tab = "";
 
           if (["manager", "lineupchecker"].includes(tool) && route_array[2]) {
             username = route_array[2].toLowerCase();
 
-            if (tool === "manager" && route_array[3]) {
-              manager_tab = route_array[3].toLowerCase();
+            if (route_array[3]) {
+              tab = route_array[3].toLowerCase();
             }
           } else if (tool === "picktracker") {
             league_id = route_array[2];
@@ -60,7 +60,7 @@ const LogsPage = () => {
             tool,
             username,
             league_id,
-            manager_tab,
+            tab,
           };
         })
       );
@@ -75,16 +75,16 @@ const LogsPage = () => {
         (ip === "" || l.ip === ip) &&
         (username === "" || l.username === username) &&
         (league_id === "" || l.league_id === league_id) &&
-        (manager_tab === "" || l.manager_tab === manager_tab)
+        (tab === "" || l.tab === tab)
       );
     });
-  }, [logs, ip, tool, username, league_id, manager_tab]);
+  }, [logs, ip, tool, username, league_id, tab]);
 
-  const { tools, usernames, league_ids, manager_tabs, ips } = useMemo(() => {
+  const { tools, usernames, league_ids, tabs, ips } = useMemo(() => {
     const tools: string[] = [];
     const usernames: string[] = [];
     const league_ids: string[] = [];
-    const manager_tabs: string[] = [];
+    const tabs: string[] = [];
     const ips: string[] = [];
 
     filteredLogs.forEach((log) => {
@@ -96,13 +96,12 @@ const LogsPage = () => {
       if (log.league_id && !league_ids.includes(log.league_id))
         league_ids.push(log.league_id);
 
-      if (log.manager_tab && !manager_tabs.includes(log.manager_tab))
-        manager_tabs.push(log.manager_tab);
+      if (log.tab && !tabs.includes(log.tab)) tabs.push(log.tab);
 
       if (!ips.includes(log.ip)) ips.push(log.ip);
     });
 
-    return { tools, usernames, league_ids, manager_tabs, ips };
+    return { tools, usernames, league_ids, tabs, ips };
   }, [filteredLogs]);
 
   const filters = [
@@ -137,9 +136,9 @@ const LogsPage = () => {
     {
       label: "Tab",
       id: "manager_tab",
-      list: manager_tabs,
-      state: manager_tab,
-      setState: setManager_tab,
+      list: tabs,
+      state: tab,
+      setState: setTab,
     },
   ];
 
@@ -296,7 +295,7 @@ const LogsPage = () => {
                   classname: "",
                 },
                 {
-                  text: log.manager_tab || "-",
+                  text: log.tab || "-",
                   colspan: 1,
                   classname: "",
                 },

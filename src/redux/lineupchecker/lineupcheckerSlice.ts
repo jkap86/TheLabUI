@@ -31,6 +31,14 @@ export interface LineupcheckerState {
 
   isSyncingMatchup: string;
   errorSyncing: string[];
+
+  playersTab: string;
+  playersTab2: string;
+  matchupsType: string;
+
+  playersCol1: string;
+  playersCol2: string;
+  playersCol3: string;
 }
 
 const initialState: LineupcheckerState = {
@@ -50,6 +58,14 @@ const initialState: LineupcheckerState = {
   errorMatchups: null,
   isSyncingMatchup: "",
   errorSyncing: [],
+
+  playersTab: "Leagues",
+  playersTab2: "Start Over",
+  matchupsType: "Start",
+
+  playersCol1: "# Start Over",
+  playersCol2: "Sub Avg S Proj",
+  playersCol3: "Player2 Avg S",
 };
 
 const lineupcheckerSlice = createSlice({

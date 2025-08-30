@@ -135,6 +135,7 @@ export const getOptimalStartersLineupCheck = (
 
   const optimal_starters: {
     index: number;
+    slot: string;
     slot__index: string;
     optimal_player_id: string;
     optimal_player_position: string;
@@ -144,6 +145,10 @@ export const getOptimalStartersLineupCheck = (
     current_player_position: string;
     current_player_value: number;
     current_player_kickoff: number;
+    current_slot_options: {
+      player_id: string;
+      proj: number;
+    }[];
   }[] = [];
 
   (roster_positions || [])
@@ -168,6 +173,7 @@ export const getOptimalStartersLineupCheck = (
 
         optimal_starters.push({
           index,
+          slot,
           slot__index: `${slot}__${index}`,
           optimal_player_id: optimal_player.player_id,
           optimal_player_position: optimal_player.position,
@@ -179,10 +185,15 @@ export const getOptimalStartersLineupCheck = (
           current_player_value: values[current_player_id],
           current_player_kickoff:
             schedule[allplayers[current_player_id]?.team]?.kickoff || 0,
+          current_slot_options: slot_options.map((so) => ({
+            player_id: so.player_id,
+            proj: so.value,
+          })),
         });
       } else {
         optimal_starters.push({
           index,
+          slot,
           slot__index: `${slot}__${index}`,
           optimal_player_id: current_player_id,
           optimal_player_position: allplayers[current_player_id].position,
@@ -194,6 +205,7 @@ export const getOptimalStartersLineupCheck = (
           current_player_value: values[current_player_id],
           current_player_kickoff:
             schedule[allplayers[current_player_id]?.team]?.kickoff || 0,
+          current_slot_options: [],
         });
       }
     });
@@ -211,6 +223,10 @@ export const getOptimalStartersLineupCheck = (
     current_player_kickoff: number;
     earlyInFlex: boolean;
     lateNotInFlex: boolean;
+    current_slot_options: {
+      player_id: string;
+      proj: number;
+    }[];
   }[] = [];
 
   optimal_starters
@@ -221,15 +237,15 @@ export const getOptimalStartersLineupCheck = (
         position_map[b.slot__index.split("__")[0]].length
     )
     .forEach((os) => {
+      const slot = os.slot__index.split("__")[0];
+
       const slot_options_optimal = playersWithValues
         .filter(
           (player) =>
             optimal_starters.some(
               (os) => os.optimal_player_id === player.player_id
             ) &&
-            position_map[os.slot__index.split("__")[0]].includes(
-              player.position
-            ) &&
+            position_map[slot].includes(player.position) &&
             !optimal_starters_ordered.find(
               (os) => os.optimal_player_id === player.player_id
             )
@@ -248,13 +264,11 @@ export const getOptimalStartersLineupCheck = (
             60 * 60 * 1000 <
             (schedule[allplayers?.[s]?.team || ""]?.kickoff || 0) &&
           position_map[roster_positions[index]].length <
-            position_map[os.slot__index.split("__")[0]].length &&
+            position_map[slot].length &&
           position_map[roster_positions[index]]?.includes(
             allplayers[os.current_player_id]?.position || ""
           ) &&
-          position_map[os.slot__index.split("__")[0]]?.includes(
-            allplayers[s]?.position || ""
-          )
+          position_map[slot]?.includes(allplayers[s]?.position || "")
         );
       });
 
@@ -265,13 +279,11 @@ export const getOptimalStartersLineupCheck = (
             (schedule[allplayers?.[s]?.team || ""]?.kickoff || 0) +
               60 * 60 * 1000 &&
           position_map[roster_positions[index]].length >
-            position_map[os.slot__index.split("__")[0]].length &&
+            position_map[slot].length &&
           position_map[roster_positions[index]]?.includes(
             allplayers[os.current_player_id]?.position || ""
           ) &&
-          position_map[os.slot__index.split("__")[0]]?.includes(
-            allplayers[s]?.position || ""
-          )
+          position_map[slot]?.includes(allplayers[s]?.position || "")
         );
       });
 
