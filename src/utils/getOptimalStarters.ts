@@ -71,7 +71,9 @@ export const getOptimalStarters = (
           (player) =>
             position_map[slot].includes(player.position) &&
             !optimal_starters.find(
-              (os) => os.optimal_player_id === player.player_id
+              (os) =>
+                os.optimal_player_id === player.player_id &&
+                os.player_position === player.position
             )
         );
 

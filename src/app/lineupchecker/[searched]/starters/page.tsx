@@ -149,7 +149,7 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
                   return (
                     position_map[slot].includes(
                       allplayers?.[user_matchup.starters[slot_index]]
-                        .position || ""
+                        ?.position || ""
                     ) &&
                     position_map[slot2].includes(
                       allplayers?.[player_id2]?.position || ""

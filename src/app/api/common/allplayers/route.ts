@@ -2,11 +2,7 @@ import { NextResponse } from "next/server";
 import pool from "@/lib/pool";
 import axiosInstance from "@/lib/axiosInstance";
 import { Allplayer } from "@/lib/types/commonTypes";
-import { position_map } from "@/utils/getOptimalStarters";
 
-const positions = Array.from(
-  new Set(Object.keys(position_map).flatMap((slot) => position_map[slot]))
-);
 export async function GET() {
   try {
     const data = await pool.query(
@@ -16,8 +12,8 @@ export async function GET() {
     const allplayers_db = data.rows[0];
 
     if (
-      new Date().getTime() - new Date(allplayers_db?.updated_at).getTime() <
-      1000 * 60 * 60 * 12
+      new Date().getTime() - 1000 * 60 * 60 * 12 <
+      new Date(allplayers_db?.updated_at).getTime()
     ) {
       return NextResponse.json(allplayers_db.data, { status: 200 });
     } else {
@@ -28,11 +24,7 @@ export async function GET() {
         const allplayersFiltered: Allplayer[] = [];
 
         Object.values(allplayers.data)
-          .filter(
-            (player) =>
-              player.active &&
-              (positions.includes(player.position) || player.position === "FB")
-          )
+          .filter((player) => player.active)
           .forEach((value) => {
             const player_obj = value as Allplayer;
 
@@ -48,13 +40,15 @@ export async function GET() {
               first_name: player_obj.first_name,
               last_name: player_obj.last_name,
               age: player_obj.age,
-              fantasy_positions: player_obj.fantasy_positions.map((p) => {
-                if (p === "FB") {
-                  return "RB";
-                } else {
-                  return p;
+              fantasy_positions: (player_obj.fantasy_positions || []).map(
+                (p) => {
+                  if (p === "FB") {
+                    return "RB";
+                  } else {
+                    return p;
+                  }
                 }
-              }),
+              ),
               years_exp: player_obj.years_exp,
               active: player_obj.active,
             });
@@ -72,7 +66,7 @@ export async function GET() {
 
         return NextResponse.json(allplayersFiltered, { status: 200 });
       } catch (err: unknown) {
-        if (err instanceof Error) console.log(err.message);
+        if (err instanceof Error) console.log(err.message + " - allplayer");
 
         return NextResponse.json(allplayers_db.data, { status: 200 });
       }
