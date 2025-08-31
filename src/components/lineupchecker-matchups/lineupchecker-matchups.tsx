@@ -23,6 +23,8 @@ const LineupcheckerMatchups = ({
   const { allplayers } = useSelector((state: RootState) => state.common);
   const { type1, type2 } = useSelector((state: RootState) => state.manager);
 
+  console.log({ league_matchups });
+
   const headers = [
     {
       text: "League",
@@ -100,7 +102,7 @@ const LineupcheckerMatchups = ({
       const nonQbInSf = matchup.user_matchup.starters
         .filter(
           (s, index) =>
-            position_map[matchup.league.roster_positions[index]].includes(
+            position_map[matchup.league.roster_positions[index]]?.includes(
               "QB"
             ) && !allplayers?.[s]?.fantasy_positions?.includes("QB")
         )
