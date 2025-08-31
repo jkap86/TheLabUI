@@ -189,7 +189,7 @@ export const getOptimalStartersLineupCheck = (
             schedule[allplayers[optimal_player.player_id]?.team]?.kickoff || 0,
           current_player_id,
           current_player_position: allplayers[current_player_id]?.position,
-          current_player_value: values[current_player_id],
+          current_player_value: values[current_player_id] || 0,
           current_player_kickoff:
             schedule[allplayers[current_player_id]?.team]?.kickoff || 0,
           current_slot_options: slot_options.map((so) => ({
@@ -204,12 +204,12 @@ export const getOptimalStartersLineupCheck = (
           slot__index: `${slot}__${index}`,
           optimal_player_id: current_player_id,
           optimal_player_position: allplayers[current_player_id].position,
-          optimal_player_value: values[current_player_id],
+          optimal_player_value: values[current_player_id] || 0,
           optimal_player_kickoff:
             schedule[allplayers[current_player_id]?.team]?.kickoff || 0,
           current_player_id: current_player_id,
           current_player_position: allplayers[current_player_id]?.position,
-          current_player_value: values[current_player_id],
+          current_player_value: values[current_player_id] || 0,
           current_player_kickoff:
             schedule[allplayers[current_player_id]?.team]?.kickoff || 0,
           current_slot_options: [],
