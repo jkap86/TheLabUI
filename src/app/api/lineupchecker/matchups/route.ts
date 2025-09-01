@@ -16,13 +16,14 @@ import { upsertMatchups } from "../helpers/upsertMatchups";
 export async function POST(req: NextRequest) {
   const formData = await req.json();
 
-  const { user_id, league_ids, week, edits } = formData;
+  const { user_id, league_ids: league_ids_all, week, edits } = formData;
 
   const schedule_week = await getSchedule(week);
   const projections_week = await getProjections(week);
   const allplayers = await getAllplayers();
 
-  const getMatchupsQuery = `
+  const getUpdatedMatchups = async (league_ids_batch: string[]) => {
+    const getMatchupsQuery = `
     WITH grouped AS (
         SELECT
             m.league_id,
@@ -38,50 +39,53 @@ export async function POST(req: NextRequest) {
     ORDER BY g.league_id;
   `;
 
-  const matchups_update: {
-    rows: { league_id: string; league: League; matchups: Matchup[] }[];
-  } = await pool.query(getMatchupsQuery, [
-    league_ids,
-    parseInt(week as string),
-  ]);
+    const matchups_update: {
+      rows: { league_id: string; league: League; matchups: Matchup[] }[];
+    } = await pool.query(getMatchupsQuery, [
+      league_ids_batch,
+      parseInt(week as string),
+    ]);
 
-  const cutoff = new Date(Date.now() - 1000 * 60 * 60 * 1);
+    const cutoff = new Date(Date.now() - 1000 * 60);
 
-  const up_to_date_matchups = matchups_update.rows.filter((l) => {
-    return edits
-      ? true
-      : l.matchups.some((m) => m.updated_at && new Date(m.updated_at) > cutoff);
-  });
+    const up_to_date_matchups = matchups_update.rows.filter((l) => {
+      return edits
+        ? true
+        : l.matchups.some(
+            (m) => m.updated_at && new Date(m.updated_at) > cutoff
+          );
+    });
 
-  const league_ids_to_update = league_ids.filter(
-    (league_id: string) =>
-      !up_to_date_matchups.some((m) => m.league_id === league_id)
-  );
+    const league_ids_to_update = league_ids_batch.filter(
+      (league_id: string) =>
+        !up_to_date_matchups.some((m) => m.league_id === league_id)
+    );
 
-  const batchSize = 10;
+    const updated_matchups: {
+      league_id: string;
+      league: League;
+      matchups: Matchup[];
+    }[] = [];
 
-  const updated_matchups: {
-    league_id: string;
-    league: League;
-    matchups: Matchup[];
-  }[] = [];
-
-  for (let i = 0; i < league_ids_to_update.length; i += batchSize) {
     await Promise.all(
-      league_ids_to_update
-        .slice(i, i + batchSize)
-        .map(async (league_id: string) => {
-          let league = matchups_update.rows.find(
-            (r) => r.league_id === league_id
-          )?.league;
+      league_ids_to_update.map(async (league_id: string) => {
+        let league = matchups_update.rows.find(
+          (r) => r.league_id === league_id
+        )?.league;
 
+        try {
           if (!league) {
             const leagueSleeper = await axiosInstance.get(
               `https://api.sleeper.app/v1/league/${league_id}`
             );
             league = leagueSleeper.data as League;
           }
+        } catch (e: unknown) {
+          if (e instanceof Error) console.log(e.message);
+          return e;
+        }
 
+        try {
           const [matchups, rosters, users]: [
             { data: SleeperMatchup[] },
             { data: SleeperRoster[] },
@@ -172,70 +176,117 @@ export async function POST(req: NextRequest) {
               league_id,
               league: {
                 ...league,
-                index: league_ids.indexOf(league.league_id),
+                index: league_ids_batch.indexOf(league.league_id),
               },
               matchups: updated_matchups_league,
             });
           }
-        })
+        } catch (err: unknown) {
+          if (err instanceof Error) console.log(err.message);
+        }
+      })
     );
-  }
 
-  const matchups = [...updated_matchups];
+    const matchups = [...updated_matchups];
 
-  up_to_date_matchups.forEach((mobj) => {
-    const matchup_user = mobj.matchups.find((m) => m.user_id === user_id);
-    const roster_id_user = matchup_user?.roster_id;
+    up_to_date_matchups.forEach((mobj) => {
+      const matchup_user = mobj.matchups.find((m) => m.user_id === user_id);
+      const roster_id_user = matchup_user?.roster_id;
 
-    const roster_id_opp = mobj.matchups.find(
-      (m2) =>
-        m2.roster_id !== roster_id_user &&
-        m2.matchup_id === matchup_user?.matchup_id
-    )?.roster_id;
+      const roster_id_opp = mobj.matchups.find(
+        (m2) =>
+          m2.roster_id !== roster_id_user &&
+          m2.matchup_id === matchup_user?.matchup_id
+      )?.roster_id;
 
-    if (roster_id_user) {
-      matchups.push({
-        ...mobj,
-        league: {
-          ...mobj.league,
-          index: league_ids.indexOf(mobj.league.league_id),
-        },
-        matchups: mobj.matchups.map((m) => {
-          const {
-            starters_optimal,
-            values,
-            projection_current,
-            projection_optimal,
-          } = getOptimalStartersLineupCheck(
-            allplayers,
-            mobj.league.roster_positions,
-            m.players,
-            m.starters,
-            projections_week,
-            mobj.league.scoring_settings,
-            schedule_week,
-            edits
+      if (roster_id_user) {
+        matchups.push({
+          ...mobj,
+          league: {
+            ...mobj.league,
+            index: league_ids_all.indexOf(mobj.league.league_id),
+          },
+          matchups: mobj.matchups.map((m) => {
+            const {
+              starters_optimal,
+              values,
+              projection_current,
+              projection_optimal,
+            } = getOptimalStartersLineupCheck(
+              allplayers,
+              mobj.league.roster_positions,
+              m.players,
+              m.starters,
+              projections_week,
+              mobj.league.scoring_settings,
+              schedule_week,
+              edits
+            );
+            return {
+              ...m,
+              starters:
+                mobj.league.settings.best_ball === 1
+                  ? starters_optimal.map((so) => so.optimal_player_id)
+                  : m.starters,
+              roster_id_user,
+              roster_id_opp,
+              starters_optimal,
+              values,
+              projection_current:
+                mobj.league.settings.best_ball === 1
+                  ? projection_optimal
+                  : projection_current,
+              projection_optimal,
+            };
+          }),
+        });
+      }
+    });
+
+    return matchups;
+  };
+
+  const batchSize = 5;
+
+  const encoder = new TextEncoder();
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        for (let i = 0; i < league_ids_all.length; i += batchSize) {
+          const batchMatchups = await getUpdatedMatchups(
+            league_ids_all.slice(i, i + batchSize)
           );
-          return {
-            ...m,
-            starters:
-              mobj.league.settings.best_ball === 1
-                ? starters_optimal.map((so) => so.optimal_player_id)
-                : m.starters,
-            roster_id_user,
-            roster_id_opp,
-            starters_optimal,
-            values,
-            projection_current:
-              mobj.league.settings.best_ball === 1
-                ? projection_optimal
-                : projection_current,
-            projection_optimal,
-          };
-        }),
-      });
-    }
+
+          const batchData = JSON.stringify(batchMatchups) + "\n";
+
+          controller.enqueue(encoder.encode(batchData));
+        }
+
+        controller.enqueue(
+          encoder.encode(
+            JSON.stringify({
+              schedule: schedule_week,
+              projections: projections_week,
+            }) + "\n"
+          )
+        );
+
+        controller.close();
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          console.log(err.message);
+          controller.error(err.message);
+        } else {
+          console.log({ err });
+          controller.error("unkown error");
+        }
+      }
+    },
   });
 
-  return NextResponse.json({ matchups, schedule_week, projections_week });
+  return new NextResponse(stream, {
+    status: 200,
+    headers: { "Content-Type": "application/x-ndjson; charset=utf-8" },
+  });
 }

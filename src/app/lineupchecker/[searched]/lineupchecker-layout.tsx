@@ -31,6 +31,7 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
     errorMatchups,
     matchups,
     isUpdatingMatchups,
+    matchupsProgress,
   } = useSelector((state: RootState) => state.lineupchecker);
 
   useFetchNflState();
@@ -231,7 +232,9 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
         </div>
         {isLoadingUserLeagueIds || isLoadingMatchups ? (
           <div className="flex-1 flex flex-col justify-center items-center">
-            <LoadingIcon messages={[]} />
+            <LoadingIcon
+              messages={[`${matchupsProgress} League matchups Loaded`]}
+            />
           </div>
         ) : (
           <div className="flex-1">

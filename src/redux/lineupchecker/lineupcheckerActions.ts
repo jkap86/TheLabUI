@@ -22,30 +22,86 @@ export const fetchUserLeagueIds = createAsyncThunk(
 
 export const fetchMatchups = createAsyncThunk(
   "fetchMatchups",
-  async ({
-    user_id,
-    league_ids,
-    week,
-    edits,
-  }: {
-    user_id: string;
-    league_ids: string[];
-    week: number;
-    edits?: ProjectionEdits;
-    initial?: true;
-  }) => {
-    const response: {
-      data: {
-        matchups: { league_id: string; league: League; matchups: Matchup[] }[];
-        schedule_week: { [team: string]: { kickoff: number; opp: string } };
-        projections_week: { [player_id: string]: { [cat: string]: number } };
-      };
-    } = await axios.post("/api/lineupchecker/matchups", {
+  async (
+    {
       user_id,
       league_ids,
       week,
       edits,
+    }: {
+      user_id: string;
+      league_ids: string[];
+      week: number;
+      edits?: ProjectionEdits;
+      initial?: true;
+    },
+    { dispatch }
+  ) => {
+    const controller = new AbortController();
+
+    const res = await fetch("/api/lineupchecker/matchups", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id, league_ids, week, edits }),
+      cache: "no-store",
+      signal: controller.signal,
     });
+
+    if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let done = false;
+    let text = "";
+
+    if (reader) {
+      while (!done) {
+        const { value, done: streamDone } = await reader.read();
+        done = streamDone;
+
+        if (value) {
+          text += decoder.decode(value, { stream: true });
+
+          const matches = text.match(/,"matchups":/g);
+
+          dispatch({
+            type: "lineupchecker/updateMatchupsProgress",
+            payload: matches?.length || 0,
+          });
+        }
+      }
+    }
+
+    const text_array = text.split("\n");
+
+    const parsedRes: {
+      matchups: {
+        league_id: string;
+        league: League;
+        matchups: Matchup[];
+      }[];
+      schedule: { [team: string]: { kickoff: number; opp: string } };
+      projections: { [player_id: string]: { [cat: string]: number } };
+    } = { matchups: [], schedule: {}, projections: {} };
+
+    text_array
+      .filter((chunk) => chunk.length > 0)
+      .forEach((chunk) => {
+        try {
+          const parsed = JSON.parse(chunk);
+
+          if (Array.isArray(parsed)) {
+            parsedRes.matchups.push(...parsed);
+          } else {
+            if (parsed?.schedule) parsedRes.schedule = parsed.schedule;
+            if (parsed?.projections) parsedRes.projections = parsed.projections;
+          }
+        } catch (err: unknown) {
+          console.log({ err, chunk });
+        }
+      });
+
+    console.log({ parsedRes });
 
     const matchups_obj: {
       [league_id: string]: {
@@ -56,7 +112,7 @@ export const fetchMatchups = createAsyncThunk(
       };
     } = {};
 
-    response.data.matchups.forEach((r) => {
+    parsedRes.matchups.forEach((r) => {
       const user_matchup = r.matchups.find(
         (m) => m.roster_id === m.roster_id_user
       );
@@ -74,14 +130,14 @@ export const fetchMatchups = createAsyncThunk(
     });
 
     const projections = Object.fromEntries(
-      Object.keys(response.data.projections_week).map((player_id) => {
+      Object.keys(parsedRes.projections).map((player_id) => {
         return [
           player_id,
           {
-            ...response.data.projections_week[player_id],
+            ...parsedRes.projections[player_id],
             pts_ppr: getPlayerTotal(
               ppr_scoring_settings,
-              response.data.projections_week[player_id]
+              parsedRes.projections[player_id]
             ),
           },
         ];
@@ -90,7 +146,7 @@ export const fetchMatchups = createAsyncThunk(
 
     return {
       matchups: matchups_obj,
-      schedule: response.data.schedule_week,
+      schedule: parsedRes.schedule,
       projections,
     };
   }

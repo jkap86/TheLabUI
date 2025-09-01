@@ -22,6 +22,7 @@ export interface LineupcheckerState {
       league: League;
     };
   };
+  matchupsProgress: number;
   isUpdatingMatchups: boolean;
   updateMatchupsAvailable: boolean;
 
@@ -52,6 +53,7 @@ const initialState: LineupcheckerState = {
 
   isLoadingMatchups: false,
   matchups: {},
+  matchupsProgress: 0,
   isUpdatingMatchups: false,
   updateMatchupsAvailable: true,
 
@@ -97,6 +99,12 @@ const lineupcheckerSlice = createSlice({
       action: PayloadAction<{ [player_id: string]: StatObj }>
     ) {
       state.liveStats = action.payload;
+    },
+    updateMatchupsProgress(
+      state: Draft<LineupcheckerState>,
+      action: PayloadAction<number>
+    ) {
+      state.matchupsProgress = action.payload;
     },
   },
   extraReducers: (builder) => {
