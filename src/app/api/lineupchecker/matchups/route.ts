@@ -257,7 +257,7 @@ export async function POST(req: NextRequest) {
       );
       try {
         for (let i = 0; i < l.length; i += batchSize) {
-          console.log("START: " + l.slice(i, i + batchSize));
+          //   console.log("START: " + l.slice(i, i + batchSize));
 
           const batchMatchups = await getUpdatedMatchups(
             l.slice(i, i + batchSize)
@@ -267,7 +267,7 @@ export async function POST(req: NextRequest) {
 
           controller.enqueue(encoder.encode(batchData));
 
-          console.log("END: " + l.slice(i, i + batchSize));
+          //   console.log("END: " + l.slice(i, i + batchSize));
         }
 
         controller.enqueue(
