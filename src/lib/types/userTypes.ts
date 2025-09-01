@@ -133,6 +133,28 @@ export type Matchup = {
   values: { [player_id: string]: number };
   projection_current: number;
   projection_optimal: number;
+  live_values?: {
+    [player_id: string]: {
+      points: number;
+      game_percent_complete: number;
+    };
+  };
+  live_projection_current?: number;
+  live_projection_optimal?: number;
+  live_starters_optimal?: {
+    index: number;
+    slot__index: string;
+    optimal_player_id: string;
+    optimal_player_position: string;
+    optimal_player_value: number;
+    optimal_player_kickoff: number;
+    current_player_id: string;
+    current_player_position: string;
+    current_player_value: number;
+    current_player_kickoff: number;
+    earlyInFlex: boolean;
+    lateNotInFlex: boolean;
+  }[];
 };
 
 export type Trade = {

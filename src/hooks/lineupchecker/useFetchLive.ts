@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { StatObj } from "@/lib/types/commonTypes";
 import { updateLiveStats } from "@/redux/lineupchecker/lineupcheckerSlice";
+import { useEffect } from "react";
 
 type Response = {
   delay: number;
@@ -15,7 +16,12 @@ const fetcher = (url: string) =>
 
 export default function useFetchLive() {
   const dispatch: AppDispatch = useDispatch();
-  const { nflState } = useSelector((state: RootState) => state.common);
+  const { nflState, allplayers } = useSelector(
+    (state: RootState) => state.common
+  );
+  const { matchups, liveStats } = useSelector(
+    (state: RootState) => state.lineupchecker
+  );
 
   const week = Math.max(1, nflState?.leg as number);
   const route = week
@@ -35,4 +41,18 @@ export default function useFetchLive() {
       dispatch(updateLiveStats(liveObj));
     },
   });
+
+  useEffect(() => {
+    if (Object.keys(liveStats).length === 0) return;
+
+    const worker = new Worker(
+      new URL("../../app/workers/liveStats.worker.ts", import.meta.url)
+    );
+
+    worker.onmessage = (e) => {
+      console.log({ e });
+    };
+
+    worker.postMessage({ liveStats, matchups, allplayers });
+  }, [liveStats, matchups, allplayers]);
 }

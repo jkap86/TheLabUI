@@ -13,7 +13,7 @@ import LeagueTypeSwitch from "@/components/leagueTypeSwitch/leagueTypeSwitch";
 import { usePathname, useRouter } from "next/navigation";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
 import "../../../components/heading/heading.css";
-import useFetchLive from "@/hooks/lineupchecker/useFetchLive";
+//import useFetchLive from "@/hooks/lineupchecker/useFetchLive";
 
 interface LayoutProps {
   searched: string;
@@ -26,7 +26,9 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
   const { type1, type2 } = useSelector((state: RootState) => state.manager);
   const {
     isLoadingUserLeagueIds,
+    errorLoadingUserLeagueIds,
     isLoadingMatchups,
+    errorMatchups,
     matchups,
     isUpdatingMatchups,
   } = useSelector((state: RootState) => state.lineupchecker);
@@ -34,7 +36,7 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
   useFetchNflState();
   useFetchAllplayers();
   useFetchMatchups({ searched });
-  useFetchLive();
+  //  useFetchLive();
 
   const proj_record = Object.values(matchups)
     .filter(
@@ -223,7 +225,9 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
 
               <LeagueTypeSwitch />
             </>
-          ) : null}
+          ) : (
+            errorLoadingUserLeagueIds || errorMatchups
+          )}
         </div>
         {isLoadingUserLeagueIds || isLoadingMatchups ? (
           <div className="flex-1 flex flex-col justify-center items-center">

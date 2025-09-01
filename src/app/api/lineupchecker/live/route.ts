@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   if (!week)
     return NextResponse.json("Error week not provided", { status: 400 });
 
-  let stats: {
+  const stats: {
     player_id: string;
     stats: { [cat: string]: number };
     kickoff: number;
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     const [schedule, statsRaw] = await Promise.all([
       getSchedule(week),
       axios.get(
-        `https://api.sleeper.com/stats/nfl/${process.env.SEASON}/${week}?season_type=regular`,
+        `https://api.sleeper.com/stats/nfl/2024/${week}?season_type=regular`,
         {
           params: {
             timestamp: new Date().getTime(),
@@ -38,11 +38,9 @@ export async function GET(req: NextRequest) {
         stats: { [cat: string]: number };
         player: { team: string };
       }) => {
-        console.log({
-          is_in_progress: schedule[statObj.player.team].is_in_progress,
-        });
-        const { kickoff, timeLeft, is_in_progress } =
-          schedule[statObj.player.team];
+        const { kickoff, timeLeft, is_in_progress } = schedule[
+          statObj.player.team
+        ] ?? { kickoff: 0, timeLeft: 0, is_in_progress: false };
 
         stats.push({
           player_id: statObj.player_id,
