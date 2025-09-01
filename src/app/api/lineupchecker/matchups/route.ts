@@ -254,6 +254,8 @@ export async function POST(req: NextRequest) {
     async start(controller) {
       try {
         for (let i = 0; i < league_ids_all.length; i += batchSize) {
+          console.log("START: " + league_ids_all.slice(i, i + batchSize));
+
           const batchMatchups = await getUpdatedMatchups(
             league_ids_all.slice(i, i + batchSize)
           );
@@ -261,6 +263,8 @@ export async function POST(req: NextRequest) {
           const batchData = JSON.stringify(batchMatchups) + "\n";
 
           controller.enqueue(encoder.encode(batchData));
+
+          console.log("END: " + league_ids_all.slice(i, i + batchSize));
         }
 
         controller.enqueue(

@@ -1,7 +1,9 @@
 import path from "path";
-import { Client } from "pg";
+import pkg from "pg";
 import fs from "fs";
 import dotenv from "dotenv";
+
+const { Client } = pkg;
 
 dotenv.config({ path: ".env.local" });
 
