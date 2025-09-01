@@ -246,25 +246,28 @@ export async function POST(req: NextRequest) {
     return matchups;
   };
 
-  const batchSize = 5;
+  const batchSize = 10;
 
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
     async start(controller) {
+      const l = league_ids_all.filter(
+        (league_id: string) => league_id !== "1217887034689978368"
+      );
       try {
-        for (let i = 0; i < league_ids_all.length; i += batchSize) {
-          console.log("START: " + league_ids_all.slice(i, i + batchSize));
+        for (let i = 0; i < l.length; i += batchSize) {
+          console.log("START: " + l.slice(i, i + batchSize));
 
           const batchMatchups = await getUpdatedMatchups(
-            league_ids_all.slice(i, i + batchSize)
+            l.slice(i, i + batchSize)
           );
 
           const batchData = JSON.stringify(batchMatchups) + "\n";
 
           controller.enqueue(encoder.encode(batchData));
 
-          console.log("END: " + league_ids_all.slice(i, i + batchSize));
+          console.log("END: " + l.slice(i, i + batchSize));
         }
 
         controller.enqueue(
