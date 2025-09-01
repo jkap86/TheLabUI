@@ -176,7 +176,7 @@ export async function POST(req: NextRequest) {
               league_id,
               league: {
                 ...league,
-                index: league_ids_batch.indexOf(league.league_id),
+                index: league_ids_all.indexOf(league.league_id),
               },
               matchups: updated_matchups_league,
             });
