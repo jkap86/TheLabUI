@@ -24,21 +24,37 @@ export const getSchedule = async (week: string) => {
     graphqlQuery
   );
 
-  const schedule_obj: { [team: string]: { kickoff: number; opp: string } } = {};
+  const schedule_obj: {
+    [team: string]: {
+      kickoff: number;
+      opp: string;
+      timeLeft: number;
+      is_in_progress: boolean;
+    };
+  } = {};
 
   schedule_week.data.data.scores.forEach(
     (game: {
       start_time: number;
-      metadata: { away_team: string; home_team: string };
+      metadata: {
+        away_team: string;
+        home_team: string;
+        time_remaining?: number;
+        is_in_progress: boolean;
+      };
     }) => {
       schedule_obj[game.metadata.away_team] = {
         kickoff: game.start_time,
         opp: "@ " + game.metadata.home_team,
+        timeLeft: game.metadata.time_remaining || 3600,
+        is_in_progress: game.metadata.is_in_progress,
       };
 
       schedule_obj[game.metadata.home_team] = {
         kickoff: game.start_time,
         opp: "vs " + game.metadata.away_team,
+        timeLeft: game.metadata.time_remaining || 3600,
+        is_in_progress: game.metadata.is_in_progress,
       };
     }
   );

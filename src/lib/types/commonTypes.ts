@@ -20,3 +20,11 @@ export type colObj = {
   classname: string;
   rankings?: string[];
 };
+
+export type StatObj = {
+  player_id: string;
+  stats: { [cat: string]: number };
+  kickoff: number;
+  timeLeft: number;
+  is_in_progress: boolean;
+};

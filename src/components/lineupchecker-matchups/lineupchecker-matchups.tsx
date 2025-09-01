@@ -23,8 +23,6 @@ const LineupcheckerMatchups = ({
   const { allplayers } = useSelector((state: RootState) => state.common);
   const { type1, type2 } = useSelector((state: RootState) => state.manager);
 
-  console.log({ league_matchups });
-
   const headers = [
     {
       text: "League",

@@ -5,6 +5,7 @@ import {
   fetchUserLeagueIds,
   syncMatchup,
 } from "./lineupcheckerActions";
+import { StatObj } from "@/lib/types/commonTypes";
 
 export interface LineupcheckerState {
   isLoadingUserLeagueIds: boolean;
@@ -31,6 +32,8 @@ export interface LineupcheckerState {
 
   isSyncingMatchup: string;
   errorSyncing: string[];
+
+  liveStats: { [player_id: string]: StatObj };
 
   playersTab: string;
   playersTab2: string;
@@ -59,6 +62,8 @@ const initialState: LineupcheckerState = {
   isSyncingMatchup: "",
   errorSyncing: [],
 
+  liveStats: {},
+
   playersTab: "Leagues",
   playersTab2: "Start Over",
   matchupsType: "Start",
@@ -86,6 +91,12 @@ const lineupcheckerSlice = createSlice({
       action: PayloadAction<ProjectionEdits>
     ) {
       state.edits = action.payload;
+    },
+    updateLiveStats(
+      state: Draft<LineupcheckerState>,
+      action: PayloadAction<{ [player_id: string]: StatObj }>
+    ) {
+      state.liveStats = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -176,6 +187,7 @@ export const {
   resetLineupcheckerState,
   updateLineupcheckerState,
   updateLineupcheckerEdits,
+  updateLiveStats,
 } = lineupcheckerSlice.actions;
 
 export default lineupcheckerSlice.reducer;
