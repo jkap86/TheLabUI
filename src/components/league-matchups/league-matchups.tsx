@@ -95,10 +95,6 @@ const LeagueMatchups = ({
           : ""
       }`;
 
-      const initialValue = getPlayerTotal(
-        matchup.league.scoring_settings,
-        projections[player_id]
-      );
       return {
         id: index.toString(),
         columns: [
@@ -127,12 +123,15 @@ const LeagueMatchups = ({
             classname,
           },
           {
-            text: (so?.current_player_value ?? 0).toFixed(1),
+            text: (matchupLocal?.values[player_id] ?? 0).toFixed(1),
             colspan: 2,
-            classname:
-              initialValue !== so?.current_player_value
-                ? "text-yellow-600"
-                : classname,
+            classname: Object.keys(edits[player_id] || {}).some(
+              (cat) =>
+                edits[player_id][cat].sleeper_value !==
+                edits[player_id][cat].update
+            )
+              ? "text-yellow-600"
+              : classname,
           },
         ],
       };
@@ -235,11 +234,6 @@ const LeagueMatchups = ({
         data={(matchupLocal?.starters_optimal || []).map((so, index) => {
           const player_id = so.optimal_player_id;
 
-          const initialValue = getPlayerTotal(
-            matchup.league.scoring_settings,
-            projections[player_id]
-          );
-
           const classname = `green`;
           return {
             id: index.toString(),
@@ -268,11 +262,13 @@ const LeagueMatchups = ({
               {
                 text: (matchupLocal?.values[player_id] ?? 0).toFixed(1),
                 colspan: 2,
-                classname:
-                  initialValue.toFixed() !==
-                  matchupLocal?.values[player_id]?.toFixed()
-                    ? "text-yellow-600"
-                    : classname,
+                classname: Object.keys(edits[player_id] || {}).some(
+                  (cat) =>
+                    edits[player_id][cat].sleeper_value !==
+                    edits[player_id][cat].update
+                )
+                  ? "text-yellow-600"
+                  : classname,
               },
             ],
           };
@@ -359,11 +355,6 @@ const LeagueMatchups = ({
               ? "yellow"
               : "red";
 
-            const initialValue = getPlayerTotal(
-              matchup.league.scoring_settings,
-              projections[so]
-            );
-
             return {
               id: so,
               columns: [
@@ -391,11 +382,12 @@ const LeagueMatchups = ({
                 {
                   text: (matchupLocal?.values?.[so] ?? 0).toFixed(1),
                   colspan: 2,
-                  classname:
-                    initialValue.toFixed() !==
-                    matchupLocal?.values[so]?.toFixed()
-                      ? "text-yellow-600"
-                      : classname,
+                  classname: Object.keys(edits[so] || {}).some(
+                    (cat) =>
+                      edits[so][cat].sleeper_value !== edits[so][cat].update
+                  )
+                    ? "text-yellow-600"
+                    : classname,
                 },
               ],
             };

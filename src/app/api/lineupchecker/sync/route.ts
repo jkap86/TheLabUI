@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     updated_matchups.push({
       ...m,
       starters:
-        best_ball === "1"
+        best_ball === 1
           ? starters_optimal.map((so) => so.optimal_player_id)
           : m.starters,
       week: parseInt(week as string),
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
       starters_optimal,
       values,
       projection_current:
-        best_ball === "1" ? projection_optimal : projection_current,
+        best_ball === 1 ? projection_optimal : projection_current,
       projection_optimal,
     });
   });
