@@ -252,13 +252,11 @@ export async function POST(req: NextRequest) {
 
   const stream = new ReadableStream({
     async start(controller) {
-      const l = league_ids_all.filter(
+      const l = league_ids_all; /*.filter(
         (league_id: string) => league_id !== "1217887034689978368"
-      );
+      );*/
       try {
         for (let i = 0; i < l.length; i += batchSize) {
-          //   console.log("START: " + l.slice(i, i + batchSize));
-
           const batchMatchups = await getUpdatedMatchups(
             l.slice(i, i + batchSize)
           );
@@ -266,8 +264,6 @@ export async function POST(req: NextRequest) {
           const batchData = JSON.stringify(batchMatchups) + "\n";
 
           controller.enqueue(encoder.encode(batchData));
-
-          //   console.log("END: " + l.slice(i, i + batchSize));
         }
 
         controller.enqueue(

@@ -394,16 +394,77 @@ export const getOptimalStarters = (
           }
         }
         if (!isFinite(dist[t])) break;
-        // augment by 1
+
+        const N = this.n;
+        const EPS = 1e-12;
+
+        const path: Array<{ u: number; i: number }> = [];
         let v = t;
+        let hops = 0;
+        const onPath = new Set<number>();
+
         while (v !== s) {
-          const u = parent[v],
-            i = pedge[v],
-            e = this.adj[u][i];
-          e.cap -= 1;
-          this.adj[v][e.rev].cap += 1;
+          if (++hops > N) {
+            throw new Error("MCMF: parent chain cycle/too long (bad parents)");
+          }
+          onPath.add(v);
+
+          let u = parent[v];
+          let i = pedge[v];
+          let ok = false;
+
+          if (u >= 0 && i >= 0) {
+            const e = this.adj[u][i];
+            if (
+              e &&
+              e.to === v &&
+              e.cap > 0 &&
+              Number.isFinite(dist[u]) &&
+              Math.abs(dist[u] + e.cost - dist[v]) <= EPS
+            ) {
+              ok = true;
+            }
+          }
+
+          if (!ok) {
+            let found = false;
+            for (let uu = 0; uu < N && !found; uu++) {
+              if (!Number.isFinite(dist[uu])) continue;
+              const adjU = this.adj[uu];
+              for (let ii = 0; ii < adjU.length; ii++) {
+                const e = adjU[ii];
+                if (e.to !== v) continue;
+                if (e.cap <= 0) continue;
+                if (Math.abs(dist[uu] + e.cost - dist[v]) > EPS) continue;
+                u = uu;
+                i = ii;
+                found = true;
+                break;
+              }
+            }
+            if (!found) throw new Error("MCMF: no valid predecessor found");
+          }
+
+          if (onPath.has(u) && u !== s) {
+            throw new Error(
+              "MCMF: cycle detected in predecessor reconstruction"
+            );
+          }
+
+          path.push({ u, i });
           v = u;
         }
+
+        // apply augmentation
+        for (let k = path.length - 1; k >= 0; k--) {
+          const { u, i } = path[k];
+          const e = this.adj[u][i];
+          if (!e || e.cap <= 0)
+            throw new Error("MCMF: zero/invalid cap when augmenting");
+          e.cap -= 1;
+          this.adj[e.to][e.rev].cap += 1;
+        }
+
         flow += 1;
         cost += dist[t];
       }
@@ -619,16 +680,78 @@ export const getOptimalStartersLineupCheck = (
           }
         }
         if (!isFinite(dist[t])) break;
-        // augment by 1
+
+        // augment by 1 (SAFE)
+        const N = this.n;
+        const EPS = 1e-12;
+
+        const path: Array<{ u: number; i: number }> = [];
         let v = t;
+        let hops = 0;
+        const onPath = new Set<number>();
+
         while (v !== s) {
-          const u = parent[v],
-            i = pedge[v],
-            e = this.adj[u][i];
-          e.cap -= 1;
-          this.adj[v][e.rev].cap += 1;
+          if (++hops > N) {
+            throw new Error("MCMF: parent chain cycle/too long (bad parents)");
+          }
+          onPath.add(v);
+
+          let u = parent[v];
+          let i = pedge[v];
+          let ok = false;
+
+          if (u >= 0 && i >= 0) {
+            const e = this.adj[u][i];
+            if (
+              e &&
+              e.to === v &&
+              e.cap > 0 &&
+              Number.isFinite(dist[u]) &&
+              Math.abs(dist[u] + e.cost - dist[v]) <= EPS
+            ) {
+              ok = true;
+            }
+          }
+
+          if (!ok) {
+            let found = false;
+            for (let uu = 0; uu < N && !found; uu++) {
+              if (!Number.isFinite(dist[uu])) continue;
+              const adjU = this.adj[uu];
+              for (let ii = 0; ii < adjU.length; ii++) {
+                const e = adjU[ii];
+                if (e.to !== v) continue;
+                if (e.cap <= 0) continue;
+                if (Math.abs(dist[uu] + e.cost - dist[v]) > EPS) continue;
+                u = uu;
+                i = ii;
+                found = true;
+                break;
+              }
+            }
+            if (!found) throw new Error("MCMF: no valid predecessor found");
+          }
+
+          if (onPath.has(u) && u !== s) {
+            throw new Error(
+              "MCMF: cycle detected in predecessor reconstruction"
+            );
+          }
+
+          path.push({ u, i });
           v = u;
         }
+
+        // apply augmentation
+        for (let k = path.length - 1; k >= 0; k--) {
+          const { u, i } = path[k];
+          const e = this.adj[u][i];
+          if (!e || e.cap <= 0)
+            throw new Error("MCMF: zero/invalid cap when augmenting");
+          e.cap -= 1;
+          this.adj[e.to][e.rev].cap += 1;
+        }
+
         flow += 1;
         cost += dist[t];
       }
