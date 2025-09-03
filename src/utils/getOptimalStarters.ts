@@ -324,9 +324,8 @@ export const getOptimalStarters = (
   values: { [player_id: string]: number } | null,
   allplayers: { [player_id: string]: Allplayer }
 ) => {
-  const starting_roster_positions = roster_positions?.filter(
-    (rp) => rp !== "BN"
-  );
+  const starting_roster_positions =
+    roster_positions?.filter((rp) => rp !== "BN") || [];
 
   // Build variants: one per (player_id, eligible fantasy position)
   type Variant = {
@@ -344,7 +343,7 @@ export const getOptimalStarters = (
   // Filter usable slots
   const slotKeys = (starting_roster_positions || [])
     .map((slot, index) => ({ slot, index }))
-    ?.filter(({ slot }) => !!position_map[slot]);
+    .filter(({ slot }) => !!position_map[slot]);
 
   const S = slotKeys.length;
   const V = variants.length;
@@ -1276,7 +1275,7 @@ export const getPlayerTotal = (
   edits?: { [cat: string]: { update: number | ""; sleeper_value: number } }
 ) => {
   const projection = Object.keys(stat_obj || {})
-    ?.filter((key) => Object.keys(scoring_settings).includes(key))
+    .filter((key) => Object.keys(scoring_settings).includes(key))
     .reduce(
       (acc, cur) =>
         acc +
