@@ -87,7 +87,7 @@ export const updateLeagues = async (
             );
 
             rostersUserInfo
-              .filter((ru) => ru.user_id)
+              ?.filter((ru) => ru.user_id)
               .forEach((ru) => {
                 if (!usersDb.some((u) => u.user_id === ru.user_id)) {
                   usersDb.push({
@@ -216,7 +216,7 @@ export const getLeagueDraftPicksObj = (
     }
 
     tradedPicks
-      .filter(
+      ?.filter(
         (x) =>
           x.owner_id === roster.roster_id && parseInt(x.season) >= draftSeason
       )
@@ -250,7 +250,7 @@ export const getLeagueDraftPicksObj = (
       });
 
     tradedPicks
-      .filter(
+      ?.filter(
         (x) =>
           x.previous_owner_id === roster.roster_id &&
           parseInt(x.season) >= draftSeason
@@ -327,7 +327,7 @@ export const getTrades = async (
 
   tradesBatch.push(
     ...transactions.data
-      .filter(
+      ?.filter(
         (t: SleeperTrade) =>
           t.type === "trade" &&
           t.status === "complete" &&
