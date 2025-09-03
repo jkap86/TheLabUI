@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
 
       const result = await pool.query(findUpdatedLeaguesQuery, [league_ids]);
 
-      const upToDateLeagues = result.rows.filter(
+      const upToDateLeagues = result.rows?.filter(
         (league) => league.updated_at > league_update_cutoff
       );
 
@@ -75,11 +75,11 @@ export async function GET(req: NextRequest) {
       );
 
       const leagueIdsToUpdate = leaguesBatch
-        .filter(
+        ?.filter(
           (league: SleeperLeague) =>
             !upToDateLeagueIds.includes(league.league_id)
         )
-        .map((league) => league.league_id);
+        ?.map((league) => league.league_id);
 
       const updatedLeagues = await updateLeagues(
         leagueIdsToUpdate,
