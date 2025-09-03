@@ -443,13 +443,15 @@ export const getOptimalStarters = (
                 break;
               }
             }
-            if (!found) throw new Error("MCMF: no valid predecessor found");
+            if (!found) {
+              path.length = 0;
+              break;
+            }
           }
 
           if (onPath.has(u) && u !== s) {
-            throw new Error(
-              "MCMF: cycle detected in predecessor reconstruction"
-            );
+            path.length = 0;
+            break;
           }
 
           path.push({ u, i });
