@@ -755,7 +755,8 @@ export const getOptimalStartersLineupCheck = (
                 const e = adjU[ii];
                 if (e.to !== v) continue;
                 if (e.cap <= 0) continue;
-                if (Math.abs(dist[uu] + e.cost - dist[v]) > EPS) continue;
+                //if (Math.abs(dist[uu] + e.cost - dist[v]) > EPS) continue;
+                if (dist[uu] + e.cost >= dist[v] - 1e-12) continue;
                 u = uu;
                 i = ii;
                 found = true;
