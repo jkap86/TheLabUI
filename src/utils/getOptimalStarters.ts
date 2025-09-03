@@ -324,7 +324,7 @@ export const getOptimalStarters = (
   values: { [player_id: string]: number } | null,
   allplayers: { [player_id: string]: Allplayer }
 ) => {
-  const starting_roster_positions = roster_positions.filter(
+  const starting_roster_positions = roster_positions?.filter(
     (rp) => rp !== "BN"
   );
 
@@ -344,7 +344,7 @@ export const getOptimalStarters = (
   // Filter usable slots
   const slotKeys = (starting_roster_positions || [])
     .map((slot, index) => ({ slot, index }))
-    .filter(({ slot }) => !!position_map[slot]);
+    ?.filter(({ slot }) => !!position_map[slot]);
 
   const S = slotKeys.length;
   const V = variants.length;
