@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/pool";
 
-const CC = "public, max-age=60, s-maxage=900, stale-while-revalidate=120";
+const CC = "public, max-age=120, s-maxage=1200, stale-while-revalidate=300";
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,8 +17,6 @@ export async function GET(req: NextRequest) {
 
     const etag = `W/"${lastModified.getTime()}"`;
     const ifNoneMatch = req.headers.get("if-none-match");
-
-    console.log(etag, ifNoneMatch, lastModified);
 
     if (etag && ifNoneMatch === etag) {
       return new NextResponse(null, {
