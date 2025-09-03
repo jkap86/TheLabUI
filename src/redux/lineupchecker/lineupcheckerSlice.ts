@@ -34,6 +34,8 @@ export interface LineupcheckerState {
   isSyncingMatchup: string;
   errorSyncing: string[];
 
+  locked: boolean;
+
   liveStats: { [player_id: string]: StatObj };
 
   playersTab: string;
@@ -63,6 +65,8 @@ const initialState: LineupcheckerState = {
   errorMatchups: null,
   isSyncingMatchup: "",
   errorSyncing: [],
+
+  locked: true,
 
   liveStats: {},
 

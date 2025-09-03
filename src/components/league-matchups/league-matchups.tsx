@@ -16,6 +16,9 @@ import "./league-matchups.css";
 
 const LeagueMatchups = ({
   matchup,
+  starters_optimal_key,
+  projection_current_key,
+  projection_optimal_key,
 }: {
   matchup: {
     user_matchup: Matchup;
@@ -23,6 +26,9 @@ const LeagueMatchups = ({
     league_matchups: Matchup[];
     league: League;
   };
+  starters_optimal_key: "starters_optimal" | "starters_optimal_locked";
+  projection_current_key: "projection_current_locked" | "projection_current";
+  projection_optimal_key: "projection_optimal_locked" | "projection_optimal";
 }) => {
   const dispatch: AppDispatch = useDispatch();
   const { allplayers, nflState } = useSelector(
@@ -36,7 +42,6 @@ const LeagueMatchups = ({
   const [table1, setTable1] = useState(`Lineup`);
   const [table2, setTable2] = useState(`Lineup`);
 
-  console.log({ matchup });
   useEffect(() => {
     if (activeIndexUser) {
       setTable2("Options");
@@ -56,7 +61,7 @@ const LeagueMatchups = ({
   const median_current = matchup.league.settings.league_average_match
     ? (
         matchup.league_matchups.reduce(
-          (acc, cur) => acc + (cur.projection_current || 0),
+          (acc, cur) => acc + (cur[projection_current_key] || 0),
           0
         ) / matchup.league_matchups.length
       ).toLocaleString("en-US", {
@@ -68,7 +73,7 @@ const LeagueMatchups = ({
   const median_optimal = matchup.league.settings.league_average_match
     ? (
         matchup.league_matchups.reduce(
-          (acc, cur) => acc + (cur.projection_optimal || 0),
+          (acc, cur) => acc + (cur[projection_optimal_key] || 0),
           0
         ) / matchup.league_matchups.length
       ).toLocaleString("en-US", {
@@ -79,11 +84,11 @@ const LeagueMatchups = ({
 
   const getLineupTable = (matchupLocal?: Matchup) => {
     const data = (matchupLocal?.starters || []).map((player_id, index) => {
-      const so = matchupLocal?.starters_optimal?.find(
+      const so = matchupLocal?.[starters_optimal_key]?.find(
         (so) => so.index === index
       );
       const classname = `${
-        matchupLocal?.starters_optimal?.some(
+        matchupLocal?.[starters_optimal_key]?.some(
           (os) => os.optimal_player_id === player_id
         )
           ? "green"
@@ -145,7 +150,7 @@ const LeagueMatchups = ({
     ) {
       total_cols = [
         {
-          text: matchupLocal?.[`projection_current`].toFixed(1) || "-",
+          text: matchupLocal?.[projection_current_key].toFixed(1) || "-",
           colspan: 2,
           classname: "highlight",
         },
@@ -158,7 +163,7 @@ const LeagueMatchups = ({
     } else {
       total_cols = [
         {
-          text: matchupLocal?.[`projection_current`]?.toFixed(1) || "-",
+          text: matchupLocal?.[projection_current_key]?.toFixed(1) || "-",
           colspan: 4,
           classname: "highlight",
         },
@@ -198,7 +203,7 @@ const LeagueMatchups = ({
   const getOptimalTable = (matchupLocal?: Matchup) => {
     const total_cols = [
       {
-        text: matchupLocal?.projection_optimal.toFixed(1) || "-",
+        text: matchupLocal?.[projection_current_key].toFixed(1) || "-",
         colspan:
           matchupLocal?.user_id === matchup.opp_matchup?.user_id &&
           median_optimal
@@ -231,7 +236,7 @@ const LeagueMatchups = ({
           },
           ...total_cols,
         ]}
-        data={(matchupLocal?.starters_optimal || []).map((so, index) => {
+        data={(matchupLocal?.[starters_optimal_key] || []).map((so, index) => {
           const player_id = so.optimal_player_id;
 
           const classname = `green`;
@@ -325,7 +330,7 @@ const LeagueMatchups = ({
               matchupLocal?.starters[
                 (activeIndex && parseInt(activeIndex)) || 0
               ];
-            const classname = matchupLocal?.starters_optimal?.some(
+            const classname = matchupLocal?.[starters_optimal_key]?.some(
               (so2) => so2.optimal_player_id === so
             )
               ? "green"

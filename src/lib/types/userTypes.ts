@@ -103,26 +103,28 @@ export type Leaguemate = {
   leagues: string[];
 };
 
+type OptimalStarter = {
+  index: number;
+  slot__index: string;
+  optimal_player_id: string;
+  optimal_player_position: string;
+  optimal_player_value: number;
+  optimal_player_kickoff: number;
+  current_player_id: string;
+  current_player_position: string;
+  current_player_value: number;
+  current_player_kickoff: number;
+  earlyInFlex: boolean;
+  lateNotInFlex: boolean;
+};
+
 export type Matchup = {
   roster_id: number;
   matchup_id: number;
   league_id: string;
   players: string[];
   starters: string[];
-  starters_optimal?: {
-    index: number;
-    slot__index: string;
-    optimal_player_id: string;
-    optimal_player_position: string;
-    optimal_player_value: number;
-    optimal_player_kickoff: number;
-    current_player_id: string;
-    current_player_position: string;
-    current_player_value: number;
-    current_player_kickoff: number;
-    earlyInFlex: boolean;
-    lateNotInFlex: boolean;
-  }[];
+  starters_optimal: OptimalStarter[];
   week?: number;
   updated_at?: Date;
   roster_id_user: number;
@@ -133,6 +135,11 @@ export type Matchup = {
   values: { [player_id: string]: number };
   projection_current: number;
   projection_optimal: number;
+
+  starters_optimal_locked: OptimalStarter[];
+  projection_current_locked: number;
+  projection_optimal_locked: number;
+
   live_values?: {
     [player_id: string]: {
       points: number;
@@ -141,20 +148,7 @@ export type Matchup = {
   };
   live_projection_current?: number;
   live_projection_optimal?: number;
-  live_starters_optimal?: {
-    index: number;
-    slot__index: string;
-    optimal_player_id: string;
-    optimal_player_position: string;
-    optimal_player_value: number;
-    optimal_player_kickoff: number;
-    current_player_id: string;
-    current_player_position: string;
-    current_player_value: number;
-    current_player_kickoff: number;
-    earlyInFlex: boolean;
-    lateNotInFlex: boolean;
-  }[];
+  live_starters_optimal?: OptimalStarter[];
 };
 
 export type Trade = {

@@ -80,8 +80,23 @@ export async function POST(req: NextRequest) {
         projections_week,
         league.data.scoring_settings,
         schedule_week,
-        edits
+        { edits }
       );
+
+    const {
+      starters_optimal: starters_optimal_locked,
+      projection_current: projection_current_locked,
+      projection_optimal: projection_optimal_locked,
+    } = getOptimalStartersLineupCheck(
+      allplayers,
+      league.data.roster_positions,
+      m.players,
+      m.starters,
+      projections_week,
+      league.data.scoring_settings,
+      schedule_week,
+      { edits, locked: true }
+    );
 
     updated_matchups.push({
       ...m,
@@ -102,6 +117,18 @@ export async function POST(req: NextRequest) {
       projection_current:
         best_ball === 1 ? projection_optimal : projection_current,
       projection_optimal,
+      starters_optimal_locked:
+        league.data.settings.best_ball === 1
+          ? starters_optimal
+          : starters_optimal_locked,
+      projection_current_locked:
+        league.data.settings.best_ball === 1
+          ? projection_current
+          : projection_current_locked,
+      projection_optimal_locked:
+        league.data.settings.best_ball === 1
+          ? projection_optimal
+          : projection_optimal_locked,
     });
   });
 

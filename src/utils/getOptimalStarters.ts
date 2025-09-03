@@ -577,6 +577,11 @@ export const getOptimalStarters = (
   return optimal_starters;
 };
 
+type Options = {
+  edits?: ProjectionEdits;
+  locked?: boolean;
+  taxi?: string[];
+};
 export const getOptimalStartersLineupCheck = (
   allplayers: { [player_id: string]: Allplayer },
   roster_positions: string[],
@@ -585,8 +590,31 @@ export const getOptimalStartersLineupCheck = (
   stat_obj: { [player_id: string]: { [key: string]: number } },
   scoring_settings: { [cat: string]: number },
   schedule: { [team: string]: { kickoff: number; opp: string } },
-  edits?: ProjectionEdits
+  options?: Options
 ) => {
+  /*
+  const schedule = Object.fromEntries(
+    Object.keys(schedule_test).map((team) => {
+      if (["PHI", "DAL"].includes(team)) {
+        return [
+          team,
+          {
+            ...schedule_test[team],
+            kickoff: schedule_test[team].kickoff - 3 * 24 * 60 * 60 * 1000,
+          },
+        ];
+      } else {
+        return [
+          team,
+          {
+            ...schedule_test[team],
+          },
+        ];
+      }
+    })
+  );
+  */
+
   const starting_roster_positions = roster_positions.filter(
     (rp) => rp !== "BN"
   );
@@ -617,7 +645,7 @@ export const getOptimalStartersLineupCheck = (
     values[player_id] = getPlayerTotal(
       scoring_settings,
       stat_obj[player_id] || {},
-      edits?.[player_id]
+      options?.edits?.[player_id]
     );
   }
 
@@ -783,17 +811,46 @@ export const getOptimalStartersLineupCheck = (
     u: number;
     ei: number;
   }[] = [];
+  const now = Date.now();
+  const startersSet = new Set(starters);
+
+  // players on bench (not already in starters) whose kickoff has passed
+  const frozenBench = new Set(
+    players.filter((pid) => {
+      if (startersSet.has(pid)) return false;
+      const team = allplayers[pid]?.team || "";
+      const k = schedule[team]?.kickoff || 0;
+      return k > 0 && k <= now;
+    })
+  );
+
   for (let si = 0; si < S; si++) {
-    const { slot } = slotEntries[si];
+    const { slot, index: originalIndex } = slotEntries[si];
     const elig = new Set(position_map[slot] || []);
     const u = baseSlots + si;
+
+    // identify current player & whether this slot should be locked
+    const curPlayer = starters[originalIndex];
+    const curKick = schedule[allplayers[curPlayer]?.team || ""]?.kickoff || 0;
+    const slotIsLockedToCurrent =
+      !!options?.locked && curPlayer && curKick > 0 && curKick <= now;
+
     for (let vi = 0; vi < V; vi++) {
       const v = variants[vi];
-      if (elig.has(v.position)) {
-        const before = g.adj[u].length;
-        g.addEdge(u, baseVariants + vi, 1, -v.value);
-        slotVariantEdge.push({ slotIdx: si, varIdx: vi, u, ei: before });
-      }
+
+      if (options?.taxi && options.taxi.includes(v.player_id)) continue;
+
+      if (options?.locked && frozenBench.has(v.player_id)) continue;
+
+      // respect position eligibility
+      if (!elig.has(v.position)) continue;
+
+      // if locked, ONLY allow the current starter's variants in this slot
+      if (slotIsLockedToCurrent && v.player_id !== curPlayer) continue;
+
+      const before = g.adj[u].length;
+      g.addEdge(u, baseVariants + vi, 1, -v.value);
+      slotVariantEdge.push({ slotIdx: si, varIdx: vi, u, ei: before });
     }
   }
 

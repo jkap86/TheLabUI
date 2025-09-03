@@ -22,6 +22,7 @@ const LineupcheckerMatchups = ({
 }) => {
   const { allplayers } = useSelector((state: RootState) => state.common);
   const { type1, type2 } = useSelector((state: RootState) => state.manager);
+  const { locked } = useSelector((state: RootState) => state.lineupchecker);
 
   const headers = [
     {
@@ -51,6 +52,18 @@ const LineupcheckerMatchups = ({
     },
   ];
 
+  const projection_current_key = locked
+    ? "projection_current_locked"
+    : "projection_current";
+
+  const projection_optimal_key = locked
+    ? "projection_optimal_locked"
+    : "projection_optimal";
+
+  const starters_optimal_key = locked
+    ? "starters_optimal_locked"
+    : "starters_optimal";
+
   const data = league_matchups
     .filter(
       (lm) =>
@@ -66,33 +79,38 @@ const LineupcheckerMatchups = ({
     )
     .sort((a, b) => a.league.index - b.league.index)
     .map((matchup) => {
+      const starters_optimal = locked
+        ? matchup.user_matchup.starters_optimal_locked
+        : matchup.user_matchup.starters_optimal;
+
+      const delta = locked
+        ? matchup.user_matchup.projection_optimal_locked -
+          matchup.user_matchup.projection_current_locked
+        : matchup.user_matchup.projection_optimal -
+          matchup.user_matchup.projection_current;
+
       const { text, classname } =
         !matchup.user_matchup.starters.some(
-          (s) =>
-            !matchup.user_matchup.starters_optimal?.some(
-              (so) => so.optimal_player_id === s
-            )
+          (s) => !starters_optimal?.some((so) => so.optimal_player_id === s)
         ) &&
-        !matchup.user_matchup.starters_optimal?.some(
+        !starters_optimal?.some(
           (so) => !matchup.user_matchup.starters.includes(so.optimal_player_id)
         )
           ? { text: <>&#10004;&#xfe0e;</>, classname: "green" }
           : {
-              text: (
-                matchup.user_matchup.projection_optimal -
-                matchup.user_matchup.projection_current
-              ).toLocaleString("en-US", { maximumFractionDigits: 1 }),
+              text: delta.toLocaleString("en-US", {
+                maximumFractionDigits: 1,
+                minimumFractionDigits: 1,
+              }),
               classname: "red",
             };
 
       const inOrder =
         matchup.league.settings.best_ball === 1 ||
-        !matchup.user_matchup.starters_optimal?.some(
-          (so) => so.earlyInFlex || so.lateNotInFlex
-        )
+        !starters_optimal?.some((so) => so.earlyInFlex || so.lateNotInFlex)
           ? { text: <>&#10004;&#xfe0e;</>, colspan: 1, classname: "green" }
           : {
-              text: "x",
+              text: "\u2716\uFE0E",
               colspan: 1,
               classname: "red",
             };
@@ -108,28 +126,28 @@ const LineupcheckerMatchups = ({
         .replace("0", "\u2714\uFE0E");
 
       const matchupVsOpp = matchup.opp_matchup
-        ? matchup.user_matchup.projection_current >
-          matchup.opp_matchup.projection_current
+        ? matchup.user_matchup[projection_current_key] >
+          matchup.opp_matchup[projection_current_key]
           ? "W"
-          : matchup.user_matchup.projection_current <
-            matchup.opp_matchup.projection_current
+          : matchup.user_matchup[projection_current_key] <
+            matchup.opp_matchup[projection_current_key]
           ? "L"
           : "T"
         : "-";
 
       const median_current = matchup.league.settings.league_average_match
         ? matchup.league_matchups.reduce(
-            (acc, cur) => acc + (cur.projection_current || 0),
+            (acc, cur) => acc + (cur[projection_current_key] || 0),
             0
           ) / matchup.league_matchups.length
         : false;
 
       const matchupVsMed = median_current
-        ? matchup.user_matchup.projection_current < median_current
+        ? matchup.user_matchup[projection_current_key] < median_current
           ? "L"
-          : matchup.user_matchup.projection_current > median_current
+          : matchup.user_matchup[projection_current_key] > median_current
           ? "W"
-          : matchup.user_matchup.projection_current === median_current
+          : matchup.user_matchup[projection_current_key] === median_current
           ? "T"
           : ""
         : "";
@@ -183,7 +201,7 @@ const LineupcheckerMatchups = ({
                   }
                 >
                   {matchupVsOpp}
-                </span>{" "}
+                </span>
                 {matchupVsMed && (
                   <span
                     className={
@@ -203,7 +221,14 @@ const LineupcheckerMatchups = ({
             colspan: 1,
           },
         ],
-        secondary: <LeagueMatchups matchup={matchup} />,
+        secondary: (
+          <LeagueMatchups
+            matchup={matchup}
+            starters_optimal_key={starters_optimal_key}
+            projection_current_key={projection_current_key}
+            projection_optimal_key={projection_optimal_key}
+          />
+        ),
       };
     });
 

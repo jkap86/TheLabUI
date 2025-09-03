@@ -54,6 +54,7 @@ export async function GET(req: NextRequest) {
       `https://api.sleeper.app/v1/user/${user_id}/leagues/nfl/${process.env.SEASON}`
     );
 
+    console.log({ LEN: leagues.data.length });
     const processLeagues = async (leaguesBatch: SleeperLeague[]) => {
       const league_ids = leaguesBatch.map(
         (league: SleeperLeague) => league.league_id

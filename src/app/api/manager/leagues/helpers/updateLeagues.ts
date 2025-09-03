@@ -121,7 +121,7 @@ export const updateLeagues = async (
               status: league.data.status,
               settings: league.data.settings,
               scoring_settings: league.data.scoring_settings,
-              roster_positions: league.data.roster_positions,
+              roster_positions: league.data.roster_positions || [],
               rosters: rostersUserInfo,
               updated_at: new Date(),
             });
