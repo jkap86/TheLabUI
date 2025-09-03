@@ -8,6 +8,8 @@ import axiosInstance from "@/lib/axiosInstance";
 import { Allplayer } from "@/lib/types/commonTypes";
 import { getRosterStats } from "./helpers/getRosterStats";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   const league_update_cutoff: Date = new Date(Date.now() - 3 * 60 * 60 * 1000);
 
@@ -24,9 +26,9 @@ export async function GET(req: NextRequest) {
       await pool.query("SELECT * FROM common WHERE name = 'projections_ros'")
     ).rows[0]?.data;
 
-    const projections = Object.fromEntries(
-      projections_db.map((p) => [p.player_id, p.stats])
-    );
+    const projections = projections_db
+      ? Object.fromEntries(projections_db.map((p) => [p.player_id, p.stats]))
+      : {};
 
     const allplayers_db = await (
       await pool.query("SELECT * FROM common WHERE name = 'allplayers'")
@@ -47,14 +49,12 @@ export async function GET(req: NextRequest) {
             (a, b) => new Date(b).getTime() - new Date(a).getTime()
           )[0]
         ],
-      redraft: {},
     };
 
     const leagues = await axiosInstance.get(
       `https://api.sleeper.app/v1/user/${user_id}/leagues/nfl/${process.env.SEASON}`
     );
 
-    console.log({ LEN: leagues.data.length });
     const processLeagues = async (leaguesBatch: SleeperLeague[]) => {
       const league_ids = leaguesBatch.map(
         (league: SleeperLeague) => league.league_id
@@ -122,19 +122,19 @@ export async function GET(req: NextRequest) {
 
     const batchSize = 25;
 
+    const encoder = new TextEncoder();
+
     const stream = new ReadableStream({
       async start(controller) {
         try {
           for (let i = 0; i < leagues.data.length; i += batchSize) {
-            const batchLeagues = await processLeagues(
+            const processed = await processLeagues(
               leagues.data.slice(i, i + batchSize)
             );
 
-            const batchData =
-              JSON.stringify(batchLeagues) +
-              (i + batchSize > leagues.data.length ? "" : "\n");
-
-            controller.enqueue(new TextEncoder().encode(batchData));
+            for (const league of processed) {
+              controller.enqueue(encoder.encode(JSON.stringify(league) + "\n"));
+            }
           }
 
           controller.close();
@@ -152,7 +152,12 @@ export async function GET(req: NextRequest) {
 
     return new NextResponse(stream, {
       status: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/x-ndjson",
+        "Cache-Control": "private, max-age=60, stale-while-revalidate=300",
+        "X-Content-Type-Options": "nosniff",
+        Connection: "keep-alive",
+      },
     });
   } catch (err: unknown) {
     if (err instanceof Error) {

@@ -10,9 +10,6 @@ export const getRosterStats = (
     dynasty: {
       [player_id: string]: number;
     };
-    redraft: {
-      [player_id: string]: number;
-    };
   }
 ) => {
   const rankings = [...league.rosters].sort(

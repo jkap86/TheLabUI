@@ -19,7 +19,7 @@ interface LoadCommonDataProps {
 }
 
 const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
-  const { isLoadingCommon, errorCommon } = useSelector(
+  const { isLoadingCommon, errorCommon, nflState, allplayers } = useSelector(
     (state: RootState) => state.common
   );
   const {
@@ -56,7 +56,10 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
             );
           })}
         </div>
-      ) : isLoadingCommon.length > 0 || isLoadingUser ? (
+      ) : !allplayers ||
+        !nflState ||
+        isLoadingCommon.length > 0 ||
+        isLoadingUser ? (
         <div className="flex-1 flex flex-col justify-center items-center">
           <LoadingIcon messages={[]} />
         </div>

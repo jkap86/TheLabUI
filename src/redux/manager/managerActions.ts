@@ -65,7 +65,7 @@ export const fetchLeagues = createAsyncThunk(
       .filter((chunk) => chunk.length > 0)
       .forEach((chunk) => {
         try {
-          parsedLeaguesArray.push(...JSON.parse(chunk));
+          parsedLeaguesArray.push(JSON.parse(chunk));
         } catch (err: unknown) {
           console.log({ err, chunk });
         }
