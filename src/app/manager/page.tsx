@@ -7,14 +7,14 @@ const Manager = () => {
   const [tab, setTab] = useState("");
   const [username_searched, setUsername_searched] = useState("");
 
-  const tab_options = [
-    "leagues",
-    "players",
-    "leaguemates",
-    "leaguemate trades",
-  ];
-
   useEffect(() => {
+    const tab_options = [
+      "leagues",
+      "players",
+      "leaguemates",
+      "leaguemate trades",
+    ];
+
     const tab_previous = localStorage.getItem("tab");
 
     if (tab_previous && tab_options.includes(tab_previous)) {
@@ -22,7 +22,7 @@ const Manager = () => {
     } else {
       setTab("LEAGUES");
     }
-  }, [tab_options]);
+  }, []);
 
   return (
     <Homepage
