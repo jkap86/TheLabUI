@@ -39,7 +39,7 @@ export const getRosterStats = (
     );
 
     const bench_ppg = (roster.players || [])
-      .filter(
+      ?.filter(
         (player_id) =>
           !starters_optimal_ppg.some((so) => so.optimal_player_id === player_id)
       )
@@ -62,7 +62,7 @@ export const getRosterStats = (
     );
 
     const bench_dynasty = (roster.players || [])
-      .filter(
+      ?.filter(
         (player_id) =>
           !starters_optimal_dynasty.some(
             (so) => so.optimal_player_id === player_id
@@ -99,26 +99,26 @@ export const getRosterStats = (
         .slice(0, 5)
         .reduce((acc, cur) => acc + cur.value, 0),
       ktc_dynasty__starter_qb: starters_optimal_dynasty
-        .filter((so) => allplayers[so.optimal_player_id]?.position === "QB")
+        ?.filter((so) => allplayers[so.optimal_player_id]?.position === "QB")
         .reduce((acc, cur) => acc + cur.value, 0),
       ktc_dynasty__bench_top_qb: bench_dynasty
-        .filter((p) => allplayers[p.player_id]?.position === "QB")
+        ?.filter((p) => allplayers[p.player_id]?.position === "QB")
         .slice(0, 1)
         .reduce((acc, cur) => acc + cur.value, 0),
 
       ktc_dynasty__bench_top5_flex: bench_dynasty
-        .filter((p) =>
+        ?.filter((p) =>
           ["RB", "WR", "TE"].includes(allplayers[p.player_id]?.position)
         )
         .slice(0, 5)
         .reduce((acc, cur) => acc + cur.value, 0),
 
       ktc_dynasty__starter_rb: starters_optimal_dynasty
-        .filter((so) => allplayers[so.optimal_player_id]?.position === "RB")
+        ?.filter((so) => allplayers[so.optimal_player_id]?.position === "RB")
         .reduce((acc, cur) => acc + cur.value, 0),
 
       ktc_dynasty__starter_wr: starters_optimal_dynasty
-        .filter((so) => allplayers[so.optimal_player_id]?.position === "WR")
+        ?.filter((so) => allplayers[so.optimal_player_id]?.position === "WR")
         .reduce((acc, cur) => acc + cur.value, 0),
 
       ros_projections__starters: starters_optimal_ppg.reduce(
@@ -131,16 +131,16 @@ export const getRosterStats = (
         .reduce((acc, cur) => acc + cur.value, 0),
 
       ros_projections__starter_qb: starters_optimal_ppg
-        .filter((so) => allplayers[so.optimal_player_id]?.position === "QB")
+        ?.filter((so) => allplayers[so.optimal_player_id]?.position === "QB")
         .reduce((acc, cur) => acc + cur.value, 0),
 
       ros_projections__bench_top_qb: bench_ppg
-        .filter((p) => allplayers[p.player_id]?.position === "QB")
+        ?.filter((p) => allplayers[p.player_id]?.position === "QB")
         .slice(0, 1)
         .reduce((acc, cur) => acc + cur.value, 0),
 
       ros_projections__bench_top5_flex: bench_ppg
-        .filter((p) =>
+        ?.filter((p) =>
           ["RB", "WR", "TE"].includes(allplayers[p.player_id]?.position)
         )
 
@@ -148,11 +148,11 @@ export const getRosterStats = (
         .reduce((acc, cur) => acc + cur.value, 0),
 
       ros_projections__starter_rb: starters_optimal_ppg
-        .filter((so) => allplayers[so.optimal_player_id]?.position === "RB")
+        ?.filter((so) => allplayers[so.optimal_player_id]?.position === "RB")
         .reduce((acc, cur) => acc + cur.value, 0),
 
       ros_projections__starter_wr: starters_optimal_ppg
-        .filter((so) => allplayers[so.optimal_player_id]?.position === "WR")
+        ?.filter((so) => allplayers[so.optimal_player_id]?.position === "WR")
         .reduce((acc, cur) => acc + cur.value, 0),
     };
   });
