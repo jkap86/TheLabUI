@@ -22,7 +22,7 @@ const Manager = () => {
     } else {
       setTab("LEAGUES");
     }
-  }, []);
+  }, [tab_options]);
 
   return (
     <Homepage

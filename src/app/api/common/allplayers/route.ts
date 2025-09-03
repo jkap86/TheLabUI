@@ -119,7 +119,7 @@ export async function GET(req: Request) {
     }
   } catch (err) {
     return NextResponse.json(
-      { error: "Failed to load players" },
+      { error: "Failed to load players - ", err },
       { status: 500 }
     );
   }
