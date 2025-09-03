@@ -16,8 +16,11 @@ const Heading = () => {
   );
 
   useEffect(() => {
-    if (pathname.split("/")[1] === "manager")
-      localStorage.setItem("tab", pathname.split("/")[3]);
+    if (pathname.split("/")[1] === "manager") {
+      const tabLocal = pathname.split("/")[3];
+
+      localStorage.setItem("tab", tabLocal);
+    }
   }, [pathname]);
 
   const leagueCount = (
