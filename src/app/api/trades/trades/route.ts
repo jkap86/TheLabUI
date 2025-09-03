@@ -136,7 +136,7 @@ export async function GET(req: NextRequest) {
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
-              = $1
+              = $${values.length + 1}
             LIMIT 1
           )`
           );
@@ -147,7 +147,7 @@ export async function GET(req: NextRequest) {
             WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
               = $${values.length + 1}
             LIMIT 1
-        ) != t.adds ->> $1`);
+        ) = t.adds ->> $1`);
         }
       } else {
         if (player_id1?.includes(".")) {
