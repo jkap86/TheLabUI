@@ -39,7 +39,7 @@ export const getRosterStats = (
     );
 
     const bench_ppg = (roster.players || [])
-      ?.filter(
+      .filter(
         (player_id) =>
           !starters_optimal_ppg.some((so) => so.optimal_player_id === player_id)
       )
@@ -54,15 +54,16 @@ export const getRosterStats = (
       })
       .sort((a, b) => b.value - a.value);
 
-    const starters_optimal_dynasty = getOptimalStarters(
-      league.roster_positions,
-      roster?.players || [],
-      ktcCurrent.dynasty,
-      allplayers
-    );
+    const starters_optimal_dynasty =
+      getOptimalStarters(
+        league.roster_positions,
+        roster?.players || [],
+        ktcCurrent.dynasty,
+        allplayers
+      ) || [];
 
     const bench_dynasty = (roster.players || [])
-      ?.filter(
+      .filter(
         (player_id) =>
           !starters_optimal_dynasty.some(
             (so) => so.optimal_player_id === player_id

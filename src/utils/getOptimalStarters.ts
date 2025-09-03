@@ -1276,7 +1276,7 @@ export const getPlayerTotal = (
   edits?: { [cat: string]: { update: number | ""; sleeper_value: number } }
 ) => {
   const projection = Object.keys(stat_obj || {})
-    .filter((key) => Object.keys(scoring_settings).includes(key))
+    ?.filter((key) => Object.keys(scoring_settings).includes(key))
     .reduce(
       (acc, cur) =>
         acc +
