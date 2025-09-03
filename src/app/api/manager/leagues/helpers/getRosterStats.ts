@@ -31,12 +31,13 @@ export const getRosterStats = (
       })
     );
 
-    const starters_optimal_ppg = getOptimalStarters(
-      league.roster_positions,
-      roster?.players || [],
-      values,
-      allplayers
-    );
+    const starters_optimal_ppg =
+      getOptimalStarters(
+        league.roster_positions,
+        roster?.players || [],
+        values,
+        allplayers
+      ) || [];
 
     const bench_ppg = (roster.players || [])
       .filter(
