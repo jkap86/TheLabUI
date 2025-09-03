@@ -744,8 +744,12 @@ export const getOptimalStartersLineupCheck = (
           if (!ok) {
             let found = false;
             for (let uu = 0; uu < N && !found; uu++) {
+              if (onPath.has(uu)) continue;
+
               if (!Number.isFinite(dist[uu])) continue;
+
               const adjU = this.adj[uu];
+
               for (let ii = 0; ii < adjU.length; ii++) {
                 const e = adjU[ii];
                 if (e.to !== v) continue;
