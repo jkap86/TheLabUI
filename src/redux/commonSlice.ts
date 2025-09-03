@@ -12,7 +12,6 @@ export interface CommonState {
   allplayers: { [player_id: string]: Allplayer } | null;
   ktcCurrent: {
     dynasty: { [player_id: string]: number };
-    redraft: { [player_id: string]: number };
   } | null;
   projections: { [player_id: string]: { [cat: string]: number } } | null;
   isLoadingCommon: string[];
@@ -42,7 +41,6 @@ const commonSlice = createSlice({
       action: PayloadAction<{
         ktcCurrent: {
           dynasty: { [player_id: string]: number };
-          redraft: { [player_id: string]: number };
         } | null;
         projections: { [player_id: string]: { [cat: string]: number } } | null;
       }>
@@ -102,7 +100,6 @@ const commonSlice = createSlice({
 
         state.ktcCurrent = {
           dynasty: Object.fromEntries(action.payload.dynasty.values),
-          redraft: Object.fromEntries(action.payload.redraft.values),
         };
       })
       .addCase(fetchKtc.rejected, (state, action) => {
