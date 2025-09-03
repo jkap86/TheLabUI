@@ -203,7 +203,7 @@ const LeagueMatchups = ({
   const getOptimalTable = (matchupLocal?: Matchup) => {
     const total_cols = [
       {
-        text: matchupLocal?.[projection_current_key].toFixed(1) || "-",
+        text: matchupLocal?.[projection_optimal_key].toFixed(1) || "-",
         colspan:
           matchupLocal?.user_id === matchup.opp_matchup?.user_id &&
           median_optimal

@@ -188,7 +188,7 @@ export async function POST(req: NextRequest) {
                     : starters_optimal_locked,
                 projection_current_locked:
                   league.settings.best_ball === 1
-                    ? projection_current
+                    ? projection_optimal
                     : projection_current_locked,
                 projection_optimal_locked:
                   league.settings.best_ball === 1
@@ -285,7 +285,7 @@ export async function POST(req: NextRequest) {
                   : starters_optimal_locked,
               projection_current_locked:
                 mobj.league.settings.best_ball === 1
-                  ? projection_current
+                  ? projection_optimal
                   : projection_current_locked,
               projection_optimal_locked:
                 mobj.league.settings.best_ball === 1
