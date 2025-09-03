@@ -1,18 +1,16 @@
 "use client";
 
-import { AppDispatch, RootState } from "@/redux/store";
+import { RootState } from "@/redux/store";
 import { use } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import LineupcheckerLayout from "../lineupchecker-layout";
 import LineupcheckerMatchups from "@/components/lineupchecker-matchups/lineupchecker-matchups";
-import { updateLineupcheckerState } from "@/redux/lineupchecker/lineupcheckerSlice";
+//import { updateLineupcheckerState } from "@/redux/lineupchecker/lineupcheckerSlice";
 
 const Matchups = ({ params }: { params: Promise<{ searched: string }> }) => {
-  const dispatch: AppDispatch = useDispatch();
+  //const dispatch: AppDispatch = useDispatch();
   const { searched } = use(params);
-  const { matchups, locked } = useSelector(
-    (state: RootState) => state.lineupchecker
-  );
+  const { matchups } = useSelector((state: RootState) => state.lineupchecker);
 
   const component = (
     <>
