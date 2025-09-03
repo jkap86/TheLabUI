@@ -337,7 +337,7 @@ export const getOptimalStarters = (
   const variants: Variant[] = players.flatMap((pid) => {
     const poss = allplayers?.[pid]?.fantasy_positions || [];
     const val = values?.[pid] ?? 0;
-    return poss.map((pos) => ({ player_id: pid, position: pos, value: val }));
+    return poss?.map((pos) => ({ player_id: pid, position: pos, value: val }));
   });
 
   // Filter usable slots
@@ -475,7 +475,7 @@ export const getOptimalStarters = (
   }
 
   // Unique players → player nodes to enforce "use at most once"
-  const uniquePlayers = Array.from(new Set(variants.map((v) => v.player_id)));
+  const uniquePlayers = Array.from(new Set(variants?.map((v) => v.player_id)));
   const pIndex: Record<string, number> = {};
   uniquePlayers.forEach((pid, i) => (pIndex[pid] = i));
 
@@ -535,7 +535,7 @@ export const getOptimalStarters = (
   }
 
   // build return in ORIGINAL roster order (index is original array position)
-  const optimal_starters = starting_roster_positions.map((slot, index) => {
+  const optimal_starters = starting_roster_positions?.map((slot, index) => {
     if (!position_map[slot]) {
       return {
         index,
