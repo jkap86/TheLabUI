@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     const [schedule, statsRaw] = await Promise.all([
       getSchedule(week),
       axios.get(
-        `https://api.sleeper.com/stats/nfl/2024/${week}?season_type=regular`,
+        `https://api.sleeper.com/stats/nfl/${process.env.SEASON}/${week}?season_type=regular`,
         {
           params: {
             timestamp: new Date().getTime(),

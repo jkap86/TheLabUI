@@ -13,7 +13,7 @@ import LeagueTypeSwitch from "@/components/leagueTypeSwitch/leagueTypeSwitch";
 import { usePathname, useRouter } from "next/navigation";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
 import "../../../components/heading/heading.css";
-//import useFetchLive from "@/hooks/lineupchecker/useFetchLive";
+import useFetchLive from "@/hooks/lineupchecker/useFetchLive";
 
 interface LayoutProps {
   searched: string;
@@ -37,7 +37,7 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
   useFetchNflState();
   useFetchAllplayers();
   useFetchMatchups({ searched });
-  //  useFetchLive();
+  useFetchLive();
 
   const proj_record = Object.values(matchups)
     .filter(

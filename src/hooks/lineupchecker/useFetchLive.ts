@@ -4,15 +4,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { StatObj } from "@/lib/types/commonTypes";
 import { updateLiveStats } from "@/redux/lineupchecker/lineupcheckerSlice";
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 type Response = {
   delay: number;
   stats: StatObj[];
 };
-
-const fetcher = (url: string) =>
-  axios.get<Response>(url).then((res) => res.data);
 
 export default function useFetchLive() {
   const dispatch: AppDispatch = useDispatch();
@@ -28,19 +25,48 @@ export default function useFetchLive() {
     ? `/api/lineupchecker/live?week=${encodeURIComponent(week)}`
     : null;
 
-  useSWR<Response>(route, fetcher, {
-    refreshInterval: (data) => data?.delay ?? 30_000, // fallback 30s
-    revalidateOnFocus: true,
-    revalidateOnReconnect: true,
-    dedupingInterval: 4000,
-    onSuccess: (data) => {
+  const fetcher = useCallback(
+    (url: string) => axios.get<Response>(url).then((res) => res.data),
+    []
+  );
+
+  const refreshInterval = useCallback(
+    (data?: Response) => data?.delay ?? 30_000,
+    []
+  );
+
+  const onSuccess = useCallback(
+    (data: Response) => {
       const liveObj = Object.fromEntries(
         data.stats.map((statObj) => [statObj.player_id, statObj])
       );
 
       dispatch(updateLiveStats(liveObj));
     },
-  });
+    [dispatch]
+  );
+
+  const swrOptions = useMemo(
+    () => ({
+      refreshInterval,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      revalidateIfStale: true,
+      revalidateOnMount: false,
+      dedupingInterval: 10_000,
+      shouldRetryOnError: true,
+      onSuccess,
+    }),
+    [refreshInterval, onSuccess]
+  );
+
+  const { data, mutate } = useSWR<Response>(route, fetcher, swrOptions);
+
+  useEffect(() => {
+    if (route && !data) {
+      mutate(fetcher(route), { revalidate: false });
+    }
+  }, [route, data, fetcher, mutate]);
 
   useEffect(() => {
     if (Object.keys(liveStats).length === 0) return;
