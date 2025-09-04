@@ -50,10 +50,20 @@ export async function GET(req: NextRequest) {
 
       return NextResponse.json(
         { user_id, username: display_name, avatar },
-        { status: 200 }
+        {
+          status: 200,
+          headers: {
+            "Cache-Control": "private, max-age=300, stale-while-revalidate=60",
+          },
+        }
       );
     } else {
-      return NextResponse.json(result.rows[0], { status: 200 });
+      return NextResponse.json(result.rows[0], {
+        status: 200,
+        headers: {
+          "Cache-Control": "private, max-age=300, stale-while-revalidate=60",
+        },
+      });
     }
   } catch (err: unknown) {
     if (err instanceof Error) {

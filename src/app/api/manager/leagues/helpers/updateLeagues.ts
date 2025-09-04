@@ -101,16 +101,21 @@ export const updateLeagues = async (
                 }
               });
 
-            if (week) {
-              const currentLeagueTrades = await getTrades(
-                league.data,
-                week,
-                rostersUserInfo,
-                upcomingDraft,
-                startupCompletionTime
-              );
+            if (week && parseInt(week) >= 1 && parseInt(week) <= 18) {
+              let week_to_fetch = parseInt(week);
 
-              tradesBatch.push(...currentLeagueTrades);
+              while (week_to_fetch > 0) {
+                const currentLeagueTrades = await getTrades(
+                  league.data,
+                  week,
+                  rostersUserInfo,
+                  upcomingDraft,
+                  startupCompletionTime
+                );
+
+                tradesBatch.push(...currentLeagueTrades);
+                week_to_fetch--;
+              }
             }
 
             updatedLeagues.push({
