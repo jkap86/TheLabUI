@@ -10,7 +10,6 @@ import { StatObj } from "@/lib/types/commonTypes";
 export interface LineupcheckerState {
   isLoadingUserLeagueIds: boolean;
   user: User | null;
-  league_ids: string[];
   errorLoadingUserLeagueIds: string | null;
 
   isLoadingMatchups: boolean;
@@ -50,7 +49,6 @@ export interface LineupcheckerState {
 const initialState: LineupcheckerState = {
   isLoadingUserLeagueIds: false,
   user: null,
-  league_ids: [],
   errorLoadingUserLeagueIds: null,
 
   isLoadingMatchups: false,
@@ -120,7 +118,6 @@ const lineupcheckerSlice = createSlice({
       .addCase(fetchUserLeagueIds.fulfilled, (state, action) => {
         state.isLoadingUserLeagueIds = false;
         state.user = action.payload.user;
-        state.league_ids = action.payload.league_ids;
       })
       .addCase(fetchUserLeagueIds.rejected, (state, action) => {
         state.isLoadingUserLeagueIds = false;

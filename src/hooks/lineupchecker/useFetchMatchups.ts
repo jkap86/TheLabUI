@@ -18,7 +18,6 @@ export default function useFetchMatchups({ searched }: { searched: string }) {
     isLoadingMatchups,
     errorMatchups,
     user,
-    league_ids,
     matchups,
     isLoadingUserLeagueIds,
     errorLoadingUserLeagueIds,
@@ -49,7 +48,6 @@ export default function useFetchMatchups({ searched }: { searched: string }) {
       !(Object.keys(matchups).length > 0) &&
       nflState &&
       user?.username.toLowerCase() === searched?.toLowerCase() &&
-      league_ids.length > 0 &&
       !isLoadingMatchups &&
       !errorMatchups &&
       !isUpdatingMatchups
@@ -57,7 +55,6 @@ export default function useFetchMatchups({ searched }: { searched: string }) {
       dispatch(
         fetchMatchups({
           user_id: user.user_id,
-          league_ids,
           week: Math.max(1, nflState?.leg as number),
           initial: true,
         })
@@ -67,7 +64,6 @@ export default function useFetchMatchups({ searched }: { searched: string }) {
     nflState,
     user,
     searched,
-    league_ids,
     isLoadingMatchups,
     errorMatchups,
     isUpdatingMatchups,

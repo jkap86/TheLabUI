@@ -3,8 +3,8 @@ import { Matchup } from "@/lib/types/userTypes";
 
 export const upsertMatchups = async (matchups: Matchup[]) => {
   const upsertMatchupsQuery = `
-      INSERT INTO matchups (week, matchup_id, roster_id, user_id, username, avatar, players, starters, league_id, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      INSERT INTO matchups (week, matchup_id, roster_id, user_id, username, avatar, players, starters, league_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       ON CONFLICT (week, roster_id, league_id) DO UPDATE SET
         matchup_id = EXCLUDED.matchup_id,
         user_id = EXCLUDED.user_id,
@@ -12,7 +12,7 @@ export const upsertMatchups = async (matchups: Matchup[]) => {
         avatar = EXCLUDED.avatar,
         players = EXCLUDED.players,
         starters = EXCLUDED.starters,
-        updated_at = EXCLUDED.updated_at;
+        updated_at = NOW();
     `;
 
   for (const matchup of matchups) {
@@ -27,7 +27,6 @@ export const upsertMatchups = async (matchups: Matchup[]) => {
         matchup.players,
         matchup.starters,
         matchup.league_id,
-        new Date(),
       ]);
     } catch (err: unknown) {
       if (err instanceof Error) {

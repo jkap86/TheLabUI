@@ -3,7 +3,7 @@ import { getSchedule } from "../helpers/getSchedule";
 import { getProjections } from "../helpers/getProjections";
 import { getAllplayers } from "../helpers/getAllplayers";
 import pool from "@/lib/pool";
-import { League, Matchup } from "@/lib/types/userTypes";
+import { League, Matchup, ProjectionEdits } from "@/lib/types/userTypes";
 import {
   SleeperMatchup,
   SleeperRoster,
@@ -12,11 +12,57 @@ import {
 import axiosInstance from "@/lib/axiosInstance";
 import { getOptimalStartersLineupCheck } from "@/utils/getOptimalStarters";
 import { upsertMatchups } from "../helpers/upsertMatchups";
+import { getMatchupsLeagueIds } from "../helpers/getMatchupsLeagueIds";
 
-export async function POST(req: NextRequest) {
-  const formData = await req.json();
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
 
-  const { user_id, league_ids: league_ids_all, week, edits } = formData;
+  const user_id = searchParams.get("user_id");
+  const week = searchParams.get("week");
+
+  const editsString = searchParams.get("edits");
+
+  let edits: ProjectionEdits = {};
+
+  if (editsString) edits = JSON.parse(editsString);
+
+  if (!user_id)
+    return NextResponse.json("No user_id provided", { status: 500 });
+
+  if (!week) return NextResponse.json("No week provided", { status: 500 });
+
+  const league_ids_all = await getMatchupsLeagueIds(user_id);
+
+  if (!league_ids_all)
+    return NextResponse.json("Error getting leagues", { status: 500 });
+
+  const {
+    rows: [ver],
+  } = await pool.query(
+    `SELECT to_char(MAX(updated_at), 'YYYYMMDDHH24MISSMS') AS maxu,
+          COUNT(*)::int AS cnt
+     FROM matchups
+    WHERE league_id = ANY($1::text[])
+      AND week = $2::int`,
+    [league_ids_all, parseInt(week as string)]
+  );
+
+  const etag = `"u=${user_id};w=${week};cnt=${ver?.cnt ?? 0};mAt=${
+    ver?.maxu ?? 0
+  }"`;
+
+  console.log({ etag, inm: req.headers.get("if-none-match") });
+
+  if (req.headers.get("if-none-match") === etag) {
+    return new NextResponse(null, {
+      status: 304,
+      headers: {
+        "Cache-Control": "private, max-age=0, stale-while-revalidate=300",
+        ETag: etag,
+        Vary: "Accept",
+      },
+    });
+  }
 
   const schedule_week = await getSchedule(week);
   const projections_week = await getProjections(week);
@@ -344,6 +390,11 @@ export async function POST(req: NextRequest) {
 
   return new NextResponse(stream, {
     status: 200,
-    headers: { "Content-Type": "application/x-ndjson; charset=utf-8" },
+    headers: {
+      "Content-Type": "application/x-ndjson",
+      "Cache-Control": "private, max-age=0, stale-while-revalidate=300",
+      "X-Content-Type-Options": "nosniff",
+      Connection: "keep-alive",
+    },
   });
 }

@@ -29,9 +29,10 @@ export const fetchLeagues = createAsyncThunk(
     { dispatch }
   ) => {
     const response = await fetch(
-      `/api/manager/leagues?user_id=${user.user_id}&week=${1}&season=${
-        nflState.season
-      }`
+      `/api/manager/leagues?user_id=${user.user_id}&week=${Math.max(
+        (nflState?.leg as number) || 0,
+        1
+      )}&season=${nflState.season}`
     );
 
     const reader = response.body?.getReader();

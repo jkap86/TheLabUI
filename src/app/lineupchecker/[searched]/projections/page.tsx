@@ -25,14 +25,8 @@ const ProjectionsPage = ({
   const { allplayers, nflState } = useSelector(
     (state: RootState) => state.common
   );
-  const {
-    projections,
-    edits,
-    schedule,
-    user,
-    league_ids,
-    updateMatchupsAvailable,
-  } = useSelector((state: RootState) => state.lineupchecker);
+  const { projections, edits, schedule, user, updateMatchupsAvailable } =
+    useSelector((state: RootState) => state.lineupchecker);
   const [filterDraftClass, setFilterDraftClass] = useState("All");
   const [filterTeam, setFilterTeam] = useState("All");
   const [filterPosition, setFilterPosition] = useState("All");
@@ -50,7 +44,6 @@ const ProjectionsPage = ({
       dispatch(
         fetchMatchups({
           user_id: user.user_id,
-          league_ids,
           week: Math.max(1, nflState?.leg as number),
           edits,
         })

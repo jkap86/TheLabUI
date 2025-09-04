@@ -25,31 +25,23 @@ export const fetchMatchups = createAsyncThunk(
   async (
     {
       user_id,
-      league_ids,
       week,
       edits,
     }: {
       user_id: string;
-      league_ids: string[];
       week: number;
       edits?: ProjectionEdits;
       initial?: true;
     },
     { dispatch }
   ) => {
-    const controller = new AbortController();
+    const res = await fetch(
+      `/api/lineupchecker/matchups?user_id=${user_id}&week=${week}&edits=${JSON.stringify(
+        edits ?? {}
+      )}`
+    );
 
-    const res = await fetch("/api/lineupchecker/matchups", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id, league_ids, week, edits }),
-      cache: "no-store",
-      signal: controller.signal,
-    });
-
-    if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
-
-    const reader = res.body.getReader();
+    const reader = res.body?.getReader();
     const decoder = new TextDecoder();
     let done = false;
     let text = "";
@@ -177,6 +169,13 @@ export const syncMatchup = createAsyncThunk(
         best_ball,
         edits,
       }
+    );
+
+    await fetch(
+      `/api/lineupchecker/matchups?user_id=${user_id}&week=${week}&edits=${JSON.stringify(
+        edits ?? {}
+      )}`,
+      { cache: "no-cache" }
     );
 
     const user_matchup = league_matchups.data.find(
