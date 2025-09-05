@@ -1,6 +1,6 @@
 "use client";
 
-import { JSX } from "react";
+import { JSX, useState } from "react";
 import LoadingIcon from "@/components/loading-icon/loading-icon";
 import useFetchMatchups from "@/hooks/lineupchecker/useFetchMatchups";
 import useFetchAllplayers from "@/hooks/useFetchAllplayers";
@@ -14,6 +14,7 @@ import { usePathname, useRouter } from "next/navigation";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
 import "../../../components/heading/heading.css";
 import useFetchLive from "@/hooks/lineupchecker/useFetchLive";
+import { getMedian } from "@/utils/getOptimalStarters";
 
 interface LayoutProps {
   searched: string;
@@ -33,13 +34,14 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
     isUpdatingMatchups,
     matchupsProgress,
   } = useSelector((state: RootState) => state.lineupchecker);
+  const [recordTab, setRecordTab] = useState<"Original" | "Live">("Original");
 
   useFetchNflState();
   useFetchAllplayers();
   useFetchMatchups({ searched });
   useFetchLive();
 
-  const proj_record = Object.values(matchups)
+  const orig_proj = Object.values(matchups)
     .filter(
       (m) =>
         (type1 === "All" ||
@@ -65,10 +67,7 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
             : "-";
 
         const median = cur.league.settings.league_average_match
-          ? cur.league_matchups.reduce(
-              (acc, cur2) => acc + (cur2[key] || 0),
-              0
-            ) / cur.league_matchups.length
+          ? getMedian(cur.league_matchups, key)
           : false;
 
         const resultMedian = median
@@ -98,14 +97,72 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
       }
     );
 
-  const recordTable = (
-    <table className="!table-auto !w-[75rem] !border-spacing-8 p-4 m-auto text-[3rem] text-center bg-gray-700 shadow-[inset_0_0_25rem_var(--color10)], shadow-[0_0_2rem_goldenrod]">
-      <tbody>
-        <tr>
-          <td className="font-chill text-[3rem]" colSpan={3}>
-            Projected Record
-          </td>
-        </tr>
+  const live_proj = Object.values(matchups)
+    .filter(
+      (m) =>
+        (type1 === "All" ||
+          (type1 === "Redraft" && m.league.settings.type !== 2) ||
+          (type1 === "Dynasty" && m.league.settings.type === 2)) &&
+        (type2 === "All" ||
+          (type2 === "Bestball" && m.league.settings.best_ball === 1) ||
+          (type2 === "Lineup" && m.league.settings.best_ball !== 1))
+    )
+    .reduce(
+      (acc, cur) => {
+        const key = "live_projection_current";
+        const user_proj = cur.user_matchup[key] ?? 0;
+        const opp_proj = cur.opp_matchup?.[key];
+
+        const resultOpp =
+          user_proj && opp_proj
+            ? user_proj > opp_proj
+              ? "W"
+              : user_proj < opp_proj
+              ? "L"
+              : "T"
+            : "-";
+
+        const median = cur.league.settings.league_average_match
+          ? getMedian(cur.league_matchups, key)
+          : false;
+
+        const resultMedian = median
+          ? user_proj < median
+            ? "L"
+            : user_proj > median
+            ? "W"
+            : "T"
+          : "";
+
+        return {
+          wins_opp: acc.wins_opp + (resultOpp === "W" ? 1 : 0),
+          losses_opp: acc.losses_opp + (resultOpp === "L" ? 1 : 0),
+          ties_opp: acc.ties_opp + (resultOpp === "T" ? 1 : 0),
+          wins_med: acc.wins_med + (resultMedian === "W" ? 1 : 0),
+          losses_med: acc.losses_med + (resultMedian === "L" ? 1 : 0),
+          ties_med: acc.ties_med + (resultMedian === "T" ? 1 : 0),
+        };
+      },
+      {
+        wins_opp: 0,
+        losses_opp: 0,
+        ties_opp: 0,
+        wins_med: 0,
+        losses_med: 0,
+        ties_med: 0,
+      }
+    );
+
+  const getRecordTable = (proj_record: {
+    wins_opp: number;
+    losses_opp: number;
+    ties_opp: number;
+    wins_med: number;
+    losses_med: number;
+    ties_med: number;
+  }) => {
+    return (
+      <>
         <tr className="shadow-[inset_0_0_5rem_var(--color10)]">
           <td className="font-metal px-8 py-4">vs Opponent</td>
           <td className="font-pulang px-8 py-4">
@@ -195,9 +252,13 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
             </em>
           </td>
         </tr>
-      </tbody>
-    </table>
-  );
+      </>
+    );
+  };
+
+  const recordTableOriginal = getRecordTable(orig_proj);
+
+  const recordTableLive = getRecordTable(live_proj);
 
   return (
     <div className="h-[100dvh] flex flex-col justify-between">
@@ -238,7 +299,41 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
           </div>
         ) : (
           <div className="flex-1">
-            {recordTable}
+            <table className="!table-auto !w-[75rem] !border-spacing-8 p-4 m-auto text-[3rem] text-center bg-gray-700 shadow-[inset_0_0_25rem_var(--color10)], shadow-[0_0_2rem_goldenrod]">
+              <tbody>
+                <tr>
+                  <td
+                    className={
+                      "text-[3rem]" +
+                      (recordTab === "Original" ? " text-[var(--color1)]" : "")
+                    }
+                    onClick={() => setRecordTab("Original")}
+                  >
+                    Original
+                  </td>
+                  <td></td>
+                  <td
+                    className={
+                      "text-[3rem]" +
+                      (recordTab === "Live" ? " text-[var(--color1)]" : "")
+                    }
+                    onClick={() => setRecordTab("Live")}
+                  >
+                    Live
+                  </td>
+                </tr>
+                <tr>
+                  <td className="font-chill text-[4rem]" colSpan={3}>
+                    Projected Record
+                  </td>
+                </tr>
+                {recordTab === "Original"
+                  ? recordTableOriginal
+                  : recordTab === "Live"
+                  ? recordTableLive
+                  : null}
+              </tbody>
+            </table>
             <br />
             <h2>
               <select
@@ -253,6 +348,7 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
                 <option>matchups</option>
                 <option>starters</option>
                 <option>projections</option>
+                <option>live</option>
               </select>
             </h2>
             {component}

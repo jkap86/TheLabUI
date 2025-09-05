@@ -1,5 +1,5 @@
 import { Allplayer } from "@/lib/types/commonTypes";
-import { ProjectionEdits } from "@/lib/types/userTypes";
+import { Matchup, ProjectionEdits } from "@/lib/types/userTypes";
 
 export const position_map: { [key: string]: string[] } = {
   QB: ["QB"],
@@ -32,6 +32,28 @@ export const getSlotAbbrev = (slot: string) => {
       return "IDP";
     default:
       return slot;
+  }
+};
+
+export const getMedian = (
+  league_matchups: Matchup[],
+  key:
+    | "projection_current"
+    | "projection_current_locked"
+    | "live_projection_current"
+) => {
+  const values = league_matchups
+    .map((cur2) => cur2[key] || 0)
+    .sort((a, b) => a - b);
+
+  const mid = Math.floor(values.length / 2);
+
+  if (values.length % 2 === 0) {
+    // even → average of two middle
+    return (values[mid - 1] + values[mid]) / 2;
+  } else {
+    // odd → middle element
+    return values[mid];
   }
 };
 

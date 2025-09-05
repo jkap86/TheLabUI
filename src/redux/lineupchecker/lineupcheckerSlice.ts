@@ -102,6 +102,19 @@ const lineupcheckerSlice = createSlice({
     ) {
       state.liveStats = action.payload;
     },
+    updateMatchups(
+      state: Draft<LineupcheckerState>,
+      action: PayloadAction<{
+        [league_id: string]: {
+          user_matchup: Matchup;
+          opp_matchup?: Matchup;
+          league_matchups: Matchup[];
+          league: League;
+        };
+      }>
+    ) {
+      state.matchups = action.payload;
+    },
     updateMatchupsProgress(
       state: Draft<LineupcheckerState>,
       action: PayloadAction<number>
@@ -197,6 +210,7 @@ export const {
   updateLineupcheckerState,
   updateLineupcheckerEdits,
   updateLiveStats,
+  updateMatchups,
 } = lineupcheckerSlice.actions;
 
 export default lineupcheckerSlice.reducer;

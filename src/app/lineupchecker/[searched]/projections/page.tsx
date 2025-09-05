@@ -6,7 +6,10 @@ import { use, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import LineupcheckerLayout from "../lineupchecker-layout";
 import Avatar from "@/components/avatar/avatar";
-import { ppr_scoring_settings } from "@/utils/getOptimalStarters";
+import {
+  getPlayerTotal,
+  ppr_scoring_settings,
+} from "@/utils/getOptimalStarters";
 import { fetchMatchups } from "@/redux/lineupchecker/lineupcheckerActions";
 import PprPointsEdit from "./components/ppr-points-edit";
 import ProjectionsPlayer from "./components/projections-player";
@@ -25,8 +28,14 @@ const ProjectionsPage = ({
   const { allplayers, nflState } = useSelector(
     (state: RootState) => state.common
   );
-  const { projections, edits, schedule, user, updateMatchupsAvailable } =
-    useSelector((state: RootState) => state.lineupchecker);
+  const {
+    projections,
+    edits,
+    schedule,
+    user,
+    updateMatchupsAvailable,
+    liveStats,
+  } = useSelector((state: RootState) => state.lineupchecker);
   const [filterDraftClass, setFilterDraftClass] = useState("All");
   const [filterTeam, setFilterTeam] = useState("All");
   const [filterPosition, setFilterPosition] = useState("All");
@@ -123,7 +132,7 @@ const ProjectionsPage = ({
         />
         <TableMain
           type={1}
-          headers_sort={[2, 3]}
+          headers_sort={[2, 3, 4]}
           headers={[
             { text: "Player", colspan: 2 },
             {
@@ -131,11 +140,15 @@ const ProjectionsPage = ({
               colspan: 1,
             },
             {
-              text: "Sleeper Ppr",
+              text: "Ppr Proj",
               colspan: 1,
             },
             {
               text: "Edited Ppr",
+              colspan: 1,
+            },
+            {
+              text: "Ppr Points",
               colspan: 1,
             },
           ]}
@@ -156,6 +169,11 @@ const ProjectionsPage = ({
               const text =
                 allplayers?.[player_id]?.full_name ||
                 (parseInt(player_id) ? "Inactive " + player_id : player_id);
+
+              const live_points = getPlayerTotal(
+                ppr_scoring_settings,
+                liveStats[player_id]?.stats ?? {}
+              );
               return {
                 id: player_id,
                 search: {
@@ -202,6 +220,12 @@ const ProjectionsPage = ({
                     colspan: 1,
                     classname: "",
                     sort: editedPpr[player_id] ?? 0,
+                  },
+                  {
+                    text: live_points.toFixed(1),
+                    classname: "",
+                    colspan: 1,
+                    sort: live_points,
                   },
                 ],
                 secondary: <ProjectionsPlayer player_id={player_id} />,

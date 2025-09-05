@@ -144,11 +144,16 @@ export type Matchup = {
     [player_id: string]: {
       points: number;
       game_percent_complete: number;
+      live_proj: number;
     };
   };
   live_projection_current?: number;
   live_projection_optimal?: number;
-  live_starters_optimal?: OptimalStarter[];
+  live_projection_starters_optimal?: OptimalStarter[];
+
+  live_points_current?: number;
+  live_points_optimal?: number;
+  live_points_starters_optimal?: OptimalStarter[];
 };
 
 export type Trade = {

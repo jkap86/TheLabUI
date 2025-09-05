@@ -27,6 +27,7 @@ export const fetchMatchups = createAsyncThunk(
       user_id,
       week,
       edits,
+      initial,
     }: {
       user_id: string;
       week: number;
@@ -38,7 +39,7 @@ export const fetchMatchups = createAsyncThunk(
     const res = await fetch(
       `/api/lineupchecker/matchups?user_id=${user_id}&week=${week}&edits=${JSON.stringify(
         edits ?? {}
-      )}`
+      )}&initial=${initial}`
     );
 
     const reader = res.body?.getReader();

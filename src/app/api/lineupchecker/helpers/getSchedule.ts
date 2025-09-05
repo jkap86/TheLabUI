@@ -1,5 +1,14 @@
 import axiosInstance from "@/lib/axiosInstance";
 
+function timeStringToS(
+  time: string | undefined,
+  quarter_num: number | ""
+): number {
+  const [minutes, seconds] = time?.split(":").map(Number) || [];
+
+  return minutes * 60 + seconds + (4 - (quarter_num || 1)) * 15 * 60;
+}
+
 export const getSchedule = async (week: string) => {
   const graphqlQuery = {
     query: `
@@ -39,21 +48,30 @@ export const getSchedule = async (week: string) => {
       metadata: {
         away_team: string;
         home_team: string;
-        time_remaining?: number;
+        time_remaining?: string;
         is_in_progress: boolean;
+        quarter_num: number | "";
       };
     }) => {
       schedule_obj[game.metadata.away_team] = {
         kickoff: game.start_time,
         opp: "@ " + game.metadata.home_team,
-        timeLeft: game.metadata.time_remaining || 3600,
+        timeLeft:
+          timeStringToS(
+            game.metadata.time_remaining,
+            game.metadata.quarter_num
+          ) ?? 3600,
         is_in_progress: game.metadata.is_in_progress,
       };
 
       schedule_obj[game.metadata.home_team] = {
         kickoff: game.start_time,
         opp: "vs " + game.metadata.away_team,
-        timeLeft: game.metadata.time_remaining || 3600,
+        timeLeft:
+          timeStringToS(
+            game.metadata.time_remaining,
+            game.metadata.quarter_num
+          ) ?? 3600,
         is_in_progress: game.metadata.is_in_progress,
       };
     }

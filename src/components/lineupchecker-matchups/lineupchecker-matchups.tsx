@@ -2,7 +2,7 @@
 
 import { League, Matchup } from "@/lib/types/userTypes";
 import { RootState } from "@/redux/store";
-import { position_map } from "@/utils/getOptimalStarters";
+import { getMedian, position_map } from "@/utils/getOptimalStarters";
 import { useSelector } from "react-redux";
 import Avatar from "../avatar/avatar";
 import LeagueMatchups from "../league-matchups/league-matchups";
@@ -136,10 +136,7 @@ const LineupcheckerMatchups = ({
         : "-";
 
       const median_current = matchup.league.settings.league_average_match
-        ? matchup.league_matchups.reduce(
-            (acc, cur) => acc + (cur[projection_current_key] || 0),
-            0
-          ) / matchup.league_matchups.length
+        ? getMedian(matchup.league_matchups, projection_current_key)
         : false;
 
       const matchupVsMed = median_current

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSchedule } from "../helpers/getSchedule";
 import axios from "axios";
 
+const CC =
+  "public, s-maxage=30, stale-while-revalidate=300, max-age=0, must-revalidate";
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
 
@@ -66,5 +69,8 @@ export async function GET(req: NextRequest) {
     delay = 30_000;
   }
 
-  return NextResponse.json({ stats, delay });
+  return NextResponse.json(
+    { stats, delay },
+    { headers: { "Cache-Control": CC } }
+  );
 }

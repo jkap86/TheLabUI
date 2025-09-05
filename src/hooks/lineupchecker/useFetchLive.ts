@@ -3,8 +3,11 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { StatObj } from "@/lib/types/commonTypes";
-import { updateLiveStats } from "@/redux/lineupchecker/lineupcheckerSlice";
-import { useCallback, useEffect, useMemo } from "react";
+import {
+  updateLiveStats,
+  updateMatchups,
+} from "@/redux/lineupchecker/lineupcheckerSlice";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 type Response = {
   delay: number;
@@ -16,9 +19,13 @@ export default function useFetchLive() {
   const { nflState, allplayers } = useSelector(
     (state: RootState) => state.common
   );
-  const { matchups, liveStats } = useSelector(
+  const { matchups, liveStats, projections } = useSelector(
     (state: RootState) => state.lineupchecker
   );
+  const workerRef = useRef<Worker | null>(null);
+  const matchupsRef = useRef(matchups);
+  const allplayersRef = useRef(allplayers);
+  const projectionsRef = useRef(projections);
 
   const week = Math.max(1, nflState?.leg as number);
   const route = week
@@ -63,22 +70,57 @@ export default function useFetchLive() {
   const { data, mutate } = useSWR<Response>(route, fetcher, swrOptions);
 
   useEffect(() => {
-    if (route && !data) {
-      mutate(fetcher(route), { revalidate: false });
+    if (route && !data && allplayers && Object.keys(matchups).length > 0) {
+      mutate(undefined, { revalidate: true });
     }
-  }, [route, data, fetcher, mutate]);
+  }, [route, data, fetcher, mutate, allplayers, matchups]);
 
   useEffect(() => {
-    if (Object.keys(liveStats).length === 0) return;
-
     const worker = new Worker(
       new URL("../../app/workers/liveStats.worker.ts", import.meta.url)
     );
+    workerRef.current = worker;
 
-    worker.onmessage = (e) => {
+    // guard dispatch to avoid no-op updates causing renders
+    let lastPayloadKey = "";
+
+    worker.onmessage = (e: MessageEvent) => {
       console.log({ e });
+      const next = e.data?.matchups_w_live;
+      const key = JSON.stringify(next);
+      console.log({ key, lastPayloadKey });
+      if (key !== lastPayloadKey) {
+        console.log("UPDATING");
+        lastPayloadKey = key;
+        dispatch(updateMatchups(next));
+      }
     };
 
-    worker.postMessage({ liveStats, matchups, allplayers });
-  }, [liveStats, matchups, allplayers]);
+    return () => {
+      worker.terminate();
+      workerRef.current = null;
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
+    matchupsRef.current = matchups;
+  }, [matchups]);
+
+  useEffect(() => {
+    allplayersRef.current = allplayers;
+  }, [allplayers]);
+
+  useEffect(() => {
+    projectionsRef.current = projections;
+  }, [projections]);
+
+  useEffect(() => {
+    if (!liveStats || Object.keys(liveStats).length === 0) return;
+    workerRef.current?.postMessage({
+      liveStats,
+      matchups: matchupsRef.current,
+      allplayers: allplayersRef.current,
+      projections: projectionsRef.current,
+    });
+  }, [liveStats]);
 }

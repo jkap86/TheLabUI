@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
 
   const user_id = searchParams.get("user_id");
   const week = searchParams.get("week");
+  const initial = searchParams.get("initial");
 
   const editsString = searchParams.get("edits");
 
@@ -50,8 +51,6 @@ export async function GET(req: NextRequest) {
   const etag = `"u=${user_id};w=${week};cnt=${ver?.cnt ?? 0};mAt=${
     ver?.maxu ?? 0
   }"`;
-
-  console.log({ etag, inm: req.headers.get("if-none-match") });
 
   if (req.headers.get("if-none-match") === etag) {
     return new NextResponse(null, {
@@ -92,10 +91,10 @@ export async function GET(req: NextRequest) {
       parseInt(week as string),
     ]);
 
-    const cutoff = new Date(Date.now() - 1000 * 60);
+    const cutoff = new Date(Date.now() - 1000 * 60 * 5);
 
     const up_to_date_matchups = matchups_update.rows.filter((l) => {
-      return edits
+      return !initial
         ? true
         : l.matchups.some(
             (m) => m.updated_at && new Date(m.updated_at) > cutoff
