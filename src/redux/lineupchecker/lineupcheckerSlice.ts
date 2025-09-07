@@ -37,6 +37,8 @@ export interface LineupcheckerState {
 
   liveStats: { [player_id: string]: StatObj };
 
+  recordTab: "Original" | "Live";
+
   playersTab: string;
   playersTab2: string;
   matchupsType: string;
@@ -73,6 +75,8 @@ const initialState: LineupcheckerState = {
   locked: true,
 
   liveStats: {},
+
+  recordTab: "Live",
 
   playersTab: "Leagues",
   playersTab2: "Start Over",

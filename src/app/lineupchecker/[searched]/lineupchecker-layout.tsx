@@ -1,20 +1,21 @@
 "use client";
 
-import { JSX, useState } from "react";
+import { JSX } from "react";
 import LoadingIcon from "@/components/loading-icon/loading-icon";
 import useFetchMatchups from "@/hooks/lineupchecker/useFetchMatchups";
 import useFetchAllplayers from "@/hooks/useFetchAllplayers";
 import useFetchNflState from "@/hooks/useFetchNflState";
 import Link from "next/link";
 import Avatar from "@/components/avatar/avatar";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/redux/store";
 import LeagueTypeSwitch from "@/components/leagueTypeSwitch/leagueTypeSwitch";
 import { usePathname, useRouter } from "next/navigation";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
 import "../../../components/heading/heading.css";
 import useFetchLive from "@/hooks/lineupchecker/useFetchLive";
 import { getMedian } from "@/utils/getOptimalStarters";
+import { updateLineupcheckerState } from "@/redux/lineupchecker/lineupcheckerSlice";
 
 interface LayoutProps {
   searched: string;
@@ -24,6 +25,7 @@ interface LayoutProps {
 const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
   const router = useRouter();
   const pathname = usePathname();
+  const dispatch: AppDispatch = useDispatch();
   const { type1, type2 } = useSelector((state: RootState) => state.manager);
   const {
     isLoadingUserLeagueIds,
@@ -33,8 +35,12 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
     matchups,
     isUpdatingMatchups,
     matchupsProgress,
+    recordTab,
   } = useSelector((state: RootState) => state.lineupchecker);
-  const [recordTab, setRecordTab] = useState<"Original" | "Live">("Original");
+
+  const setRecordTab = (value: "Original" | "Live") => {
+    dispatch(updateLineupcheckerState({ key: "recordTab", value }));
+  };
 
   useFetchNflState();
   useFetchAllplayers();

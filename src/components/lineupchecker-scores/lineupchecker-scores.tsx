@@ -131,7 +131,7 @@ const LineupcheckerScores = ({
               minimumFractionDigits: 1,
             }),
             colspan: 1,
-            classname: "",
+            classname: "font-score",
             sort: user_proj,
             style: getTrendColor_Range(user_proj, min, max),
           },
@@ -142,7 +142,7 @@ const LineupcheckerScores = ({
                 minimumFractionDigits: 1,
               }) ?? "-",
             colspan: 1,
-            classname: "",
+            classname: "font-score",
             sort: opp_proj,
             style: getTrendColor_Range(opp_proj, min, max),
           },
@@ -153,7 +153,7 @@ const LineupcheckerScores = ({
                 minimumFractionDigits: 1,
               }) ?? "-",
             colspan: 1,
-            classname: "",
+            classname: "font-score",
             sort: median ?? 0,
             style: median
               ? getTrendColor_Range(median, min_median, max_median, true)

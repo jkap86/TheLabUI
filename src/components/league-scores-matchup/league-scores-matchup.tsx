@@ -59,8 +59,8 @@ const LeagueScoresMatchup = ({
         classname: "",
       },
     ];
-    const data = (matchup?.live_projection_starters_optimal || []).map(
-      (so, index) => {
+    const data = [
+      ...(matchup?.live_projection_starters_optimal || []).map((so, index) => {
         const player_id =
           matchupsLeague.league.settings.best_ball === 1
             ? so.optimal_player_id
@@ -121,8 +121,73 @@ const LeagueScoresMatchup = ({
             },
           ],
         };
-      }
-    );
+      }),
+      ...(matchup?.players || [])
+        .filter(
+          (player_id) =>
+            !matchup?.live_points_starters_optimal?.some(
+              (so) =>
+                (matchupsLeague.league.settings.best_ball === 1
+                  ? so.optimal_player_id
+                  : so.current_player_id) === player_id
+            )
+        )
+        .map((player_id) => {
+          const percent_complete =
+            matchup?.live_values?.[player_id]?.game_percent_complete;
+
+          const classname =
+            percent_complete === 1
+              ? "text-gray-400"
+              : percent_complete === 0
+              ? "text-gray-700"
+              : "text-yellow-700";
+          return {
+            id: player_id,
+            columns: [
+              {
+                text: "BN",
+                colspan: 2,
+                classname,
+              },
+              {
+                text:
+                  player_id === "0" ? (
+                    "-"
+                  ) : (
+                    <Avatar
+                      id={player_id}
+                      text={allplayers?.[player_id]?.full_name || player_id}
+                      type="P"
+                    />
+                  ),
+                colspan: 6,
+                classname,
+              },
+              {
+                text: (
+                  matchup?.live_values?.[player_id]?.live_proj ?? 0
+                ).toLocaleString("en-US", {
+                  minimumFractionDigits: 1,
+                  maximumFractionDigits: 1,
+                }),
+                colspan: 3,
+                classname: classname + " italic",
+              },
+              {
+                text: (
+                  matchup?.live_values?.[player_id]?.points ?? 0
+                ).toLocaleString("en-US", {
+                  minimumFractionDigits: 1,
+                  maximumFractionDigits: 1,
+                }),
+                colspan: 3,
+                classname: classname + " font-score",
+              },
+            ],
+          };
+        }),
+    ];
 
     return <TableMain type={2} half={true} headers={headers} data={data} />;
   };
