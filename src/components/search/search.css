@@ -59,6 +59,8 @@ div.options > ul > li {
 
 div.options > ul > li > div.avatar {
   margin: 0;
+  display: flex;
+  align-items: center;
 }
 button.clear,
 button.show {
