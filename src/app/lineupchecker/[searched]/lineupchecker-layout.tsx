@@ -343,12 +343,12 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
                   )
                 }
                 value={pathname.split("/")[3]}
-                className="font-metal text-[var(--color1)] p-8 text-[4rem]"
+                className="font-metal text-[var(--color1)] p-8 text-[4rem] text-center"
               >
                 <option>matchups</option>
                 <option>starters</option>
                 <option>projections</option>
-                <option>live</option>
+                <option>scores</option>
               </select>
             </h2>
             {component}

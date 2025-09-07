@@ -44,6 +44,12 @@ export interface LineupcheckerState {
   playersCol1: string;
   playersCol2: string;
   playersCol3: string;
+
+  leagueScoresTab: string;
+  sortTeamsBy: {
+    column: 2 | 3 | 4;
+    asc: boolean;
+  };
 }
 
 const initialState: LineupcheckerState = {
@@ -75,6 +81,12 @@ const initialState: LineupcheckerState = {
   playersCol1: "# Start Over",
   playersCol2: "Sub Avg S Proj",
   playersCol3: "Player2 Avg S",
+
+  leagueScoresTab: "Matchups",
+  sortTeamsBy: {
+    column: 2,
+    asc: false,
+  },
 };
 
 const lineupcheckerSlice = createSlice({
@@ -120,6 +132,12 @@ const lineupcheckerSlice = createSlice({
       action: PayloadAction<number>
     ) {
       state.matchupsProgress = action.payload;
+    },
+    updateSortTeamsBy(
+      state: Draft<LineupcheckerState>,
+      action: PayloadAction<{ column: 2 | 3 | 4; asc: boolean }>
+    ) {
+      state.sortTeamsBy = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -211,6 +229,7 @@ export const {
   updateLineupcheckerEdits,
   updateLiveStats,
   updateMatchups,
+  updateSortTeamsBy,
 } = lineupcheckerSlice.actions;
 
 export default lineupcheckerSlice.reducer;

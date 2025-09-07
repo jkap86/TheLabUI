@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
           player_id: statObj.player_id,
           stats: statObj.stats,
           kickoff: kickoff ?? 0,
-          timeLeft: timeLeft ?? 3600,
+          timeLeft: kickoff ? timeLeft ?? 3600 : 0,
           is_in_progress,
         });
       }

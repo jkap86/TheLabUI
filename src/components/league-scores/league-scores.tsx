@@ -1,29 +1,49 @@
 import { League, Matchup } from "@/lib/types/userTypes";
-import TableMain from "../table-main/table-main";
+import LeagueScoresMatchup from "../league-scores-matchup/league-scores-matchup";
+import LeagueScoresTeams from "../league-scores-teams/league-scores-teams";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/redux/store";
+import { updateLineupcheckerState } from "@/redux/lineupchecker/lineupcheckerSlice";
 
 const LeagueScores = ({
-  matchup,
+  matchupsLeague,
 }: {
-  matchup: {
+  matchupsLeague: {
     user_matchup: Matchup;
     opp_matchup?: Matchup;
     league_matchups: Matchup[];
     league: League;
   };
 }) => {
-  const getTable = (matchup: Matchup | undefined) => {
-    console.log({ matchup });
-    return <TableMain type={2} half={true} headers={[]} data={[]} />;
+  const dispatch: AppDispatch = useDispatch();
+  const { leagueScoresTab: tab } = useSelector(
+    (state: RootState) => state.lineupchecker
+  );
+
+  const setTab = (value: string) => {
+    dispatch(updateLineupcheckerState({ key: "leagueScoresTab", value }));
   };
-
-  const user_table = getTable(matchup.user_matchup);
-
-  const opp_table = getTable(matchup.opp_matchup);
-
   return (
     <>
-      {user_table}
-      {opp_table}
+      <div className="nav items-center">
+        <button
+          className={tab === "Matchups" ? "active" : ""}
+          onClick={() => setTab("Matchups")}
+        >
+          Matchups
+        </button>
+        <button
+          className={tab === "Teams" ? "active" : ""}
+          onClick={() => setTab("Teams")}
+        >
+          Teams
+        </button>
+      </div>
+      {tab === "Matchups" ? (
+        <LeagueScoresMatchup matchupsLeague={matchupsLeague} />
+      ) : tab === "Teams" ? (
+        <LeagueScoresTeams matchupsLeague={matchupsLeague} />
+      ) : null}
     </>
   );
 };

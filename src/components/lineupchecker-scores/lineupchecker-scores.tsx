@@ -1,20 +1,24 @@
-"use client";
-
-import { use } from "react";
-import LineupcheckerLayout from "../lineupchecker-layout";
-import TableMain from "@/components/table-main/table-main";
+import { League, Matchup } from "@/lib/types/userTypes";
+import TableMain from "../table-main/table-main";
+import Avatar from "../avatar/avatar";
+import { getMedian } from "@/utils/getOptimalStarters";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import Avatar from "@/components/avatar/avatar";
-import { getMedian } from "@/utils/getOptimalStarters";
-//import LeagueScores from "@/components/league-scores/league-scores";
+import LeagueScores from "../league-scores/league-scores";
+import { getTrendColor_Range } from "@/utils/getTrendColor";
 
-const LivePage = ({ params }: { params: Promise<{ searched: string }> }) => {
-  const { searched } = use(params);
+const LineupcheckerScores = ({
+  matchups,
+}: {
+  matchups: {
+    user_matchup: Matchup;
+    opp_matchup?: Matchup;
+    league_matchups: Matchup[];
+    league: League;
+  }[];
+}) => {
   const { type1, type2 } = useSelector((state: RootState) => state.manager);
-  const { user, matchups } = useSelector(
-    (state: RootState) => state.lineupchecker
-  );
+  const { user } = useSelector((state: RootState) => state.lineupchecker);
 
   const headers = [
     {
@@ -44,7 +48,7 @@ const LivePage = ({ params }: { params: Promise<{ searched: string }> }) => {
     },
   ];
 
-  const data = Object.values(matchups)
+  const data = matchups
     .filter(
       (lm) =>
         (type1 === "All" ||
@@ -84,6 +88,18 @@ const LivePage = ({ params }: { params: Promise<{ searched: string }> }) => {
           ? "T"
           : ""
         : "";
+
+      const total_proj = user_proj + opp_proj;
+      const a = (total_proj / matchup.league.roster_positions.length) * 2;
+      const min = total_proj / 2 - a;
+      const max = total_proj / 2 + a;
+
+      const total_proj_median = user_proj + (median ?? 0);
+      const b =
+        (total_proj_median / matchup.league.roster_positions.length) * 2;
+      const min_median = total_proj_median / 2 - b;
+      const max_median = total_proj_median / 2 + b;
+
       return {
         id: matchup.league.league_id,
         search: {
@@ -110,24 +126,25 @@ const LivePage = ({ params }: { params: Promise<{ searched: string }> }) => {
             sort: -matchup.league.index,
           },
           {
-            text:
-              matchup.user_matchup.live_projection_current?.toLocaleString(
-                "en-US",
-                { maximumFractionDigits: 1, minimumFractionDigits: 1 }
-              ) ?? "-",
+            text: user_proj.toLocaleString("en-US", {
+              maximumFractionDigits: 1,
+              minimumFractionDigits: 1,
+            }),
             colspan: 1,
             classname: "",
-            sort: matchup.user_matchup.live_projection_current ?? 0,
+            sort: user_proj,
+            style: getTrendColor_Range(user_proj, min, max),
           },
           {
             text:
-              matchup.opp_matchup?.live_projection_current?.toLocaleString(
-                "en-US",
-                { maximumFractionDigits: 1, minimumFractionDigits: 1 }
-              ) ?? "-",
+              opp_proj.toLocaleString("en-US", {
+                maximumFractionDigits: 1,
+                minimumFractionDigits: 1,
+              }) ?? "-",
             colspan: 1,
             classname: "",
-            sort: matchup.opp_matchup?.live_projection_current ?? 0,
+            sort: opp_proj,
+            style: getTrendColor_Range(opp_proj, min, max),
           },
           {
             text:
@@ -138,6 +155,9 @@ const LivePage = ({ params }: { params: Promise<{ searched: string }> }) => {
             colspan: 1,
             classname: "",
             sort: median ?? 0,
+            style: median
+              ? getTrendColor_Range(median, min_median, max_median, true)
+              : {},
           },
           {
             text: (
@@ -172,12 +192,15 @@ const LivePage = ({ params }: { params: Promise<{ searched: string }> }) => {
             colspan: 1,
           },
         ],
+        secondary: <LeagueScores matchupsLeague={matchup} />,
       };
     });
 
-  const component = <TableMain type={1} headers={headers} data={data} />;
+  const component = (
+    <TableMain type={1} headers={headers} data={data} placeholder="League" />
+  );
 
-  return <LineupcheckerLayout searched={searched} component={component} />;
+  return component;
 };
 
-export default LivePage;
+export default LineupcheckerScores;

@@ -140,10 +140,20 @@ self.onmessage = (e: MessageEvent<Message>) => {
         return {
           ...m,
           live_values,
-          live_projection_current,
+          live_projection_current:
+            matchupLeague.league.settings.best_ball === 1
+              ? live_projection_optimal
+              : live_projection_current,
           live_projection_optimal,
           live_projection_starters_optimal,
-          live_points_current,
+          live_points_current:
+            matchupLeague.league.settings.best_ball === 1
+              ? live_projection_starters_optimal.reduce(
+                  (acc, so) =>
+                    acc + (live_values[so.optimal_player_id]?.points ?? 0),
+                  0
+                )
+              : live_points_current,
           live_points_optimal,
           live_points_starters_optimal,
         };
