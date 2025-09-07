@@ -132,6 +132,12 @@ const LeagueScoresMatchup = ({
                   : so.current_player_id) === player_id
             )
         )
+        .sort((a, b) => {
+          return (
+            (matchup?.live_values?.[b]?.live_proj ?? 0) -
+            (matchup?.live_values?.[a]?.live_proj ?? 0)
+          );
+        })
         .map((player_id) => {
           const percent_complete =
             matchup?.live_values?.[player_id]?.game_percent_complete;
