@@ -39,7 +39,7 @@ const PlayerMatchups = ({
 }) => {
   const dispatch: AppDispatch = useDispatch();
   const { matchups } = useSelector((state: RootState) => state.lineupchecker);
-  const { playersTab, playersTab2, matchupsType, scoresTab } = useSelector(
+  const { playersTab, playersTab2, matchupsType } = useSelector(
     (state: RootState) => state.lineupchecker
   );
 
