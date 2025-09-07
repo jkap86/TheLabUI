@@ -2,8 +2,8 @@ import { JSX, useEffect, useMemo, useRef, useState } from "react";
 import "./search.css";
 import { FixedSizeList as List } from "react-window";
 
-const ROW_HEIGHT = 36;
-const MAX_MENU_HEIGHT = 240;
+const ROW_HEIGHT = 50;
+const MAX_MENU_HEIGHT = 260;
 
 interface Option {
   id: string;
@@ -101,7 +101,7 @@ const Search = ({
 
   return (
     <div className="search_container" ref={searchRef}>
-      <div className="relative">
+      <div className="relative z-11">
         <div>
           <input
             className={"search" + (disabled ? " opacity-[.25]" : "")}
@@ -132,17 +132,21 @@ const Search = ({
             itemCount={searchOptions.length}
             itemSize={ROW_HEIGHT}
             width="100%"
+            itemData={searchOptions}
+            innerElementType="ul"
+            itemKey={(i, data) => data[i].id}
+            overscanCount={5}
           >
-            {({ index, style }) => {
+            {({ index, style, data }) => {
               const option = searchOptions[index];
 
               return (
                 <li
                   key={`${option.id}`}
                   style={style}
-                  onClick={() => handleSearch(option.text)}
+                  onClick={() => handleSearch(data[index].text)}
                 >
-                  {option.display}
+                  {data[index].display}
                 </li>
               );
             }}
