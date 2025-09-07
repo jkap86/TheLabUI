@@ -101,7 +101,7 @@ const Search = ({
 
   return (
     <div className="search_container" ref={searchRef}>
-      <div className="relative z-11">
+      <div className="relative">
         <div>
           <input
             className={"search" + (disabled ? " opacity-[.25]" : "")}

@@ -22,6 +22,10 @@ div.search_container > div > div:first-child {
 div.options {
   height: 0;
   border: 1rem ridge var(--color2);
+  height: fit-content !important;
+  max-height: 25vmax;
+  position: relative;
+  z-index: 12;
 }
 input.search {
   color: black;
@@ -42,7 +46,6 @@ div.options {
 }
 
 div.options > ul {
-  z-index: 11;
   width: 100%;
   background-color: var(--color5);
 }
