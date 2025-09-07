@@ -221,6 +221,7 @@ const LineupcheckerMatchups = ({
         secondary: (
           <LeagueMatchups
             matchup={matchup}
+            median_current={median_current}
             starters_optimal_key={starters_optimal_key}
             projection_current_key={projection_current_key}
             projection_optimal_key={projection_optimal_key}

@@ -4,6 +4,7 @@ import { League, Matchup } from "@/lib/types/userTypes";
 import TableMain from "../table-main/table-main";
 import Avatar from "../avatar/avatar";
 import {
+  getMedian,
   getPlayerTotal,
   getSlotAbbrev,
   position_map,
@@ -16,6 +17,7 @@ import "./league-matchups.css";
 
 const LeagueMatchups = ({
   matchup,
+  median_current,
   starters_optimal_key,
   projection_current_key,
   projection_optimal_key,
@@ -26,6 +28,7 @@ const LeagueMatchups = ({
     league_matchups: Matchup[];
     league: League;
   };
+  median_current: number | false;
   starters_optimal_key: "starters_optimal" | "starters_optimal_locked";
   projection_current_key: "projection_current_locked" | "projection_current";
   projection_optimal_key: "projection_optimal_locked" | "projection_optimal";
@@ -42,6 +45,10 @@ const LeagueMatchups = ({
   const [table1, setTable1] = useState(`Lineup`);
   const [table2, setTable2] = useState(`Lineup`);
 
+  const median_optimal = matchup.league.settings.league_average_match
+    ? getMedian(matchup.league_matchups, projection_optimal_key)
+    : false;
+
   useEffect(() => {
     if (activeIndexUser) {
       setTable2("Options");
@@ -57,30 +64,6 @@ const LeagueMatchups = ({
       setTable1("Lineup");
     }
   }, [activeIndexOpp]);
-
-  const median_current = matchup.league.settings.league_average_match
-    ? (
-        matchup.league_matchups.reduce(
-          (acc, cur) => acc + (cur[projection_current_key] || 0),
-          0
-        ) / matchup.league_matchups.length
-      ).toLocaleString("en-US", {
-        maximumFractionDigits: 1,
-        minimumFractionDigits: 1,
-      })
-    : false;
-
-  const median_optimal = matchup.league.settings.league_average_match
-    ? (
-        matchup.league_matchups.reduce(
-          (acc, cur) => acc + (cur[projection_optimal_key] || 0),
-          0
-        ) / matchup.league_matchups.length
-      ).toLocaleString("en-US", {
-        maximumFractionDigits: 1,
-        minimumFractionDigits: 1,
-      })
-    : false;
 
   const getLineupTable = (matchupLocal?: Matchup) => {
     const data = (matchupLocal?.starters || []).map((player_id, index) => {
@@ -155,7 +138,7 @@ const LeagueMatchups = ({
           classname: "highlight",
         },
         {
-          text: median_current,
+          text: median_current.toFixed(1) || "",
           colspan: 2,
           classname: "italic highlight",
         },
@@ -203,7 +186,11 @@ const LeagueMatchups = ({
   const getOptimalTable = (matchupLocal?: Matchup) => {
     const total_cols = [
       {
-        text: matchupLocal?.[projection_optimal_key].toFixed(1) || "-",
+        text:
+          matchupLocal?.[projection_optimal_key]?.toLocaleString("en-US", {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1,
+          }) || "-",
         colspan:
           matchupLocal?.user_id === matchup.opp_matchup?.user_id &&
           median_optimal
@@ -218,7 +205,10 @@ const LeagueMatchups = ({
       median_optimal
     ) {
       total_cols.push({
-        text: median_optimal,
+        text: median_optimal?.toLocaleString("en-US", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        }),
         colspan: 2,
         classname: "italic highlight",
       });

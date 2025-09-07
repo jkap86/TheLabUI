@@ -42,6 +42,8 @@ export const getMedian = (
     | "projection_current_locked"
     | "live_projection_current"
     | "live_points_current"
+    | "projection_optimal"
+    | "projection_optimal_locked"
 ) => {
   const values = league_matchups
     .map((cur2) => cur2[key] || 0)
