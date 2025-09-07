@@ -134,8 +134,10 @@ const LeagueScoresMatchup = ({
         )
         .sort((a, b) => {
           return (
+            (matchup?.live_values?.[b]?.points ?? 0) -
+              (matchup?.live_values?.[a]?.points ?? 0) ||
             (matchup?.live_values?.[b]?.live_proj ?? 0) -
-            (matchup?.live_values?.[a]?.live_proj ?? 0)
+              (matchup?.live_values?.[a]?.live_proj ?? 0)
           );
         })
         .map((player_id) => {
