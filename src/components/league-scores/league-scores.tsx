@@ -42,9 +42,9 @@ const LeagueScores = ({
         </button>
       </div>
       {tab === "Matchups" ? (
-        <LeagueScoresMatchup matchupsLeague={matchupsLeague} type={type + 1} />
+        <LeagueScoresMatchup matchupsLeague={matchupsLeague} type={type} />
       ) : tab === "Teams" ? (
-        <LeagueScoresTeams matchupsLeague={matchupsLeague} type={type + 1} />
+        <LeagueScoresTeams matchupsLeague={matchupsLeague} type={type} />
       ) : null}
     </>
   );
