@@ -126,10 +126,7 @@ const LeagueScoresMatchup = ({
         .filter(
           (player_id) =>
             !matchup?.live_points_starters_optimal?.some(
-              (so) =>
-                (matchupsLeague.league.settings.best_ball === 1
-                  ? so.optimal_player_id
-                  : so.current_player_id) === player_id
+              (so) => so.current_player_id === player_id
             )
         )
         .sort((a, b) => {
