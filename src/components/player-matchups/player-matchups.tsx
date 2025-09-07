@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import LineupcheckerStartBenchOver from "../lineupchecker-startbenchover/lineupchecker-startbenchover";
 import { updateLineupcheckerState } from "@/redux/lineupchecker/lineupcheckerSlice";
+import LineupcheckerScores from "../lineupchecker-scores/lineupchecker-scores";
 
 const PlayerMatchups = ({
   player_id1,
@@ -38,7 +39,7 @@ const PlayerMatchups = ({
 }) => {
   const dispatch: AppDispatch = useDispatch();
   const { matchups } = useSelector((state: RootState) => state.lineupchecker);
-  const { playersTab, playersTab2, matchupsType } = useSelector(
+  const { playersTab, playersTab2, matchupsType, scoresTab } = useSelector(
     (state: RootState) => state.lineupchecker
   );
 
@@ -83,7 +84,7 @@ const PlayerMatchups = ({
   return (
     <>
       <div className="nav">
-        {["Leagues", "Players"].map((label) => {
+        {["Matchups", "Players", "Scores"].map((label) => {
           return (
             <button
               key={label}
@@ -100,7 +101,7 @@ const PlayerMatchups = ({
           );
         })}
       </div>
-      {playersTab === "Leagues" ? (
+      {["Matchups", "Scores"].includes(playersTab) ? (
         <div className="nav">
           {["Start", "Bench", "Opp Start", "Opp Bench"].map((label) => {
             return (
@@ -143,8 +144,10 @@ const PlayerMatchups = ({
           })}
         </div>
       )}
-      {playersTab === "Leagues" ? (
+      {playersTab === "Matchups" ? (
         <LineupcheckerMatchups type={2} league_matchups={matchupsView} />
+      ) : playersTab === "Scores" ? (
+        <LineupcheckerScores matchups={matchupsView} type={2} />
       ) : (
         <LineupcheckerStartBenchOver
           player_id1={player_id1}

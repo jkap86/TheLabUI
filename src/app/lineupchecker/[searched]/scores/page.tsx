@@ -11,7 +11,9 @@ const LivePage = ({ params }: { params: Promise<{ searched: string }> }) => {
   const { searched } = use(params);
   const { matchups } = useSelector((state: RootState) => state.lineupchecker);
 
-  const component = <LineupcheckerScores matchups={Object.values(matchups)} />;
+  const component = (
+    <LineupcheckerScores type={1} matchups={Object.values(matchups)} />
+  );
 
   return <LineupcheckerLayout searched={searched} component={component} />;
 };

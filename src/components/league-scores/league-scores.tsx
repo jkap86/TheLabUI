@@ -6,6 +6,7 @@ import { AppDispatch, RootState } from "@/redux/store";
 import { updateLineupcheckerState } from "@/redux/lineupchecker/lineupcheckerSlice";
 
 const LeagueScores = ({
+  type,
   matchupsLeague,
 }: {
   matchupsLeague: {
@@ -14,6 +15,7 @@ const LeagueScores = ({
     league_matchups: Matchup[];
     league: League;
   };
+  type: number;
 }) => {
   const dispatch: AppDispatch = useDispatch();
   const { leagueScoresTab: tab } = useSelector(
@@ -40,9 +42,9 @@ const LeagueScores = ({
         </button>
       </div>
       {tab === "Matchups" ? (
-        <LeagueScoresMatchup matchupsLeague={matchupsLeague} />
+        <LeagueScoresMatchup matchupsLeague={matchupsLeague} type={type + 1} />
       ) : tab === "Teams" ? (
-        <LeagueScoresTeams matchupsLeague={matchupsLeague} />
+        <LeagueScoresTeams matchupsLeague={matchupsLeague} type={type + 1} />
       ) : null}
     </>
   );

@@ -8,6 +8,7 @@ import LeagueScores from "../league-scores/league-scores";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
 
 const LineupcheckerScores = ({
+  type,
   matchups,
 }: {
   matchups: {
@@ -16,6 +17,7 @@ const LineupcheckerScores = ({
     league_matchups: Matchup[];
     league: League;
   }[];
+  type: number;
 }) => {
   const { type1, type2 } = useSelector((state: RootState) => state.manager);
   const { user } = useSelector((state: RootState) => state.lineupchecker);
@@ -192,12 +194,12 @@ const LineupcheckerScores = ({
             colspan: 1,
           },
         ],
-        secondary: <LeagueScores matchupsLeague={matchup} />,
+        secondary: <LeagueScores matchupsLeague={matchup} type={type + 1} />,
       };
     });
 
   const component = (
-    <TableMain type={1} headers={headers} data={data} placeholder="League" />
+    <TableMain type={type} headers={headers} data={data} placeholder="League" />
   );
 
   return component;

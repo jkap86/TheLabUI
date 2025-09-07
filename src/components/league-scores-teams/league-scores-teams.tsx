@@ -8,6 +8,7 @@ import { getMedian } from "@/utils/getOptimalStarters";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
 
 const LeagueScoresTeams = ({
+  type,
   matchupsLeague,
 }: {
   matchupsLeague: {
@@ -16,6 +17,7 @@ const LeagueScoresTeams = ({
     league_matchups: Matchup[];
     league: League;
   };
+  type: number;
 }) => {
   const dispatch: AppDispatch = useDispatch();
   const { sortTeamsBy } = useSelector(
@@ -59,7 +61,7 @@ const LeagueScoresTeams = ({
 
   return (
     <TableMain
-      type={2}
+      type={type}
       headers_sort={[2, 3, 4]}
       sortBy={sortTeamsBy}
       setSortBy={(sortby) =>

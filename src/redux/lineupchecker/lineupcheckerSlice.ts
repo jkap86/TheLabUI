@@ -43,6 +43,8 @@ export interface LineupcheckerState {
   playersTab2: string;
   matchupsType: string;
 
+  scoresTab: string;
+
   playersCol1: string;
   playersCol2: string;
   playersCol3: string;
@@ -81,6 +83,8 @@ const initialState: LineupcheckerState = {
   playersTab: "Leagues",
   playersTab2: "Start Over",
   matchupsType: "Start",
+
+  scoresTab: "Start",
 
   playersCol1: "# Start Over",
   playersCol2: "Sub Avg S Proj",

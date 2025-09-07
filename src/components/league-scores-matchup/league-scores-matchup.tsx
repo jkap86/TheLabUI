@@ -7,6 +7,7 @@ import Avatar from "../avatar/avatar";
 import TableMain from "../table-main/table-main";
 
 const LeagueScoresMatchup = ({
+  type,
   matchupsLeague,
 }: {
   matchupsLeague: {
@@ -15,6 +16,7 @@ const LeagueScoresMatchup = ({
     league_matchups: Matchup[];
     league: League;
   };
+  type: number;
 }) => {
   const { allplayers } = useSelector((state: RootState) => state.common);
   const [activeMatchupId, setActiveMatchupId] = useState(
@@ -197,7 +199,7 @@ const LeagueScoresMatchup = ({
         }),
     ];
 
-    return <TableMain type={2} half={true} headers={headers} data={data} />;
+    return <TableMain type={type} half={true} headers={headers} data={data} />;
   };
 
   const findMatchup = (matchup_id: number, index: 0 | 1) => {
