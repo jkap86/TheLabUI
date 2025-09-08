@@ -72,11 +72,12 @@ const LeagueScoresMatchup = ({
           matchup?.live_values?.[player_id]?.game_percent_complete;
 
         const classname =
-          percent_complete === 1
+          "font-black" +
+          (percent_complete === 1
             ? ""
             : percent_complete === 0
-            ? "text-gray-400"
-            : "text-yellow-400";
+            ? " text-gray-400"
+            : " text-yellow-400");
         return {
           id: player_id + "_" + index,
           columns: [
@@ -147,11 +148,12 @@ const LeagueScoresMatchup = ({
             matchup?.live_values?.[player_id]?.game_percent_complete;
 
           const classname =
-            percent_complete === 1
-              ? "text-gray-400"
+            "shadow-[inset_0_0_3rem_rgb(0,0,0)] opacity-[0.5] " +
+            (percent_complete === 1
+              ? ""
               : percent_complete === 0
-              ? "text-gray-700"
-              : "text-yellow-700";
+              ? " text-gray-400"
+              : " text-yellow-700");
           return {
             id: player_id,
             columns: [
@@ -192,7 +194,7 @@ const LeagueScoresMatchup = ({
                   maximumFractionDigits: 1,
                 }),
                 colspan: 3,
-                classname: classname + " font-score",
+                classname: classname + "",
               },
             ],
           };

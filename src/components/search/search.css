@@ -11,6 +11,10 @@ div.searches > p {
   margin-top: 1rem;
 }
 
+div.search_container > div > div {
+  font-size: 75%;
+}
+
 div.search_container > div > div:first-child {
   font-size: inherit;
   width: 100%;

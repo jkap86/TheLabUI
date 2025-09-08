@@ -1,11 +1,16 @@
 div.avatar {
   width: fit-content;
-  font-weight: 400;
+
   margin: 0, auto;
   color: inherit;
   text-align: left;
+
+  font-size: inherit;
+}
+
+table.main div.avatar {
   font-family: var(--fontMetal);
-  font-size: 2.5rem;
+  font-weight: inherit;
 }
 
 div.options div.avatar,
