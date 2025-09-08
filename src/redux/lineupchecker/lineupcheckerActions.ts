@@ -94,8 +94,6 @@ export const fetchMatchups = createAsyncThunk(
         }
       });
 
-    console.log({ parsedRes });
-
     const matchups_obj: {
       [league_id: string]: {
         user_matchup: Matchup;

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { StatObj } from "@/lib/types/commonTypes";
 import {
+  updateLineupcheckerState,
   updateLiveStats,
   updateMatchups,
 } from "@/redux/lineupchecker/lineupcheckerSlice";
@@ -19,7 +20,7 @@ export default function useFetchLive() {
   const { nflState, allplayers } = useSelector(
     (state: RootState) => state.common
   );
-  const { matchups, liveStats, projections } = useSelector(
+  const { matchups, liveStats, projections, isLoadingLiveStats } = useSelector(
     (state: RootState) => state.lineupchecker
   );
   const workerRef = useRef<Worker | null>(null);
@@ -71,7 +72,14 @@ export default function useFetchLive() {
 
   useEffect(() => {
     if (route && !data && allplayers && Object.keys(matchups).length > 0) {
-      mutate(undefined, { revalidate: true });
+      (async () => {
+        console.log("mutate");
+        dispatch(
+          updateLineupcheckerState({ key: "isLoadingLiveStats", value: true })
+        );
+
+        await mutate(undefined, { revalidate: true });
+      })();
     }
   }, [route, data, fetcher, mutate, allplayers, matchups]);
 
@@ -85,14 +93,19 @@ export default function useFetchLive() {
     let lastPayloadKey = "";
 
     worker.onmessage = (e: MessageEvent) => {
-      console.log({ e });
       const next = e.data?.matchups_w_live;
       const key = JSON.stringify(next);
-      console.log({ key, lastPayloadKey });
+
       if (key !== lastPayloadKey) {
-        console.log("UPDATING");
         lastPayloadKey = key;
         dispatch(updateMatchups(next));
+
+        dispatch(
+          updateLineupcheckerState({
+            key: "isLoadingLiveStats",
+            value: false,
+          })
+        );
       }
     };
 

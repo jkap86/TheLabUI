@@ -1,10 +1,8 @@
 import type { Allplayer, StatObj } from "@/lib/types/commonTypes";
 import type { Matchup } from "@/lib/types/userTypes";
 import type { League } from "@/lib/types/userTypes";
-import {
-  getOptimalStartersLineupCheck,
-  getPlayerTotal,
-} from "@/utils/getOptimalStarters";
+import { getLivePointsObj, getLiveProjObj } from "@/utils/getLiveProjObject";
+import { getOptimalStartersLineupCheck } from "@/utils/getOptimalStarters";
 
 type Message = {
   matchups: {
@@ -19,6 +17,7 @@ type Message = {
   allplayers: { [player_id: string]: Allplayer };
   projections: { [player_id: string]: { [cat: string]: number } };
 };
+
 self.onmessage = (e: MessageEvent<Message>) => {
   console.log("Worker received live stats");
   try {
@@ -37,49 +36,11 @@ self.onmessage = (e: MessageEvent<Message>) => {
       const matchupLeague = matchups[league_id];
 
       const league_matchups_w_live = matchupLeague.league_matchups.map((m) => {
-        const live_values: {
-          [player_id: string]: {
-            points: number;
-            game_percent_complete: number;
-            live_proj: number;
-          };
-        } = {};
-
-        m.players.forEach((player_id) => {
-          try {
-            const { stats, timeLeft } = liveStats[player_id] || {
-              stats: {},
-              timeLeft: 3600,
-            };
-
-            const points = getPlayerTotal(
-              matchupLeague.league.scoring_settings,
-              stats
-            );
-
-            const game_percent_complete = (3600 - timeLeft) / 3600;
-
-            const original_proj = m.values[player_id] ?? 0;
-
-            const live_proj =
-              original_proj * (1 - game_percent_complete) + points;
-
-            live_values[player_id] = {
-              points,
-              game_percent_complete,
-              live_proj,
-            };
-          } catch {
-            console.log("Error -" + player_id);
-          }
+        const { live_values, stat_obj_points } = getLiveProjObj({
+          m,
+          liveStats,
+          scoring_settings: matchupLeague.league.scoring_settings,
         });
-
-        const stat_obj_points = Object.fromEntries(
-          Object.keys(liveStats).map((player_id) => [
-            player_id,
-            liveStats[player_id].stats,
-          ])
-        );
 
         const {
           starters_optimal: live_points_starters_optimal,
@@ -95,32 +56,10 @@ self.onmessage = (e: MessageEvent<Message>) => {
           {}
         );
 
-        const stat_obj_live_proj: {
-          [player_id: string]: { [key: string]: number };
-        } = {};
-
-        const players_ids = Array.from(
-          new Set([...Object.keys(projections), ...Object.keys(liveStats)])
-        );
-
-        players_ids.forEach((player_id) => {
-          stat_obj_live_proj[player_id] = {};
-
-          const stat_keys = Array.from(
-            new Set([
-              ...Object.keys(liveStats[player_id]?.stats || {}),
-              ...Object.keys(projections[player_id] || {}),
-            ])
-          );
-
-          stat_keys.forEach((cat) => {
-            const value =
-              (projections[player_id]?.[cat] || 0) *
-                (1 - (live_values[player_id]?.game_percent_complete || 0)) +
-              (liveStats[player_id]?.stats?.[cat] || 0);
-
-            stat_obj_live_proj[player_id][cat] = value;
-          });
+        const stat_obj_live_proj = getLivePointsObj({
+          projections,
+          liveStats,
+          live_values,
         });
 
         const {
@@ -148,7 +87,7 @@ self.onmessage = (e: MessageEvent<Message>) => {
           live_projection_starters_optimal,
           live_points_current:
             matchupLeague.league.settings.best_ball === 1
-              ? live_projection_starters_optimal.reduce(
+              ? live_points_starters_optimal.reduce(
                   (acc, so) =>
                     acc + (live_values[so.optimal_player_id]?.points ?? 0),
                   0

@@ -5,13 +5,18 @@ import LineupcheckerLayout from "../lineupchecker-layout";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import LineupcheckerScores from "@/components/lineupchecker-scores/lineupchecker-scores";
+import LoadingIcon from "@/components/loading-icon/loading-icon";
 //import LeagueScores from "@/components/league-scores/league-scores";
 
 const LivePage = ({ params }: { params: Promise<{ searched: string }> }) => {
   const { searched } = use(params);
-  const { matchups } = useSelector((state: RootState) => state.lineupchecker);
+  const { matchups, isLoadingLiveStats } = useSelector(
+    (state: RootState) => state.lineupchecker
+  );
 
-  const component = (
+  const component = isLoadingLiveStats ? (
+    <LoadingIcon messages={[]} />
+  ) : (
     <LineupcheckerScores type={1} matchups={Object.values(matchups)} />
   );
 
