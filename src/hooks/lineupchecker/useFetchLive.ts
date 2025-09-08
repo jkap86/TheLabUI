@@ -20,7 +20,7 @@ export default function useFetchLive() {
   const { nflState, allplayers } = useSelector(
     (state: RootState) => state.common
   );
-  const { matchups, liveStats, projections, isLoadingLiveStats } = useSelector(
+  const { matchups, liveStats, projections } = useSelector(
     (state: RootState) => state.lineupchecker
   );
   const workerRef = useRef<Worker | null>(null);
