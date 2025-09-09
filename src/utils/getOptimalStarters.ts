@@ -611,9 +611,9 @@ type Options = {
 };
 export const getOptimalStartersLineupCheck = (
   allplayers: { [player_id: string]: Allplayer },
-  roster_positions: string[],
-  players: string[],
-  starters: string[],
+  roster_positions: string[] | null,
+  players: string[] | null,
+  starters: string[] | null,
   stat_obj: { [player_id: string]: { [key: string]: number } },
   scoring_settings: { [cat: string]: number },
   schedule: { [team: string]: { kickoff: number; opp: string } },
@@ -642,9 +642,8 @@ export const getOptimalStartersLineupCheck = (
   );
   */
 
-  const starting_roster_positions = roster_positions.filter(
-    (rp) => rp !== "BN"
-  );
+  const starting_roster_positions =
+    roster_positions?.filter((rp) => rp !== "BN") ?? [];
 
   const FLEX_BUFFER_MS = 60 * 60 * 1000; // 1 hour tolerance
 
@@ -668,7 +667,7 @@ export const getOptimalStartersLineupCheck = (
 
   // 1) Values by player
   const values: { [player_id: string]: number } = {};
-  for (const player_id of players) {
+  for (const player_id of players ?? []) {
     values[player_id] = getPlayerTotal(
       scoring_settings,
       stat_obj[player_id] || {},
@@ -683,7 +682,7 @@ export const getOptimalStartersLineupCheck = (
     value: number;
     kickoff: number;
   };
-  const variants: Variant[] = players.flatMap((player_id) => {
+  const variants: Variant[] = (players ?? []).flatMap((player_id) => {
     const poss = allplayers?.[player_id]?.fantasy_positions || [];
     const value = values[player_id] || 0;
     const kickoff = schedule?.[allplayers[player_id]?.team || ""]?.kickoff || 0;
@@ -850,7 +849,7 @@ export const getOptimalStartersLineupCheck = (
 
   // players on bench (not already in starters) whose kickoff has passed
   const frozenBench = new Set(
-    players.filter((pid) => {
+    (players ?? []).filter((pid) => {
       if (startersSet.has(pid)) return false;
       const team = allplayers[pid]?.team || "";
       const k = schedule?.[team]?.kickoff || 0;
@@ -864,7 +863,7 @@ export const getOptimalStartersLineupCheck = (
     const u = baseSlots + si;
 
     // identify current player & whether this slot should be locked
-    const curPlayer = starters[originalIndex];
+    const curPlayer = (starters ?? [])[originalIndex] ?? "0";
     const curKick = schedule?.[allplayers[curPlayer]?.team || ""]?.kickoff || 0;
     const slotIsLockedToCurrent =
       !!options?.locked && curPlayer && curKick > 0 && curKick <= now;
@@ -945,7 +944,7 @@ export const getOptimalStartersLineupCheck = (
   for (let i = 0; i < S; i++) {
     const { slot, index: originalIndex, occ } = slotEntries[i];
     const slot__index = `${slot}__${occ}`;
-    const curPlayer = starters[originalIndex];
+    const curPlayer = starters?.[originalIndex] ?? "0";
     const curKick = schedule?.[allplayers[curPlayer]?.team || ""]?.kickoff || 0;
     const chosenVi = chosenVariantBySlot[i];
     const optimal =
