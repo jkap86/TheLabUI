@@ -44,8 +44,6 @@ const League = ({ league, type }: LeagueProps) => {
     (r) => r.roster_id.toString() === activeRosterId
   );
 
-  console.log({ activeRoster });
-
   const projectionsObj = useMemo(() => {
     const players: { [player_id: string]: number } = {};
     const teams: { [roster_id: number]: { p_s: number; p_b_5: number } } = {};
@@ -627,7 +625,10 @@ const League = ({ league, type }: LeagueProps) => {
                 b.indexOf("rush") - a.indexOf("rush") ||
                 ((b.startsWith("rec") && 1) || 0) -
                   ((a.startsWith("rec") && 1) || 0) ||
-                b.indexOf("rec") - a.indexOf("rec")
+                b.indexOf("rec") - a.indexOf("rec") ||
+                Math.abs(league.scoring_settings[b]) -
+                  Math.abs(league.scoring_settings[a]) ||
+                league.scoring_settings[b] - league.scoring_settings[a]
             )
             .map((cat) => {
               return {

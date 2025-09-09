@@ -13,13 +13,13 @@ export interface LeaguematesState {
 
 const initialState: LeaguematesState = {
   column1: "# Common",
-  column2: "Proj S Rk",
-  column3: "Proj S Rk Lm",
-  column4: "Proj S Rk \u0394",
-  leaguesColumn1: "Proj S Rk",
-  leaguesColumn2: "Proj S Rk Lm",
-  leaguesColumn3: "KTC S Rk",
-  leaguesColumn4: "KTC S Rk Lm",
+  column2: "Rk",
+  column3: "Rk Lm",
+  column4: "Rk \u0394",
+  leaguesColumn1: "Rk",
+  leaguesColumn2: "Rk Lm",
+  leaguesColumn3: "Pts Rk",
+  leaguesColumn4: "Pts Rk Lm",
 };
 
 const leaguematesSlice = createSlice({

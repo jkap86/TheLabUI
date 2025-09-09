@@ -40,10 +40,12 @@ export const getLeaguesObj = (
   leagues.forEach((league) => {
     const ranks: { [abbrev: string]: colObj } = {};
 
+    const roster = league.rosters.find((r) => r.user_id === user_id) as Roster;
+
     for (const { abbrev, key } of leagueHeaders.filter((h) => h.key)) {
       let rk: number;
       if (key === "rank") {
-        rk = league.user_roster.rank ?? 0;
+        rk = roster?.rank ?? 0;
       } else {
         rk = rankBy(league.rosters, user_id, key as keyof Roster);
       }
@@ -72,6 +74,20 @@ export const getLeaguesObj = (
       }
     }
 
+    const record_lm =
+      user_id === league.user_roster.user_id || !roster
+        ? null
+        : {
+            "Record Lm": {
+              sort: (roster.rank && -roster.rank) ?? 0,
+              text: `${roster.wins}-${roster.losses}${
+                roster.ties ? `-${roster.ties}` : ""
+              }`,
+              trendColor: getTrendColor_Range(roster.win_pct ?? 0.5, 0, 1),
+              classname: "",
+            },
+          };
+
     obj[league.league_id] = {
       "Trade Deadline": {
         sort: league.settings.trade_deadline,
@@ -91,6 +107,19 @@ export const getLeaguesObj = (
         trendColor: {},
         classname: "",
       },
+      Record: {
+        sort: (league.user_roster.rank && -league.user_roster.rank) ?? 0,
+        text: `${league.user_roster.wins}-${league.user_roster.losses}${
+          league.user_roster.ties ? `-${league.user_roster.ties}` : ""
+        }`,
+        trendColor: getTrendColor_Range(
+          league.user_roster.win_pct ?? 0.5,
+          0,
+          1
+        ),
+        classname: "",
+      },
+      ...record_lm,
       ...ranks,
     };
   });
@@ -144,37 +173,37 @@ export const leagueHeaders = [
   {
     abbrev: "Proj S Rk",
     text: "Projected Points Starters Rank",
-    desc: "The user rank of the total projected points of optimal starters.  Starters are determined by projected points",
+    desc: "The user rank of the total rest of season projected points of optimal starters.  Starters are determined by projected points",
     key: "ros_projections__starters",
   },
   {
     abbrev: "Proj B T5 Rk",
     text: "Projected Points Top 5 Bench Rank",
-    desc: "The user rank of the total projected points of top 5 bench players when optimal redraft roster is set.  Optimal starters are determined by projected points",
+    desc: "The user rank of the total rest of season projected points of top 5 bench players when optimal redraft roster is set.  Optimal starters are determined by projected points",
     key: "ros_projections__bench_top_5",
   },
   {
     abbrev: "Proj S QB Rk",
     text: "Projected Points Starting QBs Rank",
-    desc: "The user rank of the total projected points of the projected starting quarterbacks.",
+    desc: "The user rank of the total rest of season projected points of the projected starting quarterbacks.",
     key: "ros_projections__starter_qb",
   },
   {
     abbrev: "Proj B T5 F Rk",
     text: "Projected Points Top 5 Bench Flex Rank",
-    desc: "The user rank of the total projected points of top 5 bench flex players when optimal redraft roster is set.  Optimal starters are determined by projected points",
+    desc: "The user rank of the total rest of season projected points of top 5 bench flex players when optimal redraft roster is set.  Optimal starters are determined by projected points",
     key: "ros_projections__bench_top5_flex",
   },
   {
     abbrev: "Proj S RB Rk",
     text: "Projected Points Starting RBs Rank",
-    desc: "The user rank of the total projected points of the projected starting running backs.",
+    desc: "The user rank of the total rest of season projected points of the projected starting running backs.",
     key: "ros_projections__starter_rb",
   },
   {
     abbrev: "Proj S WR Rk",
     text: "Projected Points Starting WRs Rank",
-    desc: "The user rank of the total projected points of the projected starting wide receivers.",
+    desc: "The user rank of the total rest of season projected points of the projected starting wide receivers.",
     key: "ros_projections__starter_wr",
   },
   {
@@ -221,18 +250,28 @@ export type Header = {
 
 export const getLeaguemateHeaders = (leagueHeaders: Header[]) => {
   return leagueHeaders
-    .filter((h) => h.key)
-    .flatMap((h) => [
-      {
-        abbrev: h.abbrev + " Lm",
-        text: h.text + " - Leaguemate",
-        desc: h.desc.replace("user", "leaguemate"),
-        key: h.abbrev + " Lm",
-      },
-      {
-        abbrev: h.abbrev + " \u0394",
-        text: h.text + " - Delta",
-        desc: "Difference between user and leaguemate " + h.text,
-      },
-    ]);
+    .filter((h) => h.key || h.abbrev === "Record")
+    .flatMap((h) =>
+      h.abbrev === "Record"
+        ? [
+            {
+              abbrev: h.abbrev + " Lm",
+              text: h.text + " - Leaguemate",
+              desc: h.desc.replace("user", "leaguemate"),
+            },
+          ]
+        : [
+            {
+              abbrev: h.abbrev + " Lm",
+              text: h.text + " - Leaguemate",
+              desc: h.desc.replace("user", "leaguemate"),
+              key: h.abbrev + " Lm",
+            },
+            {
+              abbrev: h.abbrev + " \u0394",
+              text: h.text + " - Delta",
+              desc: "Difference between user and leaguemate " + h.text,
+            },
+          ]
+    );
 };
