@@ -91,7 +91,7 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
           };
         }
 
-        if (user_matchup.starters.includes(player_id)) {
+        if (user_matchup.starters?.includes(player_id)) {
           obj[player_id].start.push(league_id);
 
           const indexStarter = user_matchup.starters.indexOf(player_id);
@@ -104,7 +104,7 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
               position_map[slot]?.includes(
                 allplayers?.[player_id]?.position ?? ""
               ) &&
-              position_map[cur_slot].includes(
+              position_map[cur_slot]?.includes(
                 allplayers?.[user_matchup.starters[indexSlot]]?.position ?? ""
               )
           );
@@ -114,8 +114,8 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
               [cur_slot, ...alt_slots].flatMap((slot) => {
                 return user_matchup.players.filter(
                   (player_id2) =>
-                    !user_matchup.starters.includes(player_id2) &&
-                    position_map[slot].includes(
+                    !user_matchup.starters?.includes(player_id2) &&
+                    position_map[slot]?.includes(
                       allplayers?.[player_id2]?.position ?? ""
                     )
                 );
@@ -147,11 +147,11 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
               matchups[league_id].league.roster_positions.some(
                 (slot2, slot_index) => {
                   return (
-                    position_map[slot].includes(
+                    position_map[slot]?.includes(
                       allplayers?.[user_matchup.starters[slot_index]]
                         ?.position || ""
                     ) &&
-                    position_map[slot2].includes(
+                    position_map[slot2]?.includes(
                       allplayers?.[player_id2]?.position || ""
                     )
                   );
@@ -184,7 +184,7 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
           };
         }
 
-        if (matchups[league_id].opp_matchup?.starters.includes(player_id)) {
+        if (matchups[league_id].opp_matchup?.starters?.includes(player_id)) {
           obj[player_id].opp_start.push(league_id);
         } else {
           obj[player_id].opp_bench.push(league_id);
