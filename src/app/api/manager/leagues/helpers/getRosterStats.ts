@@ -78,9 +78,18 @@ export const getRosterStats = (
     const rank =
       rankings.findIndex((r) => r.roster_id === roster.roster_id) + 1;
 
+    const total_games = roster.wins + roster.losses + (roster.ties ?? 0);
+
+    let win_pct: number | null = null;
+
+    if (total_games > 0) {
+      win_pct = roster.wins / total_games;
+    }
+
     return {
       ...roster,
       rank,
+      win_pct,
       starters_optimal_ppg: starters_optimal_ppg.map(
         (so) => so.optimal_player_id
       ),

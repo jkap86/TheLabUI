@@ -8,8 +8,8 @@ export interface LeaguesState {
 }
 
 const initialState: LeaguesState = {
-  column1: "Rank",
-  column2: "KTC S Rk",
+  column1: "Rk",
+  column2: "Pts Rk",
   column3: "Proj S Rk",
   column4: "Proj B T5 Rk",
 };

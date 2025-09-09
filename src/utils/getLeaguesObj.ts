@@ -177,12 +177,22 @@ export const leagueHeaders = [
     desc: "The user rank of the total projected points of the projected starting wide receivers.",
     key: "ros_projections__starter_wr",
   },
-
   {
-    abbrev: "Rank",
+    abbrev: "Record",
+    text: "Record",
+    desc: "Record",
+  },
+  {
+    abbrev: "Rk",
     text: "League Rank",
     desc: "The user league Rank based on W/L and Points",
     key: "rank",
+  },
+  {
+    abbrev: "Pts Rk",
+    text: "Points Rank",
+    desc: "Points For Rank",
+    key: "fp",
   },
 
   {

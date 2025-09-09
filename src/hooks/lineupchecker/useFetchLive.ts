@@ -73,7 +73,6 @@ export default function useFetchLive() {
   useEffect(() => {
     if (route && !data && allplayers && Object.keys(matchups).length > 0) {
       (async () => {
-        console.log("mutate");
         dispatch(
           updateLineupcheckerState({ key: "isLoadingLiveStats", value: true })
         );
@@ -81,7 +80,7 @@ export default function useFetchLive() {
         await mutate(undefined, { revalidate: true });
       })();
     }
-  }, [route, data, fetcher, mutate, allplayers, matchups]);
+  }, [route, data, fetcher, mutate, allplayers, matchups, dispatch]);
 
   useEffect(() => {
     const worker = new Worker(

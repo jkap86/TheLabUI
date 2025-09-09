@@ -44,6 +44,8 @@ const League = ({ league, type }: LeagueProps) => {
     (r) => r.roster_id.toString() === activeRosterId
   );
 
+  console.log({ activeRoster });
+
   const projectionsObj = useMemo(() => {
     const players: { [player_id: string]: number } = {};
     const teams: { [roster_id: number]: { p_s: number; p_b_5: number } } = {};
@@ -85,7 +87,7 @@ const League = ({ league, type }: LeagueProps) => {
     desc: string;
     key: keyof Roster;
   }[] = leagueHeaders
-    .filter((h) => h.key)
+    .filter((h) => h.key || h.abbrev === "Record")
     .map((h) => {
       return {
         ...h,
@@ -119,11 +121,18 @@ const League = ({ league, type }: LeagueProps) => {
             sort: value,
             text: Math.round(value).toLocaleString("en-US"),
             trendColor: getTrendColor_Range(value, minValue, maxValue),
-            classname: h.key.startsWith("ktc")
-              ? "ktc"
-              : h.key.startsWith("ros")
-              ? "font-score"
-              : "font-hugmate",
+            classname: h.key.startsWith("ktc") ? "ktc" : "font-score",
+          };
+        });
+      } else if (h.abbrev === "Record") {
+        league.rosters.forEach((roster) => {
+          obj[roster.roster_id]["Record"] = {
+            sort: (roster.rank && -roster.rank) ?? 0,
+            text: `${roster.wins}-${roster.losses}${
+              roster.ties ? `-${roster.ties}` : ""
+            }`,
+            trendColor: getTrendColor_Range(roster.win_pct ?? 0.5, 0, 1),
+            classname: "",
           };
         });
       }

@@ -53,6 +53,7 @@ export type Roster = {
   fp: number;
   fpa: number;
   rank?: number;
+  win_pct?: number | null;
   starters_optimal_dynasty?: string[];
   starters_optimal_ppg?: string[];
   bench_ppg?: string[];

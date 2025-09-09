@@ -9,8 +9,8 @@ export interface StandingsState {
 }
 
 const initialState: StandingsState = {
-  teamsColumn1: "Proj S",
-  teamsColumn2: "Proj B T5",
+  teamsColumn1: "Record",
+  teamsColumn2: "Pts",
   playersColumn1: "KTC D",
   playersColumn2: "ROS P",
   type: "R",
