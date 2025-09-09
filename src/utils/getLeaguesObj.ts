@@ -41,8 +41,12 @@ export const getLeaguesObj = (
     const ranks: { [abbrev: string]: colObj } = {};
 
     for (const { abbrev, key } of leagueHeaders.filter((h) => h.key)) {
-      const rk = rankBy(league.rosters, user_id, key as keyof Roster);
-
+      let rk: number;
+      if (key === "rank") {
+        rk = league.user_roster.rank ?? 0;
+      } else {
+        rk = rankBy(league.rosters, user_id, key as keyof Roster);
+      }
       ranks[abbrev + (user_id === league.user_roster.user_id ? "" : " Lm")] =
         getRankColObj(rk, league.rosters.length);
 
