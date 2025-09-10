@@ -12,7 +12,7 @@ export interface LineupcheckerState {
   user: User | null;
   errorLoadingUserLeagueIds: string | null;
 
-  isLoadingMatchups: boolean;
+  isLoadingMatchups: boolean | null;
   matchups: {
     [league_id: string]: {
       user_matchup: Matchup;
@@ -62,7 +62,7 @@ const initialState: LineupcheckerState = {
   user: null,
   errorLoadingUserLeagueIds: null,
 
-  isLoadingMatchups: false,
+  isLoadingMatchups: null,
   matchups: {},
   matchupsProgress: 0,
   isUpdatingMatchups: false,

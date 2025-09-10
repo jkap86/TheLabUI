@@ -23,6 +23,8 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
     (state: RootState) => state.common
   );
   const {
+    user,
+    leagues,
     isLoadingUser,
     errorUser,
     isLoadingLeagues,
@@ -56,10 +58,7 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
             );
           })}
         </div>
-      ) : !allplayers ||
-        !nflState ||
-        isLoadingCommon.length > 0 ||
-        isLoadingUser ? (
+      ) : !allplayers || !nflState || isLoadingCommon.length > 0 || !user ? (
         <div className="flex-1 flex flex-col justify-center items-center">
           <LoadingIcon messages={[]} />
         </div>
@@ -67,7 +66,9 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
         <div className="flex-1">
           <Heading />
           {isLoadingCommon.length > 0 ||
-          isLoadingUser ? null : isLoadingLeagues ? (
+          isLoadingUser ||
+          isLoadingLeagues ||
+          leagues === null ? (
             <LoadingIcon messages={[`${leaguesProgress} Leagues Loaded`]} />
           ) : (
             component

@@ -19,10 +19,13 @@ export const useFetchUserAndLeagues = (searched: string) => {
   } = useSelector((state: RootState) => state.manager);
 
   useEffect(() => {
-    if (user && user.username.toLowerCase() !== searched?.toLowerCase()) {
+    if (user?.username?.toLowerCase() !== searched?.toLowerCase()) {
       dispatch(resetState());
-      console.log("RESETTING");
-    } else if (
+    }
+  }, []);
+
+  useEffect(() => {
+    if (
       !user &&
       !isLoadingUser &&
       !errorUser &&
@@ -30,8 +33,6 @@ export const useFetchUserAndLeagues = (searched: string) => {
       ktcCurrent &&
       projections
     ) {
-      console.log("FETCH USER");
-
       dispatch(fetchUser(searched));
     } else if (
       nflState &&
@@ -42,7 +43,6 @@ export const useFetchUserAndLeagues = (searched: string) => {
       !isLoadingLeagues &&
       !errorLeagues
     ) {
-      console.log("FETCH LEAGUES");
       dispatch(fetchLeagues({ user, nflState }));
     }
   }, [

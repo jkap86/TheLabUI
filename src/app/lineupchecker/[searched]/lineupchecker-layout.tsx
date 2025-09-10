@@ -28,6 +28,7 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
   const dispatch: AppDispatch = useDispatch();
   const { type1, type2 } = useSelector((state: RootState) => state.manager);
   const {
+    user,
     isLoadingUserLeagueIds,
     errorLoadingUserLeagueIds,
     isLoadingMatchups,
@@ -275,7 +276,7 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
           <Link href={"/lineupchecker"} className="home">
             Lineup Checker Home
           </Link>
-          {Object.values(matchups)[0]?.user_matchup?.username ? (
+          {user?.username ? (
             <>
               <div className="heading pt-[5rem]">
                 <h1 className="tool-title !text-[5rem] ![text-shadow:0_0_.5rem_red]">

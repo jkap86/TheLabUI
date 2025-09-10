@@ -20,7 +20,7 @@ export interface ManagerState {
   errorUser: string | null;
 
   leagues: { [league_id: string]: League } | null;
-  isLoadingLeagues: boolean;
+  isLoadingLeagues: boolean | null;
   errorLeagues: string | null;
   leaguesProgress: number;
 
@@ -64,7 +64,7 @@ const initialState: ManagerState = {
   errorUser: null,
 
   leagues: null,
-  isLoadingLeagues: false,
+  isLoadingLeagues: null,
   errorLeagues: null,
   leaguesProgress: 0,
 
