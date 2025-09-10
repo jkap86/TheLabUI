@@ -127,7 +127,7 @@ export default function useFetchLive() {
   }, [projections]);
 
   useEffect(() => {
-    if (!liveStats || Object.keys(liveStats).length === 0) return;
+    if (!liveStats) return;
     workerRef.current?.postMessage({
       liveStats,
       matchups: matchupsRef.current,
