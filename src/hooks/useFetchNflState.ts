@@ -1,8 +1,8 @@
-import { fetchNflState } from "@/redux/commonActions";
+import { fetchNflState } from "@/redux/common/commonActions";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { nflStateMessage } from "@/redux/commonSlice";
+import { nflStateMessage } from "@/redux/common/commonSlice";
 
 export default function useFetchNflState() {
   const dispatch: AppDispatch = useDispatch();

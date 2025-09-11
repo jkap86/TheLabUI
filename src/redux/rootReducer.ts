@@ -1,5 +1,5 @@
 import { combineReducers } from "redux";
-import commonSlice from "./commonSlice";
+import commonSlice from "./common/commonSlice";
 import managerSlice from "./manager/managerSlice";
 import leaguesSlice from "./leagues/leaguesSlice";
 import playersSlice from "./players/playersSlice";

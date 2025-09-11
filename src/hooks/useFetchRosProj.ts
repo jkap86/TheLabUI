@@ -1,5 +1,5 @@
-import { fetchProjections } from "@/redux/commonActions";
-import { projectionsMessage } from "@/redux/commonSlice";
+import { fetchProjections } from "@/redux/common/commonActions";
+import { projectionsMessage } from "@/redux/common/commonSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";

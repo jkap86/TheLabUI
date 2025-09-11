@@ -1,8 +1,8 @@
-import { fetchKtc } from "@/redux/commonActions";
+import { fetchKtc } from "@/redux/common/commonActions";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { AppDispatch, RootState } from "@/redux/store";
-import { ktcCurrentMessage } from "@/redux/commonSlice";
+import { ktcCurrentMessage } from "@/redux/common/commonSlice";
 
 export default function useFetchKtcCurrent() {
   const dispatch: AppDispatch = useDispatch();

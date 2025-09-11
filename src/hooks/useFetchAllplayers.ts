@@ -1,5 +1,5 @@
-import { fetchAllplayers } from "@/redux/commonActions";
-import { allplayersMessage } from "@/redux/commonSlice";
+import { fetchAllplayers } from "@/redux/common/commonActions";
+import { allplayersMessage } from "@/redux/common/commonSlice";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";

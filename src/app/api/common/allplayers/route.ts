@@ -3,6 +3,8 @@ import pool from "@/lib/pool";
 import axiosInstance from "@/lib/axiosInstance";
 import { Allplayer } from "@/lib/types/commonTypes";
 
+const CC = "public, s-maxage=3600, stale-while-revalidate=300";
+
 export async function GET(req: Request) {
   try {
     const data = await pool.query(
@@ -30,7 +32,7 @@ export async function GET(req: Request) {
         headers: {
           ETag: etag,
           "Last-Modified": new Date(allplayers_db.updated_at).toUTCString(),
-          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=300",
+          "Cache-Control": CC,
         },
       });
     }
@@ -39,10 +41,7 @@ export async function GET(req: Request) {
       const res = NextResponse.json(allplayers_db.data, { status: 200 });
 
       res.headers.set("ETag", etag!);
-      res.headers.set(
-        "Cache-Control",
-        "public, s-maxage=3600, stale-while-revalidate=300"
-      );
+      res.headers.set("Cache-Control", CC);
 
       return res;
     }
