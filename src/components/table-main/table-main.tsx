@@ -105,12 +105,7 @@ const TableMain = ({
   const [searched, setSearched] = useState<false | string>(false);
   const [page, setPage] = useState(1);
   const [active, setActive] = useState<false | string>(false);
-  /*
-  useEffect(() => {
-    if (headers_sort)
-      setSortBy({ column: headers_sort[0] as 0 | 1 | 2 | 3 | 4, asc: false });
-  }, [headers_sort]);
-*/
+
   const body = !half
     ? data
         .filter((d) => !searched || d.id === searched)

@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import thelablogo from "../../../public/images/thelab.png";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
-import { useCallback, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import useFetchNflState from "@/hooks/useFetchNflState";
 
 const Trades = () => {
@@ -36,41 +36,35 @@ const Trades = () => {
   useFetchAllplayers();
   useFetchKtcCurrent();
 
-  const setSearchedPlayer1 = useCallback(
-    (value: string) => {
-      if (!value) {
-        dispatch(
-          updateTradesState({
-            key: "searched_player1_pc",
-            value: searched_player3_pc,
-          })
-        );
+  useEffect(() => {
+    if (!searched_player1_pc && searched_player3_pc) {
+      dispatch(
+        updateTradesState({
+          key: "searched_player1_pc",
+          value:
+            searched_player3_pc === "Price Check" ? "" : searched_player3_pc,
+        })
+      );
 
+      if (searched_player3_pc !== "Price Check")
         dispatch(updateTradesState({ key: "searched_player3_pc", value: "" }));
-      } else {
-        dispatch(updateTradesState({ key: "searched_player1_pc", value }));
-      }
-    },
-    [dispatch, searched_player3_pc]
-  );
+    }
+  }, [searched_player1_pc, searched_player3_pc]);
 
-  const setSearchedPlayer2 = useCallback(
-    (value: string) => {
-      if (!value) {
-        dispatch(
-          updateTradesState({
-            key: "searched_player2_pc",
-            value: searched_player4_pc,
-          })
-        );
+  useEffect(() => {
+    if (!searched_player2_pc && searched_player4_pc) {
+      dispatch(
+        updateTradesState({
+          key: "searched_player2_pc",
+          value:
+            searched_player4_pc === "Price Check" ? "" : searched_player4_pc,
+        })
+      );
 
+      if (searched_player4_pc !== "Price Check")
         dispatch(updateTradesState({ key: "searched_player4_pc", value: "" }));
-      } else {
-        dispatch(updateTradesState({ key: "searched_player2_pc", value }));
-      }
-    },
-    [dispatch, searched_player4_pc]
-  );
+    }
+  }, [searched_player2_pc, searched_player4_pc]);
 
   const player_pick_options = useMemo(() => {
     const pick_seasons =
@@ -112,6 +106,11 @@ const Trades = () => {
         });
       }),
       ...current_season_picks,
+      {
+        id: "Price Check",
+        text: "$$ Price Check",
+        display: <>$$ Price Check</>,
+      },
     ];
 
     return [
@@ -144,10 +143,15 @@ const Trades = () => {
                 player_pick_options.find((o) => o.id === searched_player1_pc)
                   ?.text || ""
               }
-              setSearched={(value) => setSearchedPlayer1(value)}
+              setSearched={(value) =>
+                dispatch(
+                  updateTradesState({ key: "searched_player1_pc", value })
+                )
+              }
               options={player_pick_options.filter(
                 (o) =>
                   ![
+                    "Price Check",
                     searched_player2_pc,
                     searched_player3_pc,
                     searched_player4_pc,
@@ -169,11 +173,6 @@ const Trades = () => {
                   )
                 }
                 options={[
-                  {
-                    id: "Price Check",
-                    text: "$$ Price Check",
-                    display: <>$$ Price Check</>,
-                  },
                   ...player_pick_options.filter(
                     (o) =>
                       ![
@@ -196,10 +195,15 @@ const Trades = () => {
                 player_pick_options.find((o) => o.id === searched_player2_pc)
                   ?.text || ""
               }
-              setSearched={(value) => setSearchedPlayer2(value)}
+              setSearched={(value) =>
+                dispatch(
+                  updateTradesState({ key: "searched_player2_pc", value })
+                )
+              }
               options={player_pick_options.filter(
                 (o) =>
                   ![
+                    "Price Check",
                     searched_player1_pc,
                     searched_player3_pc,
                     searched_player4_pc,
@@ -249,7 +253,8 @@ const Trades = () => {
           t.player_id2 === searched_player2_pc &&
           t.player_id3 === searched_player3_pc &&
           t.player_id4 === searched_player4_pc
-      ) ? null : (
+      ) ||
+      !searched_player1_pc ? null : (
         <button
           className="text-[2.5rem] px-6 py-3 bg-blue-900 w-fit mx-auto my-8"
           onClick={() =>

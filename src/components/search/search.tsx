@@ -27,7 +27,6 @@ const Search = ({
   const searchRef = useRef<HTMLDivElement>(null);
   const [searchText, setSearchText] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
-  //const [searchOptions, setSearchOptions] = useState<Option[]>([]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -58,17 +57,13 @@ const Search = ({
       setSearchText("");
       setSearched("");
       setIsOpen(false);
-      // setSearchOptions([]);
     } else if (match) {
       setSearchText(match.text);
       setSearched(match.id);
       setIsOpen(false);
-      // setSearchOptions([]);
     } else {
       setSearchText(input);
       setIsOpen(true);
-
-      // setSearchOptions(filteredOptions);
     }
   };
 
@@ -86,15 +81,22 @@ const Search = ({
               .toLowerCase()
           )
       )
-      .sort(
-        (a, b) =>
-          a.text.toLowerCase().trim().indexOf(searchText.trim().toLowerCase()) -
-            b.text
-              .toLowerCase()
-              .trim()
-              .indexOf(searchText.trim().toLowerCase()) ||
+      .sort((a, b) => {
+        const getTextMinIndex = (text: string) => {
+          return Math.min(
+            ...text
+              .split(" ")
+              .map((s) =>
+                s.toLowerCase().trim().indexOf(searchText.trim().toLowerCase())
+              )
+              .filter((i) => i >= 0)
+          );
+        };
+        return (
+          getTextMinIndex(a.text) - getTextMinIndex(b.text) ||
           (a.text.trim() > b.text.trim() ? 1 : -1)
-      );
+        );
+      });
 
     return filteredOptions;
   }, [searchText, options]);

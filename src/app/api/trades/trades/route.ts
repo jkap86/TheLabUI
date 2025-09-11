@@ -3,6 +3,12 @@ import pool from "@/lib/pool";
 import { getRosterStats } from "../../manager/leagues/helpers/getRosterStats";
 import { Allplayer } from "@/lib/types/commonTypes";
 
+const draftPickEquals = (value: string) => {
+  return `(dp->>'season') || ' ' || (dp->>'round')::text || '.' 
+    || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
+    = ${value}`;
+};
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
 
@@ -19,7 +25,11 @@ export async function GET(req: NextRequest) {
 
   if (player_id1?.includes(".")) {
     conditions.push(
-      `EXISTS (SELECT 1 FROM jsonb_array_elements(t.draft_picks) AS dp WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') = $1)`
+      `EXISTS (
+        SELECT 1 
+        FROM jsonb_array_elements(t.draft_picks) AS dp 
+        WHERE ${draftPickEquals("$1")}
+      )`
     );
   } else {
     conditions.push(`t.adds ? $1`);
@@ -34,16 +44,12 @@ export async function GET(req: NextRequest) {
           (
             SELECT dp1->>'new'
             FROM jsonb_array_elements(t.draft_picks) AS dp1
-            WHERE (dp1->>'season') || ' ' || (dp1->>'round') || '.' ||
-                  COALESCE(LPAD((dp1->>'order')::text, 2, '0'), 'null') = $1
+            WHERE ${draftPickEquals("$1")}
             LIMIT 1
           ) != (
             SELECT dp2->>'new'
             FROM jsonb_array_elements(t.draft_picks) AS dp2
-            WHERE (dp2->>'season') || ' ' || (dp2->>'round') || '.' ||
-                  COALESCE(LPAD((dp2->>'order')::text, 2, '0'), 'null') = $${
-                    values.length + 1
-                  }
+            WHERE ${draftPickEquals(`$${values.length + 1}`)}
             LIMIT 1
           )
 `);
@@ -54,8 +60,7 @@ export async function GET(req: NextRequest) {
             ) != (
               SELECT dp->>'new' 
               FROM jsonb_array_elements(t.draft_picks) AS dp 
-              WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
-                = $${values.length + 1}
+              WHERE ${draftPickEquals(`$${values.length + 1}`)}
               LIMIT 1
             )`
         );
@@ -68,8 +73,7 @@ export async function GET(req: NextRequest) {
             ) != (
               SELECT dp->>'new' 
               FROM jsonb_array_elements(t.draft_picks) AS dp 
-              WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
-                = $1
+              WHERE ${draftPickEquals("$1")}
               LIMIT 1
             )`
         );
@@ -89,8 +93,7 @@ export async function GET(req: NextRequest) {
             WITH pick(new_val) AS (
               SELECT dp->>'new'
               FROM jsonb_array_elements(t.draft_picks) dp
-              WHERE (dp->>'season') || ' ' || (dp->>'round') || '.' ||
-                    COALESCE(LPAD(dp->>'order', 2, '0'), 'null') = $1
+              WHERE ${draftPickEquals("$1")}
               LIMIT 1
             )
             SELECT
@@ -129,14 +132,12 @@ export async function GET(req: NextRequest) {
             `(
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
-            WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
-              = $1
+            WHERE ${draftPickEquals("$1")}
             LIMIT 1
         ) = (
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
-            WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
-              = $${values.length + 1}
+            WHERE ${draftPickEquals(`$${values.length + 1}`)}
             LIMIT 1
           )`
           );
@@ -144,8 +145,7 @@ export async function GET(req: NextRequest) {
           conditions.push(`(
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
-            WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
-              = $${values.length + 1}
+            WHERE ${draftPickEquals(`$${values.length + 1}`)}
             LIMIT 1
         ) = t.adds ->> $1`);
         }
@@ -155,8 +155,7 @@ export async function GET(req: NextRequest) {
             `t.adds ->> $${values.length + 1} != (
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
-            WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
-              = $1
+            WHERE ${draftPickEquals("$1")}
             LIMIT 1
           )`
           );
@@ -176,8 +175,7 @@ export async function GET(req: NextRequest) {
             WITH pick(new_val) AS (
               SELECT dp->>'new'
               FROM jsonb_array_elements(t.draft_picks) dp
-              WHERE (dp->>'season') || ' ' || (dp->>'round') || '.' ||
-                    COALESCE(LPAD(dp->>'order', 2, '0'), 'null') = $2
+              WHERE ${draftPickEquals("$2")}
               LIMIT 1
             )
             SELECT
@@ -216,14 +214,12 @@ export async function GET(req: NextRequest) {
             `(
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
-            WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
-              = $2
+            WHERE ${draftPickEquals("$2")}
             LIMIT 1
           ) = (
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
-            WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
-              = $${values.length + 1}
+            WHERE ${draftPickEquals(`$${values.length + 1}`)}
             LIMIT 1
           )`
           );
@@ -232,8 +228,7 @@ export async function GET(req: NextRequest) {
           (
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
-            WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
-              = $${values.length + 1}
+            WHERE ${draftPickEquals(`$${values.length + 1}`)}
             LIMIT 1
           ) = t.adds ->> $2`);
         }
@@ -242,8 +237,7 @@ export async function GET(req: NextRequest) {
           conditions.push(`t.adds ->> $${values.length + 1} = (
             SELECT dp->>'new' 
             FROM jsonb_array_elements(t.draft_picks) AS dp 
-            WHERE (dp->>'season') || ' ' || (dp->>'round')::text || '.' || COALESCE(LPAD((dp->>'order')::text, 2, '0'), 'null') 
-              = $2
+            WHERE ${draftPickEquals("$2")}
             LIMIT 1
           )`);
         } else {
