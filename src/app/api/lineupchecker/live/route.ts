@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getLiveStats } from "../helpers/getLiveStats";
 
-const CC =
-  "public, s-maxage=30, stale-while-revalidate=300, max-age=0, must-revalidate";
+const CC = "public, s-maxage=10, max-age=10, must-revalidate";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
