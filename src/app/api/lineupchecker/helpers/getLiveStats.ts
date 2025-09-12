@@ -49,7 +49,7 @@ export const getLiveStats = async (week: string) => {
       .map((team) => team.kickoff);
 
     delay = Object.values(schedule).some((team) => team.is_in_progress)
-      ? 30_000
+      ? 10_000
       : upcomingKickoffTimes.length > 0
       ? Math.min(...upcomingKickoffTimes) - new Date().getTime()
       : 12 * 60 * 60 * 1000;
