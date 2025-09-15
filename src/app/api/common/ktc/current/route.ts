@@ -5,19 +5,19 @@ const CC = "public, max-age=120, s-maxage=1200, stale-while-revalidate=300";
 
 export async function GET(req: NextRequest) {
   try {
-    /*
     const {
       current_date: date_dynasty,
       values: values_dynasty,
       last_modified: lastModified,
     } = await getKtcCurrent();
-    */
 
+    /*
     const {
       date: date_dynasty,
       values: values_dynasty,
       lastModified,
     } = await getKtcValues("dynasty");
+*/
 
     if (!date_dynasty || !values_dynasty) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json("Error fetching KTC values", { status: 500 });
   }
 }
-/*
+
 const getKtcCurrent = async () => {
   const query = `
     WITH last_day AS (
@@ -76,7 +76,7 @@ const getKtcCurrent = async () => {
 
   return { current_date, last_modified, values: Object.entries(values) };
 };
-*/
+/*
 const getKtcValues = async (type: "dynasty" | "fantasy") => {
   const ktc_dates_db = await pool.query(
     `SELECT * FROM common WHERE name = 'ktc_dates_${type}'`
@@ -97,3 +97,4 @@ const getKtcValues = async (type: "dynasty" | "fantasy") => {
 
   return { date, values, lastModified };
 };
+*/

@@ -27,9 +27,9 @@ const TrendsPage = () => {
     asc: boolean;
   }>({ column: 1, asc: false });
   const [col1, setCol1] = useState("gms active");
-  const [col2, setCol2] = useState("rec");
-  const [col3, setCol3] = useState("rec yd");
-  const [col4, setCol4] = useState("rec td");
+  const [col2, setCol2] = useState("ktc trend");
+  const [col3, setCol3] = useState("value min");
+  const [col4, setCol4] = useState("value max");
 
   useFetchAllplayers();
 
@@ -172,7 +172,7 @@ const TrendsPage = () => {
         )
       );
       sort = v;
-      classname = "font-score";
+      classname = col.startsWith("value") ? "font-pulang" : "font-score";
     } else {
       let v = 0;
       switch (col) {
@@ -194,7 +194,7 @@ const TrendsPage = () => {
             Math.max(...all_trends)
           );
           sort = v;
-          classname = "font-score";
+          classname = "font-pulang";
           break;
         case "tgts per snap":
           v =
