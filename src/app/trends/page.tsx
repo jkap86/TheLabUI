@@ -2,25 +2,34 @@
 
 import Avatar from "@/components/avatar/avatar";
 import LoadingIcon from "@/components/loading-icon/loading-icon";
+import PlayersFilters from "@/components/players-filters/players-filters";
 import TableMain from "@/components/table-main/table-main";
 import useFetchAllplayers from "@/hooks/useFetchAllplayers";
+import useFetchNflState from "@/hooks/useFetchNflState";
 import { RootState } from "@/redux/store";
+import { filterPlayerIds } from "@/utils/filterPlayers";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
 import axios from "axios";
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import thelablogo from "../../../public/images/thelab.png";
+import Image from "next/image";
 
 const TrendsPage = () => {
-  const { allplayers } = useSelector((state: RootState) => state.common);
+  const { allplayers, nflState } = useSelector(
+    (state: RootState) => state.common
+  );
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
+  const [seasonType, setSeasonType] = useState("regular");
   const [data, setData] = useState<{
     start_date: string;
     end_date: string;
+    season_type: string;
     players: {
       [player_id: string]: { [key: string]: number };
     };
-  }>({ players: {}, start_date: "", end_date: "" });
+  }>({ players: {}, start_date: "", end_date: "", season_type: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [sortBy, setSortBy] = useState<{
     column: 1 | 2 | 3 | 4;
@@ -30,7 +39,11 @@ const TrendsPage = () => {
   const [col2, setCol2] = useState("ktc trend");
   const [col3, setCol3] = useState("value min");
   const [col4, setCol4] = useState("value max");
+  const [filterDraftClass, setFilterDraftClass] = useState("All");
+  const [filterTeam, setFilterTeam] = useState("All");
+  const [filterPosition, setFilterPosition] = useState("All");
 
+  useFetchNflState();
   useFetchAllplayers();
 
   const getUtcDate = (date: string) => {
@@ -48,6 +61,10 @@ const TrendsPage = () => {
   const fetchStats = async () => {
     setIsLoading(true);
 
+    const start_date = startDate;
+    const end_date = endDate;
+    const season_type = seasonType;
+
     const stats: {
       data: ({
         player_id: string;
@@ -57,8 +74,8 @@ const TrendsPage = () => {
       })[];
     } = await axios.get("/api/trends", {
       params: {
-        start_date: getUtcDate(startDate),
-        end_date: getUtcDate(endDate),
+        start_date: getUtcDate(start_date),
+        end_date: getUtcDate(end_date),
       },
     });
 
@@ -76,7 +93,7 @@ const TrendsPage = () => {
         })
     );
 
-    setData({ players: dataObj, start_date: startDate, end_date: endDate });
+    setData({ players: dataObj, start_date, end_date, season_type });
     setIsLoading(false);
   };
 
@@ -84,33 +101,14 @@ const TrendsPage = () => {
     startDate &&
     endDate &&
     data.start_date === startDate &&
-    data.end_date === endDate;
+    data.end_date === endDate &&
+    data.season_type === seasonType;
 
-  const header_options = [
+  const header_options_ktc = [
     {
       abbrev: "ktc trend",
-      text: "ktc trend",
-      desc: "ktc trend",
-    },
-    {
-      abbrev: "rush att",
-      text: "Rushing Attempts",
-      desc: "Rushing Attempts/Carries",
-    },
-    {
-      abbrev: "rush yd",
-      text: "Rushing Yards",
-      desc: "Rushing Yards",
-    },
-    {
-      abbrev: "tgts per snap",
-      text: "Targets Per Snap",
-      desc: "Targets Per Snap",
-    },
-    {
-      abbrev: "rec tgt",
-      text: "Targets",
-      desc: "Receiving Targets",
+      text: "KTC Trend",
+      desc: "Difference between KTC values at start and end dates",
     },
     {
       abbrev: "value max",
@@ -124,13 +122,114 @@ const TrendsPage = () => {
     },
     {
       abbrev: "value max date",
-      text: "Max ktc value",
-      desc: "Peak Ktc value",
+      text: "KTC Max Value Date",
+      desc: "Date when KTC value peaked in date range.",
     },
     {
       abbrev: "value min date",
-      text: "date of Min ktc value",
-      desc: "date of lowest Ktc value",
+      text: "KTC Min Value Date",
+      desc: "Date when KTC value bottomed out in date range.",
+    },
+  ];
+
+  const header_options_passing = [
+    {
+      abbrev: "pass att",
+      text: "Pass Attempts",
+      desc: "Passing Attempts",
+    },
+    {
+      abbrev: "pass cmp",
+      text: "Pass Completions",
+      desc: "Completions",
+    },
+    {
+      abbrev: "pass yd",
+      text: "Pass Yards",
+      desc: "Passing Yards",
+    },
+    {
+      abbrev: "pass td",
+      text: "Pass TDs",
+      desc: "Passing Touchdowns",
+    },
+    {
+      abbrev: "pass int",
+      text: "Pass Int",
+      desc: "Interceptions",
+    },
+    {
+      abbrev: "pass air yd",
+      text: "Pass Air Yards",
+      desc: "Passing Air Yards",
+    },
+  ];
+
+  const header_options_rushing = [
+    {
+      abbrev: "rush att",
+      text: "Rush Attempts",
+      desc: "Rushing Attempts/Carries",
+    },
+    {
+      abbrev: "rush yd",
+      text: "Rush Yards",
+      desc: "Rushing Yards",
+    },
+  ];
+
+  const header_options_receiving = [
+    {
+      abbrev: "tgts per snap",
+      text: "Rec Targets Per Snap",
+      desc: "Receiving Targets Per Snap",
+    },
+    {
+      abbrev: "rec tgt",
+      text: "Rec Targets",
+      desc: "Receiving Targets",
+    },
+    {
+      abbrev: "rec",
+      text: "Rec Catches",
+      desc: "Receptions",
+    },
+    {
+      abbrev: "rec yd",
+      text: "Rec Yards",
+      desc: "Receiving Yards",
+    },
+    {
+      abbrev: "rec td",
+      text: "Rec TDs",
+      desc: "Receiving Touchdowns",
+    },
+    {
+      abbrev: "rec air yd",
+      text: "Rec Air Yards",
+      desc: "Receiving Air Yards",
+    },
+  ];
+
+  const header_options = [
+    ...header_options_ktc,
+    ...header_options_passing,
+    ...header_options_rushing,
+    ...header_options_receiving,
+    {
+      abbrev: "gms active",
+      text: "Games Active",
+      desc: "Games Active",
+    },
+    {
+      abbrev: "snp %",
+      text: "Snap Percentage",
+      desc: "Percent of team's offensive snaps",
+    },
+    {
+      abbrev: "pts ppr",
+      text: "Ppr points",
+      desc: "Ppr points",
     },
   ];
 
@@ -142,7 +241,7 @@ const TrendsPage = () => {
           .map((cat) => cat)
       )
     )
-  );
+  ).sort((a, b) => (a > b ? 1 : -1));
 
   console.log({ scoring_cats });
 
@@ -211,6 +310,18 @@ const TrendsPage = () => {
           sort = v;
           classname = "font-score";
           break;
+        case "snp %":
+          v =
+            data.players[player_id].tm_off_snp > 0
+              ? (data.players[player_id]?.off_snp ?? 0) /
+                data.players[player_id].tm_off_snp
+              : 0;
+
+          text = Math.round(v * 100) + "%";
+          trendColor = getTrendColor_Range(v, 0, 1);
+          sort = v;
+          classname = "font-score";
+          break;
         default:
           break;
       }
@@ -221,9 +332,30 @@ const TrendsPage = () => {
 
   return (
     <>
-      <h1>Trends</h1>
-      <div className="flex flex-col items-center">
+      <div className="flex justify-center items-center p-8 w-fit m-auto relative">
+        <Image
+          src={thelablogo}
+          alt="logo"
+          className="w-[25rem] m-8 opacity-[.35] drop-shadow-[0_0_1rem_white]"
+        />
+        <h1 className="absolute !text-[15rem] font-metal !text-[var(--color7)] ![text-shadow:0_0_.5rem_red] drop-shadow-[0_0_1rem_black]">
+          Trends
+        </h1>
+      </div>
+      <div className="flex flex-col items-center text-[3rem]">
         <div className="flex justify-center">
+          <div className="flex flex-col items-center m-8">
+            <label>Season Type</label>
+            <select
+              value={seasonType}
+              onChange={(e) => setSeasonType(e.target.value)}
+              className="bg-[lightslategray] text-[gold] font-hugmate h-full"
+            >
+              {["regular", "pre", "post"].map((st) => {
+                return <option key={st}>{st}</option>;
+              })}
+            </select>
+          </div>
           {[
             { label: "Start Date", date: startDate, setDate: setStartDate },
             { label: "End Date", date: endDate, setDate: setEndDate },
@@ -235,6 +367,8 @@ const TrendsPage = () => {
                   type="date"
                   value={obj.date}
                   onChange={(e) => obj.setDate(e.target.value)}
+                  placeholder={obj.label}
+                  className="p-2"
                 />
               </div>
             );
@@ -243,62 +377,80 @@ const TrendsPage = () => {
         <button
           onClick={fetchStats}
           disabled={dataLoaded || !startDate || !endDate}
+          className="font-metal text-red-600 bg-blue-900 p-2 rounded"
         >
-          Submit
+          Get Players
         </button>
       </div>
       {dataLoaded ? (
-        <TableMain
-          type={1}
-          headers_options={header_options}
-          headers_sort={[1, 2, 3, 4]}
-          headers={[
-            { text: "Player", colspan: 2 },
-            { text: col1, colspan: 1, update: setCol1 },
-            { text: col2, colspan: 1, update: setCol2 },
-            { text: col3, colspan: 1, update: setCol3 },
-            { text: col4, colspan: 1, update: setCol4 },
-          ]}
-          data={Object.keys(data.players).map((player_id) => {
-            return {
-              id: player_id,
-              columns: [
-                {
-                  text: (
-                    <Avatar
-                      id={player_id}
-                      text={allplayers?.[player_id]?.full_name ?? player_id}
-                      type="P"
-                    />
-                  ),
-                  colspan: 2,
-                  classname: "",
-                },
-                ...[col1, col2, col3, col4].map((col) => {
-                  const { text, trendColor, classname, sort } = getColumn(
-                    col,
-                    player_id
-                  );
+        <>
+          <PlayersFilters
+            filterDraftClass={filterDraftClass}
+            setFilterDraftClass={(e) => setFilterDraftClass(e.target.value)}
+            filterTeam={filterTeam}
+            setFilterTeam={(e) => setFilterTeam(e.target.value)}
+            filterPosition={filterPosition}
+            setFilterPosition={(e) => setFilterPosition(e.target.value)}
+          />
+          <TableMain
+            type={1}
+            headers_options={header_options}
+            headers_sort={[1, 2, 3, 4]}
+            headers={[
+              { text: "Player", colspan: 2 },
+              { text: col1, colspan: 1, update: setCol1 },
+              { text: col2, colspan: 1, update: setCol2 },
+              { text: col3, colspan: 1, update: setCol3 },
+              { text: col4, colspan: 1, update: setCol4 },
+            ]}
+            data={filterPlayerIds({
+              player_ids: Object.keys(data.players),
+              allplayers,
+              nflState,
+              filterDraftClass,
+              filterPosition,
+              filterTeam,
+            }).map((player_id) => {
+              return {
+                id: player_id,
+                columns: [
+                  {
+                    text: (
+                      <Avatar
+                        id={player_id}
+                        text={allplayers?.[player_id]?.full_name ?? player_id}
+                        type="P"
+                      />
+                    ),
+                    colspan: 2,
+                    classname: "",
+                  },
+                  ...[col1, col2, col3, col4].map((col) => {
+                    const { text, trendColor, classname, sort } = getColumn(
+                      col,
+                      player_id
+                    );
 
-                  return {
-                    text,
-                    colspan: 1,
-                    style: trendColor,
-                    classname,
-                    sort,
-                  };
-                }),
-              ],
-            };
-          })}
-          sortBy={sortBy}
-          setSortBy={({ column, asc }) =>
-            setSortBy({ column, asc } as {
-              column: 1 | 2 | 3 | 4;
-              asc: boolean;
-            })
-          }
-        />
+                    return {
+                      text,
+                      colspan: 1,
+                      style: trendColor,
+                      classname,
+                      sort,
+                    };
+                  }),
+                ],
+              };
+            })}
+            sortBy={sortBy}
+            setSortBy={({ column, asc }) =>
+              setSortBy({ column, asc } as {
+                column: 1 | 2 | 3 | 4;
+                asc: boolean;
+              })
+            }
+          />
+        </>
       ) : isLoading ? (
         <LoadingIcon messages={[]} />
       ) : null}

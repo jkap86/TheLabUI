@@ -24,12 +24,12 @@ export async function GET(req: NextRequest) {
     ranked AS (
       SELECT
         s.*,
-        ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY value         DESC, date ASC) AS rn_value_max,
-        ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY value         ASC,  date ASC) AS rn_value_min,
-        ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY overall_rank  DESC, date ASC) AS rn_overall_max,
-        ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY overall_rank  ASC,  date ASC) AS rn_overall_min,
-        ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY position_rank DESC, date ASC) AS rn_pos_max,
-        ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY position_rank ASC,  date ASC) AS rn_pos_min
+        ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY value         DESC, date DESC) AS rn_value_max,
+        ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY value         ASC,  date DESC) AS rn_value_min,
+        ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY overall_rank  DESC, date DESC) AS rn_overall_max,
+        ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY overall_rank  ASC,  date DESC) AS rn_overall_min,
+        ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY position_rank DESC, date DESC) AS rn_pos_max,
+        ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY position_rank ASC,  date DESC) AS rn_pos_min
       FROM span s
     )
     SELECT
