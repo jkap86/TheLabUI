@@ -38,7 +38,7 @@ export const getLiveStats = async (week: string) => {
           player_id: statObj.player_id,
           stats: statObj.stats,
           kickoff: kickoff ?? 0,
-          timeLeft: kickoff ? timeLeft ?? 3600 : 0,
+          timeLeft: kickoff ? Math.max(timeLeft, 0) ?? 3600 : 0,
           is_in_progress,
         });
       }
