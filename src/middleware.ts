@@ -5,7 +5,7 @@ import type { NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   //if (process.env.NODE_ENV === "production") {
   // Extract IP address from the request
-  const ipAddress = request.headers.get("x-forwarded-for") || "Unknown IP";
+  //const ipAddress = request.headers.get("x-forwarded-for") || "Unknown IP";
 
   // Get the current timestamp
 
