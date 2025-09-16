@@ -23,7 +23,7 @@ const Homepage = ({
   const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setId_searched(e.target.value);
+    setId_searched(e.target.value.trim());
   };
 
   return (

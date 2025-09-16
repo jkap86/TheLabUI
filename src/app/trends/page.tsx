@@ -35,10 +35,10 @@ const TrendsPage = () => {
     column: 1 | 2 | 3 | 4;
     asc: boolean;
   }>({ column: 1, asc: false });
-  const [col1, setCol1] = useState("gms active");
+  const [col1, setCol1] = useState("pts ppr");
   const [col2, setCol2] = useState("ktc trend");
-  const [col3, setCol3] = useState("value min");
-  const [col4, setCol4] = useState("value max");
+  const [col3, setCol3] = useState("ktc min");
+  const [col4, setCol4] = useState("ktc max");
   const [filterDraftClass, setFilterDraftClass] = useState("All");
   const [filterTeam, setFilterTeam] = useState("All");
   const [filterPosition, setFilterPosition] = useState("All");
@@ -76,6 +76,7 @@ const TrendsPage = () => {
       params: {
         start_date: getUtcDate(start_date),
         end_date: getUtcDate(end_date),
+        season_type,
       },
     });
 
@@ -104,31 +105,55 @@ const TrendsPage = () => {
     data.end_date === endDate &&
     data.season_type === seasonType;
 
-  const header_options_ktc = [
+  const header_options_ktc: {
+    abbrev: string;
+    text: string;
+    desc: string;
+  }[] = [
     {
       abbrev: "ktc trend",
       text: "KTC Trend",
       desc: "Difference between KTC values at start and end dates",
     },
     {
-      abbrev: "value max",
+      abbrev: "ktc max",
       text: "Max ktc value",
       desc: "Peak Ktc value",
     },
     {
-      abbrev: "value min",
+      abbrev: "ktc min",
       text: "Min ktc value",
       desc: "Lowest Ktc value",
     },
     {
-      abbrev: "value max date",
+      abbrev: "ktc max date",
       text: "KTC Max Value Date",
       desc: "Date when KTC value peaked in date range.",
     },
     {
-      abbrev: "value min date",
+      abbrev: "ktc min date",
       text: "KTC Min Value Date",
       desc: "Date when KTC value bottomed out in date range.",
+    },
+    {
+      abbrev: "ktc start",
+      text: "KTC Value Start",
+      desc: "KTC value on start date",
+    },
+    {
+      abbrev: "ktc end",
+      text: "KTC Value End",
+      desc: "KTC value on end date",
+    },
+    {
+      abbrev: "ktc position rank max",
+      text: "KTC Max Position Rank",
+      desc: "KTC Peak Positional Ranking",
+    },
+    {
+      abbrev: "ktc position rank min",
+      text: "KTC Min Position Rank",
+      desc: "KTC Lowest Positional Ranking",
     },
   ];
 
@@ -183,6 +208,11 @@ const TrendsPage = () => {
       abbrev: "tgts per snap",
       text: "Rec Targets Per Snap",
       desc: "Receiving Targets Per Snap",
+    },
+    {
+      abbrev: "yds per snap",
+      text: "Rec Yards Per Snap",
+      desc: "Receiving Yards Per Snap",
     },
     {
       abbrev: "rec tgt",
@@ -243,8 +273,6 @@ const TrendsPage = () => {
     )
   ).sort((a, b) => (a > b ? 1 : -1));
 
-  console.log({ scoring_cats });
-
   const getColumn = (col: string, player_id: string) => {
     let trendColor = {};
     let text = "-";
@@ -268,23 +296,26 @@ const TrendsPage = () => {
           ...Object.keys(data.players).map(
             (player_id) => data.players[player_id]?.[key] ?? 0
           )
-        )
+        ),
+        key.includes("rank")
       );
       sort = v;
-      classname = col.startsWith("value") ? "font-pulang" : "font-score";
+      classname =
+        col.includes("rank") || col.startsWith("ktc")
+          ? "font-pulang"
+          : "font-score";
     } else {
       let v = 0;
       switch (col) {
         case "ktc trend":
           const all_trends = Object.keys(data.players).map(
             (player_id) =>
-              (data.players[player_id].value_at_end ?? 0) -
-              (data.players[player_id].value_at_start ?? 0)
+              (data.players[player_id].ktc_end ?? 0) -
+              (data.players[player_id].ktc_start ?? 0)
           );
 
           v =
-            data.players[player_id].value_at_end -
-            data.players[player_id].value_at_start;
+            data.players[player_id].ktc_end - data.players[player_id].ktc_start;
 
           text = v.toString();
           trendColor = getTrendColor_Range(
@@ -307,6 +338,21 @@ const TrendsPage = () => {
             minimumFractionDigits: 2,
           });
           trendColor = getTrendColor_Range(v, 0.05, 0.25);
+          sort = v;
+          classname = "font-score";
+          break;
+        case "yds per snap":
+          v =
+            data.players[player_id].off_snp > 0
+              ? (data.players[player_id]?.rec_yd ?? 0) /
+                data.players[player_id].off_snp
+              : 0;
+
+          text = v.toLocaleString("en-US", {
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 2,
+          });
+          trendColor = getTrendColor_Range(v, 0.5, 2);
           sort = v;
           classname = "font-score";
           break;
@@ -411,8 +457,17 @@ const TrendsPage = () => {
               filterPosition,
               filterTeam,
             }).map((player_id) => {
+              const player_name =
+                allplayers?.[player_id]?.full_name ?? player_id;
               return {
                 id: player_id,
+                search: {
+                  id: player_id,
+                  text: player_name,
+                  display: (
+                    <Avatar id={player_id} text={player_name} type="P" />
+                  ),
+                },
                 columns: [
                   {
                     text: (
@@ -449,6 +504,7 @@ const TrendsPage = () => {
                 asc: boolean;
               })
             }
+            placeholder="Player"
           />
         </>
       ) : isLoading ? (

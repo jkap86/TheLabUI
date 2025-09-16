@@ -14,8 +14,9 @@ import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import thelablogo from "../../../public/images/thelab.png";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useFetchNflState from "@/hooks/useFetchNflState";
+import Modal from "@/components/modal/modal";
 
 const Trades = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -27,10 +28,12 @@ const Trades = () => {
     searched_player2_pc,
     searched_player3_pc,
     searched_player4_pc,
+    league_type1,
     trades,
     isLoadingTrades,
   } = useSelector((state: RootState) => state.trades);
   const { user } = useSelector((state: RootState) => state.manager);
+  const [isOpen, setIsOpen] = useState(false);
 
   useFetchNflState();
   useFetchAllplayers();
@@ -179,7 +182,7 @@ const Trades = () => {
                         searched_player1_pc,
                         searched_player2_pc,
                         searched_player4_pc,
-                      ].includes(o.id)
+                      ].includes(o.id) || o.id === "Price Check"
                   ),
                 ]}
                 placeholder="Player 2"
@@ -225,21 +228,14 @@ const Trades = () => {
                     updateTradesState({ key: "searched_player4_pc", value })
                   )
                 }
-                options={[
-                  {
-                    id: "Price Check",
-                    text: "**Price Check**",
-                    display: <>**Price Check**</>,
-                  },
-                  ...player_pick_options.filter(
-                    (o) =>
-                      ![
-                        searched_player1_pc,
-                        searched_player2_pc,
-                        searched_player3_pc,
-                      ].includes(o.id)
-                  ),
-                ]}
+                options={player_pick_options.filter(
+                  (o) =>
+                    ![
+                      searched_player1_pc,
+                      searched_player2_pc,
+                      searched_player3_pc,
+                    ].includes(o.id) || o.id === "Price Check"
+                )}
                 placeholder="Player 2"
               />
             </div>
@@ -252,7 +248,8 @@ const Trades = () => {
           t.player_id1 === searched_player1_pc &&
           t.player_id2 === searched_player2_pc &&
           t.player_id3 === searched_player3_pc &&
-          t.player_id4 === searched_player4_pc
+          t.player_id4 === searched_player4_pc &&
+          t.league_type1 === league_type1
       ) ||
       !searched_player1_pc ? null : (
         <button
@@ -264,6 +261,7 @@ const Trades = () => {
                 player_id2: searched_player2_pc,
                 player_id3: searched_player3_pc,
                 player_id4: searched_player4_pc,
+                league_type1,
                 offset: tradeObj?.trades?.length || 0,
                 limit: 125,
               })
@@ -281,7 +279,31 @@ const Trades = () => {
       t.player_id1 === searched_player1_pc &&
       t.player_id2 === searched_player2_pc &&
       t.player_id3 === searched_player3_pc &&
-      t.player_id4 === searched_player4_pc
+      t.player_id4 === searched_player4_pc &&
+      t.league_type1 === league_type1
+  );
+
+  const modalContent = (
+    <div className="flex flex-col items-center">
+      <label className="text-[2.5rem]">League Type</label>
+      <select
+        className="text-[3rem]"
+        value={league_type1}
+        onChange={(e) =>
+          dispatch(
+            updateTradesState({
+              key: "league_type1",
+              value: e.target.value,
+            })
+          )
+        }
+      >
+        <option>Any</option>
+        <option value={"2"}>Dynasty</option>
+        <option value={"1"}>Keeper</option>
+        <option value={"0"}>Redraft</option>
+      </select>
+    </div>
   );
 
   return (
@@ -316,7 +338,24 @@ const Trades = () => {
           </h1>
         </div>
         {isLoadingCommon.length > 0 ? null : (
-          <div className="flex flex-col ">{searches}</div>
+          <>
+            <div className="flex flex-col items-center">
+              <i
+                className="fa-solid fa-filter text-[3rem] text-[var(--color1)]"
+                onClick={() => setIsOpen(true)}
+              ></i>
+              <div className="flex justify-evenly text-[2.5rem] text-red-600 font-pulang">
+                {league_type1 === "0"
+                  ? "Redraft"
+                  : league_type1 === "1"
+                  ? "Keeper"
+                  : league_type1 === "2"
+                  ? "Dynasty"
+                  : null}
+              </div>
+            </div>
+            <div className="flex flex-col ">{searches}</div>
+          </>
         )}
         {isLoadingTrades ? (
           <div className="flex-1 flex">
@@ -334,6 +373,7 @@ const Trades = () => {
                     player_id2: searched_player2_pc,
                     player_id3: searched_player3_pc,
                     player_id4: searched_player4_pc,
+                    league_type1,
                     offset: tradeObj?.trades?.length || 0,
                     limit: 125,
                   })
@@ -343,6 +383,9 @@ const Trades = () => {
           </div>
         )}
       </div>
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
+        {modalContent}
+      </Modal>
     </div>
   );
 };

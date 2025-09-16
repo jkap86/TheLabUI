@@ -9,6 +9,7 @@ export const fetchTrades = createAsyncThunk(
       player_id2,
       player_id3,
       player_id4,
+      league_type1,
       offset,
       limit,
     }: {
@@ -16,6 +17,7 @@ export const fetchTrades = createAsyncThunk(
       player_id2?: string;
       player_id3?: string;
       player_id4?: string;
+      league_type1: string;
       offset: number;
       limit: number;
     },
@@ -27,6 +29,7 @@ export const fetchTrades = createAsyncThunk(
         player_id2,
         player_id3,
         player_id4,
+        league_type1,
         offset,
         limit,
       },
@@ -45,6 +48,7 @@ export const fetchTrades = createAsyncThunk(
       player_id2,
       player_id3,
       player_id4,
+      league_type1,
       count: trades.data.count,
       trades: trades.data.rows,
     };

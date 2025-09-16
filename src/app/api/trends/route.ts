@@ -6,10 +6,11 @@ export async function GET(req: NextRequest) {
 
   const start_date = searchParams.get("start_date");
   const end_date = searchParams.get("end_date");
+  const season_type = searchParams.get("season_type");
 
-  if (!start_date || !end_date) {
+  if (!start_date || !end_date || !season_type) {
     return NextResponse.json(
-      { error: "start_date and end_date are required" },
+      { error: "start_date, end_date, and season_type are required" },
       { status: 400 }
     );
   }
@@ -36,28 +37,28 @@ export async function GET(req: NextRequest) {
       player_id,
 
       -- value
-      MAX(value) AS value_max,
-      MIN(value) AS value_min,
-      MIN(date) FILTER (WHERE rn_value_max = 1) AS value_max_date,
-      MIN(date) FILTER (WHERE rn_value_min = 1) AS value_min_date,
-      MAX(value) FILTER (WHERE date = to_timestamp($1::bigint / 1000)::date ) AS value_at_start,
-      MAX(value) FILTER (WHERE date = to_timestamp($2::bigint / 1000)::date ) AS value_at_end,
+      MAX(value) AS ktc_max,
+      MIN(value) AS ktc_min,
+      to_char(MIN(date) FILTER (WHERE rn_value_max = 1), 'FMMM/FMDD/YY') AS ktc_max_date,
+      to_char(MIN(date) FILTER (WHERE rn_value_min = 1), 'FMMM/FMDD/YY') AS ktc_min_date,
+      MAX(value) FILTER (WHERE date = to_timestamp($1::bigint / 1000)::date ) AS ktc_start,
+      MAX(value) FILTER (WHERE date = to_timestamp($2::bigint / 1000)::date ) AS ktc_end,
 
       -- overall_rank
-      MAX(overall_rank) AS overall_rank_max,
-      MIN(overall_rank) AS overall_rank_min,
-      MIN(date) FILTER (WHERE rn_overall_max = 1) AS overall_rank_max_date,
-      MIN(date) FILTER (WHERE rn_overall_min = 1) AS overall_rank_min_date,
-      MAX(overall_rank) FILTER (WHERE date = to_timestamp($1::bigint / 1000)::date) AS overall_rank_at_start,
-      MAX(overall_rank) FILTER (WHERE date = to_timestamp($2::bigint / 1000)::date ) AS overall_rank_at_end,
+      MIN(overall_rank) AS ktc_overall_rank_max,
+      MAX(overall_rank) AS ktc_overall_rank_min,
+      to_char(MAX(date) FILTER (WHERE rn_overall_max = 1), 'FMMM/FMDD/YY') AS ktc_overall_rank_max_date,
+      to_char(MAX(date) FILTER (WHERE rn_overall_min = 1), 'FMMM/FMDD/YY') AS ktc_overall_rank_min_date,
+      MAX(overall_rank) FILTER (WHERE date = to_timestamp($1::bigint / 1000)::date) AS ktc_overall_rank_start,
+      MAX(overall_rank) FILTER (WHERE date = to_timestamp($2::bigint / 1000)::date ) AS ktc_overall_rank_end,
 
       -- position_rank
-      MAX(position_rank) AS position_rank_max,
-      MIN(position_rank) AS position_rank_min,
-      MIN(date) FILTER (WHERE rn_pos_max = 1) AS position_rank_max_date,
-      MIN(date) FILTER (WHERE rn_pos_min = 1) AS position_rank_min_date,
-      MAX(position_rank) FILTER (WHERE date = to_timestamp($1::bigint / 1000)::date ) AS position_rank_at_start,
-      MAX(position_rank) FILTER (WHERE date = to_timestamp($2::bigint / 1000)::date ) AS position_rank_at_end
+      MIN(position_rank) AS ktc_position_rank_max,
+      MAX(position_rank) AS ktc_position_rank_min,
+      to_char(MAX(date) FILTER (WHERE rn_pos_max = 1), 'FMMM/FMDD/YY') AS ktc_position_rank_max_date,
+      to_char(MAX(date) FILTER (WHERE rn_pos_min = 1), 'FMMM/FMDD/YY') AS ktc_position_rank_min_date,
+      MAX(position_rank) FILTER (WHERE date = to_timestamp($1::bigint / 1000)::date ) AS ktc_position_rank_start,
+      MAX(position_rank) FILTER (WHERE date = to_timestamp($2::bigint / 1000)::date ) AS ktc_position_rank_end
 
     FROM ranked
     GROUP BY player_id;
@@ -75,7 +76,8 @@ export async function GET(req: NextRequest) {
         FROM weekly_stats,
             jsonb_each_text(stats)
         WHERE kickoff > $1
-        AND kickoff < $2
+          AND kickoff < $2
+          AND season_type = $3
         GROUP BY player_id, key
     ) t
     GROUP BY player_id;
@@ -83,7 +85,7 @@ export async function GET(req: NextRequest) {
 
   const values = [parseInt(start_date), parseInt(end_date)];
 
-  const resultStats = await pool.query(statsQuery, values);
+  const resultStats = await pool.query(statsQuery, [...values, season_type]);
   const resultKtc = await pool.query(ktcQuery, values);
 
   const player_ids = Array.from(

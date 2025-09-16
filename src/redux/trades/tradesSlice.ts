@@ -9,6 +9,7 @@ export interface TradesState {
     player_id2: string | undefined;
     player_id3: string | undefined;
     player_id4: string | undefined;
+    league_type1: string;
     count: number;
     trades: Trade[];
   }[];
@@ -18,6 +19,7 @@ export interface TradesState {
   searched_player2_pc: string;
   searched_player3_pc: string;
   searched_player4_pc: string;
+  league_type1: string;
 }
 
 const initialState: TradesState = {
@@ -29,6 +31,7 @@ const initialState: TradesState = {
   searched_player2_pc: "",
   searched_player3_pc: "",
   searched_player4_pc: "",
+  league_type1: "Any",
 };
 
 const tradesSlice = createSlice({
@@ -56,7 +59,8 @@ const tradesSlice = createSlice({
               t.player_id1 === action.payload.player_id1 &&
               t.player_id2 === action.payload.player_id2 &&
               t.player_id3 === action.payload.player_id3 &&
-              t.player_id4 === action.payload.player_id4
+              t.player_id4 === action.payload.player_id4 &&
+              t.league_type1 === action.payload.league_type1
           )?.trades || [];
 
         state.trades = [
@@ -66,7 +70,8 @@ const tradesSlice = createSlice({
                 t.player_id1 === action.payload.player_id1 &&
                 t.player_id2 === action.payload.player_id2 &&
                 t.player_id3 === action.payload.player_id3 &&
-                t.player_id4 === action.payload.player_id4
+                t.player_id4 === action.payload.player_id4 &&
+                t.league_type1 === action.payload.league_type1
               )
           ),
           {
@@ -74,6 +79,7 @@ const tradesSlice = createSlice({
             player_id2: action.payload.player_id2,
             player_id3: action.payload.player_id3,
             player_id4: action.payload.player_id4,
+            league_type1: action.payload.league_type1,
             count: action.payload.count,
             trades: [
               ...existing,

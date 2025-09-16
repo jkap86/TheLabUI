@@ -16,6 +16,7 @@ export async function GET(req: NextRequest) {
   const player_id2 = searchParams.get("player_id2");
   const player_id3 = searchParams.get("player_id3");
   const player_id4 = searchParams.get("player_id4");
+  const league_type1 = searchParams.get("league_type1");
   const limit = searchParams.get("limit");
   const offset = searchParams.get("offset");
 
@@ -248,6 +249,12 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  if (league_type1 !== "Any") {
+    conditions.push(`l.settings ->> 'type' = $${values.length + 1}`);
+
+    values.push(league_type1);
+  }
+
   const getPcTradesQuery = `
       SELECT t.*, to_jsonb(l) AS league
 
@@ -261,6 +268,7 @@ export async function GET(req: NextRequest) {
   const countPcTradesQuery = `
       SELECT COUNT(*) 
       FROM trades t
+      JOIN leagues l ON t.league_id = l.league_id
       WHERE ${conditions.join(" AND ")}
     `;
 
