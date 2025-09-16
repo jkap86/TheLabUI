@@ -17,11 +17,19 @@ export async function middleware(request: NextRequest) {
       : "http://localhost:3000";
   const redirectUrl = new URL("/api/logs", url);
 
-  redirectUrl.searchParams.set("ip", ipAddress);
   redirectUrl.searchParams.set("route", request.nextUrl.pathname);
 
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 200);
+
   try {
-    await axios.get(redirectUrl.toString());
+    axios
+      .get(redirectUrl.toString(), {
+        signal: controller.signal,
+        headers: { "cache-control": "no-store" },
+      })
+      .catch(() => {})
+      .finally(() => clearTimeout(timer));
   } catch (err: unknown) {
     if (err instanceof Error) console.log(err.message);
   }
