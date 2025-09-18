@@ -5,7 +5,10 @@ import type { NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   //if (process.env.NODE_ENV === "production") {
   // Extract IP address from the request
-  //const ipAddress = request.headers.get("x-forwarded-for") || "Unknown IP";
+  const ipAddress = (request.headers.get("x-forwarded-for") || "Unknown IP")
+    .split(",")[0]
+    ?.trim()
+    .replace(/^::ffff:/, "");
 
   // Get the current timestamp
 
@@ -17,19 +20,11 @@ export async function middleware(request: NextRequest) {
       : "http://localhost:3000";
   const redirectUrl = new URL("/api/logs", url);
 
+  redirectUrl.searchParams.set("ip", ipAddress);
   redirectUrl.searchParams.set("route", request.nextUrl.pathname);
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 200);
-
   try {
-    axios
-      .get(redirectUrl.toString(), {
-        signal: controller.signal,
-        headers: { "cache-control": "no-store" },
-      })
-      .catch(() => {})
-      .finally(() => clearTimeout(timer));
+    await axios.get(redirectUrl.toString());
   } catch (err: unknown) {
     if (err instanceof Error) console.log(err.message);
   }

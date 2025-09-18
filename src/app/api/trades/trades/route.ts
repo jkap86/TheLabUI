@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/pool";
 import { getRosterStats } from "../../manager/leagues/helpers/getRosterStats";
 import { Allplayer } from "@/lib/types/commonTypes";
+import { getKtcCurrent } from "../../common/helpers/getKtcCurrent";
 
 const draftPickEquals = (value: string) => {
   return `(dp->>'season') || ' ' || (dp->>'round')::text || '.' 
@@ -291,6 +292,15 @@ export async function GET(req: NextRequest) {
     allplayers_db.map((p: Allplayer) => [p.player_id, p])
   );
 
+  const { values: ktc } = (await getKtcCurrent()) as {
+    values: [string, number][];
+  };
+
+  const ktcCurrent: { dynasty: { [player_id: string]: number } } = {
+    dynasty: Object.fromEntries(ktc),
+  };
+
+  /*
   const ktc_dynasty = await (
     await pool.query("SELECT * FROM common WHERE name = 'ktc_dates_dynasty'")
   ).rows[0].data;
@@ -304,6 +314,7 @@ export async function GET(req: NextRequest) {
       ],
     redraft: {},
   };
+  */
 
   try {
     const result = await pool.query(getPcTradesQuery, [
