@@ -71,10 +71,7 @@ const LineupcheckerMatchups = ({
           (type1 === "Redraft" && lm.league.settings.type !== 2) ||
           (type1 === "Dynasty" && lm.league.settings.type === 2)) &&
           (type2 === "All" ||
-            (type2 === "Bestball" &&
-              type1 === "Redraft" &&
-              lm.league.settings.type !== 2))) ||
-        lm.league.settings.best_ball === 1 ||
+            (type2 === "Bestball" && lm.league.settings.best_ball === 1))) ||
         (type2 === "Lineup" && lm.league.settings.best_ball !== 1)
     )
     .sort((a, b) => a.league.index - b.league.index)
