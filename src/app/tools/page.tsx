@@ -9,17 +9,17 @@ export default function Tools() {
     { href: "/lineupchecker", text: "Lineup Checker" },
   ];
   return (
-    <>
-      <div className="absolute top-0 left-0 right-0 h-[20rem] z-2 text-[10rem] flex justify-center items-center font-metal font-black text-[var(--color1)] ![text-shadow:0_0_1rem_red]">
+    <main className="relative h-[100dvh] flex flex-col items-center justify-center text-center">
+      <h1 className="absolute top-0 left-0 right-0 h-[20rem] z-2 !text-[10rem] flex justify-center items-center font-metal font-black text-[var(--color1)] ![text-shadow:0_0_1rem_red]">
         The Lab
-      </div>
+      </h1>
       <div className="relative h-[100dvh] flex items-center justify-center z-1">
         <div className="scale-150 drop-shadow-[0_0_5rem_white] opacity-[0.25]">
           <LoadingIcon messages={[]} />
         </div>
       </div>
 
-      <div className="h-[100dvh] pt-[5rem]  flex flex-col justify-evenly items-center absolute top-0 left-0 right-0 z-2">
+      <nav className="h-[100dvh] pt-[5rem]  flex flex-col justify-evenly items-center absolute top-0 left-0 right-0 z-2">
         {links.map((link) => {
           return (
             <Link
@@ -31,7 +31,7 @@ export default function Tools() {
             </Link>
           );
         })}
-      </div>
-    </>
+      </nav>
+    </main>
   );
 }

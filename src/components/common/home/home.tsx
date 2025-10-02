@@ -3,7 +3,7 @@
 import React from "react";
 import "./home.css";
 import Image from "next/image";
-import thelablogo from "../../../public/images/thelab.png";
+import thelablogo from "../../../../public/images/thelab.png";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -37,18 +37,7 @@ const Homepage = ({
         <div className="home-title">
           <h1 className="font-metal text-[var(--color1)]">The Lab</h1>
           <h1 className="font-metal text-yellow-600">{title}</h1>
-          {/* <select
-            className="nav-options"
-            value={tab}
-            onChange={(e) => setTab(e.target.value)}
-          >
-            {["PLAYERS", "LEAGUES", "LEAGUEMATES", "LEAGUEMATE TRADES"].map(
-              (option) => {
-                return <option key={option}>{option}</option>;
-              }
-            )}
-          </select>
-*/}
+
           <div className="user-input">
             <input
               type="text"

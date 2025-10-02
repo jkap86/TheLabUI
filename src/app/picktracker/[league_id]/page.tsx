@@ -1,10 +1,10 @@
 "use client";
 
-import Avatar from "@/components/avatar/avatar";
+import Avatar from "@/components/common/avatar/avatar";
 import LoadingIcon from "@/components/loading-icon/loading-icon";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
 import TableMain from "@/components/table-main/table-main";
-import useFetchAllplayers from "@/hooks/useFetchAllplayers";
+import useFetchAllplayers from "@/hooks/common/useFetchAllplayers";
 import axios from "axios";
 import Link from "next/link";
 import { use, useEffect, useState } from "react";

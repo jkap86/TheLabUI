@@ -7,7 +7,7 @@ import ManagerLayout from "../manager-layout";
 import TableTrades from "@/components/table-trades/table-trades";
 import Search from "@/components/search/search";
 import { updatedLmtradesState } from "@/redux/lmtrades/lmtradesSlice";
-import Avatar from "@/components/avatar/avatar";
+import Avatar from "@/components/common/avatar/avatar";
 import { fetchLmTrades } from "@/redux/manager/managerActions";
 import LoadingIcon from "@/components/loading-icon/loading-icon";
 import { convertDraftPickName, getDraftPickIdFromRaw } from "@/utils/getPickId";

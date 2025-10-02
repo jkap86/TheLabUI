@@ -2,15 +2,15 @@
 
 import { JSX } from "react";
 import LoadingIcon from "@/components/loading-icon/loading-icon";
-import useFetchNflState from "@/hooks/useFetchNflState";
-import useFetchAllplayers from "@/hooks/useFetchAllplayers";
+import useFetchNflState from "@/hooks/common/useFetchNflState";
+import useFetchAllplayers from "@/hooks/common/useFetchAllplayers";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import useFetchKtcCurrent from "@/hooks/useFetchKtcCurrent";
+import useFetchKtcCurrent from "@/hooks/common/useFetchKtcCurrent";
 import { useFetchUserAndLeagues } from "@/hooks/manager/useFetchUserAndLeagues";
 import Heading from "@/components/heading/heading";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
-import useFetchRosProj from "@/hooks/useFetchRosProj";
+import useFetchRosProj from "@/hooks/common/useFetchRosProj";
 import { useFetchLmTrades } from "@/hooks/manager/useFetchLmTrades";
 
 interface LoadCommonDataProps {

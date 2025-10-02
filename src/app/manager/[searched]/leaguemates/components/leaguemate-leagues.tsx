@@ -1,4 +1,4 @@
-import Avatar from "@/components/avatar/avatar";
+import Avatar from "@/components/common/avatar/avatar";
 import League from "@/components/league/league";
 import TableMain from "@/components/table-main/table-main";
 import { colObj } from "@/lib/types/commonTypes";

@@ -5,7 +5,7 @@ import ManagerLayout from "../manager-layout";
 import TableMain from "@/components/table-main/table-main";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
-import Avatar from "@/components/avatar/avatar";
+import Avatar from "@/components/common/avatar/avatar";
 import { filterLeagueIds } from "@/utils/filterLeagues";
 import { League as LeagueType } from "@/lib/types/userTypes";
 import League from "@/components/league/league";

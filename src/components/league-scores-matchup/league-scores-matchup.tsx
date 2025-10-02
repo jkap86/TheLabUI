@@ -3,7 +3,7 @@ import { RootState } from "@/redux/store";
 import { getSlotAbbrev } from "@/utils/getOptimalStarters";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import Avatar from "../avatar/avatar";
+import Avatar from "../common/avatar/avatar";
 import TableMain from "../table-main/table-main";
 
 const LeagueScoresMatchup = ({

@@ -1,11 +1,11 @@
 "use client";
 
-import Avatar from "@/components/avatar/avatar";
+import Avatar from "@/components/common/avatar/avatar";
 import LoadingIcon from "@/components/loading-icon/loading-icon";
 import Search from "@/components/search/search";
 import TableTrades from "@/components/table-trades/table-trades";
-import useFetchAllplayers from "@/hooks/useFetchAllplayers";
-import useFetchKtcCurrent from "@/hooks/useFetchKtcCurrent";
+import useFetchAllplayers from "@/hooks/common/useFetchAllplayers";
+import useFetchKtcCurrent from "@/hooks/common/useFetchKtcCurrent";
 import { AppDispatch, RootState } from "@/redux/store";
 import { fetchTrades } from "@/redux/trades/tradesActions";
 import { updateTradesState } from "@/redux/trades/tradesSlice";
@@ -15,7 +15,7 @@ import Image from "next/image";
 import thelablogo from "../../../public/images/thelab.png";
 import ShNavbar from "@/components/sh-navbar/sh-navbar";
 import { useEffect, useMemo, useState } from "react";
-import useFetchNflState from "@/hooks/useFetchNflState";
+import useFetchNflState from "@/hooks/common/useFetchNflState";
 import Modal from "@/components/modal/modal";
 
 const Trades = () => {

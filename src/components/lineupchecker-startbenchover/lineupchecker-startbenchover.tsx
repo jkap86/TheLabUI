@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import Avatar from "../avatar/avatar";
+import Avatar from "../common/avatar/avatar";
 import TableMain from "../table-main/table-main";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useCallback, useState } from "react";

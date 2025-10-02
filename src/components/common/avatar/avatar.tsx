@@ -1,6 +1,6 @@
-import userAvatar from "../../../public/images/user_avatar.jpeg";
-import leagueAvatar from "../../../public/images/league_avatar.png";
-import playerAvatar from "../../../public/images/player_avatar.png";
+import userAvatar from "../../../../public/images/user_avatar.jpeg";
+import leagueAvatar from "../../../../public/images/league_avatar.png";
+import playerAvatar from "../../../../public/images/player_avatar.png";
 import "./avatar.css";
 import React from "react";
 import Image from "next/image";

@@ -1,6 +1,6 @@
 import { League, Matchup } from "@/lib/types/userTypes";
 import TableMain from "../table-main/table-main";
-import Avatar from "../avatar/avatar";
+import Avatar from "../common/avatar/avatar";
 import { getMedian } from "@/utils/getOptimalStarters";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";

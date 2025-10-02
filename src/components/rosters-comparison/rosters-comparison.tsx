@@ -5,7 +5,7 @@ import TableMain from "../table-main/table-main";
 import { getPlayerTotal, getSlotAbbrev } from "@/utils/getOptimalStarters";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import Avatar from "../avatar/avatar";
+import Avatar from "../common/avatar/avatar";
 import { getDraftPickId } from "@/utils/getPickId";
 import "./rosters-comparison.css";
 

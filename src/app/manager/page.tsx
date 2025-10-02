@@ -1,6 +1,6 @@
 "use client";
 
-import Homepage from "@/components/home/home";
+import Homepage from "@/components/common/home/home";
 import { useEffect, useState } from "react";
 
 const Manager = () => {

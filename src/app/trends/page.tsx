@@ -1,11 +1,11 @@
 "use client";
 
-import Avatar from "@/components/avatar/avatar";
+import Avatar from "@/components/common/avatar/avatar";
 import LoadingIcon from "@/components/loading-icon/loading-icon";
 import PlayersFilters from "@/components/players-filters/players-filters";
 import TableMain from "@/components/table-main/table-main";
-import useFetchAllplayers from "@/hooks/useFetchAllplayers";
-import useFetchNflState from "@/hooks/useFetchNflState";
+import useFetchAllplayers from "@/hooks/common/useFetchAllplayers";
+import useFetchNflState from "@/hooks/common/useFetchNflState";
 import { RootState } from "@/redux/store";
 import { filterPlayerIds } from "@/utils/filterPlayers";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
@@ -21,7 +21,7 @@ const TrendsPage = () => {
   );
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
-  const [seasonType, setSeasonType] = useState("regular");
+  const [seasonType, setSeasonType] = useState("REG");
   const [data, setData] = useState<{
     start_date: string;
     end_date: string;
@@ -169,7 +169,7 @@ const TrendsPage = () => {
       desc: "Completions",
     },
     {
-      abbrev: "pass yd",
+      abbrev: "pass yds",
       text: "Pass Yards",
       desc: "Passing Yards",
     },
@@ -184,9 +184,24 @@ const TrendsPage = () => {
       desc: "Interceptions",
     },
     {
-      abbrev: "pass air yd",
-      text: "Pass Air Yards",
-      desc: "Passing Air Yards",
+      abbrev: "pass air yds comp",
+      text: "Pass Air Yards Completed",
+      desc: "Completed Receiving Air Yards",
+    },
+    {
+      abbrev: "pass air yds tot",
+      text: "Pass Air Yards Total",
+      desc: "Completed and Unrealized Passing Air Yards",
+    },
+    {
+      abbrev: "pass ep",
+      text: "Pass Expected Points",
+      desc: "Passing Expected Points",
+    },
+    {
+      abbrev: "pass epa",
+      text: "Pass Expected Points Added",
+      desc: "Passing Expected Points",
     },
   ];
 
@@ -197,9 +212,24 @@ const TrendsPage = () => {
       desc: "Rushing Attempts/Carries",
     },
     {
-      abbrev: "rush yd",
+      abbrev: "rush yds",
       text: "Rush Yards",
       desc: "Rushing Yards",
+    },
+    {
+      abbrev: "rush success %",
+      text: "Rush Success Rate",
+      desc: "Percentage of rush attempts deemed successful",
+    },
+    {
+      abbrev: "rush ep",
+      text: "Rush Expected Points",
+      desc: "Rushing Expected Points",
+    },
+    {
+      abbrev: "rush epa",
+      text: "Rush Expected Points Added",
+      desc: "Rushing Expected Points",
     },
   ];
 
@@ -210,7 +240,7 @@ const TrendsPage = () => {
       desc: "Receiving Targets Per Snap",
     },
     {
-      abbrev: "yds per snap",
+      abbrev: "rec yds/snap",
       text: "Rec Yards Per Snap",
       desc: "Receiving Yards Per Snap",
     },
@@ -225,7 +255,7 @@ const TrendsPage = () => {
       desc: "Receptions",
     },
     {
-      abbrev: "rec yd",
+      abbrev: "rec yds",
       text: "Rec Yards",
       desc: "Receiving Yards",
     },
@@ -235,9 +265,24 @@ const TrendsPage = () => {
       desc: "Receiving Touchdowns",
     },
     {
-      abbrev: "rec air yd",
-      text: "Rec Air Yards",
-      desc: "Receiving Air Yards",
+      abbrev: "rec air yds comp",
+      text: "Rec Air Yards Completed",
+      desc: "Completed Receiving Air Yards",
+    },
+    {
+      abbrev: "rec air yds tot",
+      text: "Rec Air Yards Total",
+      desc: "Completed and Unrealized Receiving Air Yards",
+    },
+    {
+      abbrev: "rec ep",
+      text: "Rec Expected Points",
+      desc: "Receiving Expected Points",
+    },
+    {
+      abbrev: "rec epa",
+      text: "Rec Expected Points Added",
+      desc: "Receiving Expected Points",
     },
   ];
 
@@ -341,10 +386,10 @@ const TrendsPage = () => {
           sort = v;
           classname = "font-score";
           break;
-        case "yds per snap":
+        case "rec yds/snap":
           v =
             data.players[player_id].off_snp > 0
-              ? (data.players[player_id]?.rec_yd ?? 0) /
+              ? (data.players[player_id]?.rec_yds ?? 0) /
                 data.players[player_id].off_snp
               : 0;
 
@@ -358,9 +403,21 @@ const TrendsPage = () => {
           break;
         case "snp %":
           v =
-            data.players[player_id].tm_off_snp > 0
+            data.players[player_id].team_plays > 0
               ? (data.players[player_id]?.off_snp ?? 0) /
-                data.players[player_id].tm_off_snp
+                data.players[player_id].team_plays
+              : 0;
+
+          text = Math.round(v * 100) + "%";
+          trendColor = getTrendColor_Range(v, 0, 1);
+          sort = v;
+          classname = "font-score";
+          break;
+        case "rush success %":
+          v =
+            data.players[player_id].rush_att > 0
+              ? (data.players[player_id]?.rush_successes ?? 0) /
+                data.players[player_id].rush_att
               : 0;
 
           text = Math.round(v * 100) + "%";
@@ -397,7 +454,7 @@ const TrendsPage = () => {
               onChange={(e) => setSeasonType(e.target.value)}
               className="bg-[lightslategray] text-[gold] font-hugmate h-full"
             >
-              {["regular", "pre", "post"].map((st) => {
+              {["REG", "POST"].map((st) => {
                 return <option key={st}>{st}</option>;
               })}
             </select>

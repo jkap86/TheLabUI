@@ -4,7 +4,7 @@ import { League, Matchup } from "@/lib/types/userTypes";
 import { RootState } from "@/redux/store";
 import { getMedian, position_map } from "@/utils/getOptimalStarters";
 import { useSelector } from "react-redux";
-import Avatar from "../avatar/avatar";
+import Avatar from "../common/avatar/avatar";
 import LeagueMatchups from "../league-matchups/league-matchups";
 import TableMain from "../table-main/table-main";
 

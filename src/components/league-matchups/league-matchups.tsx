@@ -2,7 +2,7 @@
 
 import { League, Matchup } from "@/lib/types/userTypes";
 import TableMain from "../table-main/table-main";
-import Avatar from "../avatar/avatar";
+import Avatar from "../common/avatar/avatar";
 import {
   getMedian,
   getPlayerTotal,

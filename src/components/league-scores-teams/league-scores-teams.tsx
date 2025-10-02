@@ -1,6 +1,6 @@
 import { League, Matchup } from "@/lib/types/userTypes";
 import TableMain from "../table-main/table-main";
-import Avatar from "../avatar/avatar";
+import Avatar from "../common/avatar/avatar";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { updateSortTeamsBy } from "@/redux/lineupchecker/lineupcheckerSlice";

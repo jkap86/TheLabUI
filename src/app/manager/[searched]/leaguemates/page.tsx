@@ -6,7 +6,7 @@ import TableMain from "@/components/table-main/table-main";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { updateLeaguematesState } from "@/redux/leaguemates/leaguematesSlice";
-import Avatar from "@/components/avatar/avatar";
+import Avatar from "@/components/common/avatar/avatar";
 import { colObj } from "@/lib/types/commonTypes";
 import { filterLeagueIds } from "@/utils/filterLeagues";
 import LeaguemateLeagues from "./components/leaguemate-leagues";

@@ -59,7 +59,7 @@ export default function useFetchLive() {
       refreshInterval,
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
-      revalidateIfStale: true,
+      revalidateIfStale: false,
       revalidateOnMount: false,
       dedupingInterval: 10_000,
       shouldRetryOnError: true,
@@ -88,24 +88,17 @@ export default function useFetchLive() {
     );
     workerRef.current = worker;
 
-    // guard dispatch to avoid no-op updates causing renders
-    let lastPayloadKey = "";
-
     worker.onmessage = (e: MessageEvent) => {
       const next = e.data?.matchups_w_live;
-      const key = JSON.stringify(next);
 
-      if (key !== lastPayloadKey) {
-        lastPayloadKey = key;
-        dispatch(updateMatchups(next));
+      dispatch(updateMatchups(next));
 
-        dispatch(
-          updateLineupcheckerState({
-            key: "isLoadingLiveStats",
-            value: false,
-          })
-        );
-      }
+      dispatch(
+        updateLineupcheckerState({
+          key: "isLoadingLiveStats",
+          value: false,
+        })
+      );
     };
 
     return () => {

@@ -5,7 +5,7 @@ import { AppDispatch, RootState } from "@/redux/store";
 import { use, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import LineupcheckerLayout from "../lineupchecker-layout";
-import Avatar from "@/components/avatar/avatar";
+import Avatar from "@/components/common/avatar/avatar";
 import {
   getPlayerTotal,
   ppr_scoring_settings,

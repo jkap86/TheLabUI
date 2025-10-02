@@ -65,22 +65,94 @@ export async function GET(req: NextRequest) {
   `;
 
   const statsQuery = `
+    WITH f AS (  
+    SELECT *
+    FROM player_game_stats
+    WHERE kickoff > $1::bigint
+      AND kickoff < $2::bigint
+      AND season_type = $3
+    ),
+    g AS (  
+      SELECT player_id,
+            COUNT(DISTINCT CASE WHEN COALESCE(off_snp, 0) > 0 THEN game_id END)::int AS games,
+            COALESCE(
+              ROUND(
+                100.0 * SUM(COALESCE(off_snp, 0))::numeric
+                      / NULLIF(SUM(COALESCE(team_plays, 0))::numeric, 0),
+                1
+              )::float8,
+              0.0
+            ) AS off_snp_pct
+      FROM f
+      GROUP BY player_id
+    ),
+    kv AS (  
+      SELECT
+        f.player_id,
+        k.key,
+        SUM(k.val)::numeric AS sum_val
+      FROM f
+      CROSS JOIN LATERAL (
+        VALUES
+          ('pass_att',          COALESCE(f.pass_att, 0)::numeric),
+          ('pass_sack',         COALESCE(f.pass_sack, 0)::numeric),
+          ('pass_att_ez',       COALESCE(f.pass_att_ez, 0)::numeric),
+          ('pass_att_rz',       COALESCE(f.pass_att_rz, 0)::numeric),
+          ('pass_td_rz',        COALESCE(f.pass_td_rz, 0)::numeric),
+          ('pass_cmp',          COALESCE(f.pass_cmp, 0)::numeric),
+          ('pass_yds',          COALESCE(f.pass_yds, 0)::numeric),
+          ('pass_td',           COALESCE(f.pass_td, 0)::numeric),
+          ('pass_int',          COALESCE(f.pass_int, 0)::numeric),
+          ('pass_air_yds_comp', COALESCE(f.pass_air_yds_comp, 0)::numeric),
+          ('pass_air_yds_tot',  COALESCE(f.pass_air_yds_tot, 0)::numeric),
+          ('pass_ep',           ROUND(COALESCE(f.pass_ep, 0)::numeric, 1)),
+          ('pass_epa',          ROUND(COALESCE(f.pass_epa, 0)::numeric, 1)),
+
+          ('rec_tgt',           COALESCE(f.rec_tgt, 0)::numeric),
+          ('rec_tgt_ez',        COALESCE(f.rec_tgt_ez, 0)::numeric),
+          ('rec_tgt_rz',        COALESCE(f.rec_tgt_rz, 0)::numeric),
+          ('rec_rz',            COALESCE(f.rec_rz, 0)::numeric),
+          ('rec_td_rz',         COALESCE(f.rec_td_rz, 0)::numeric),
+          ('rec',               COALESCE(f.rec, 0)::numeric),
+          ('rec_yds',           COALESCE(f.rec_yds, 0)::numeric),
+          ('rec_td',            COALESCE(f.rec_td, 0)::numeric),
+          ('rec_air_yds_comp',  COALESCE(f.rec_air_yds_comp, 0)::numeric),
+          ('rec_air_yds_tot',   COALESCE(f.rec_air_yds_tot, 0)::numeric),
+          ('rec_ep',            ROUND(COALESCE(f.rec_ep, 0)::numeric, 1)),
+          ('rec_epa',           ROUND(COALESCE(f.rec_epa, 0)::numeric, 1)),
+
+          ('rush_gl_att',       COALESCE(f.rush_gl_att, 0)::numeric),
+          ('rush_rz_att',       COALESCE(f.rush_rz_att, 0)::numeric),
+          ('rush_att',          COALESCE(f.rush_att, 0)::numeric),
+          ('rush_yds',          COALESCE(f.rush_yds, 0)::numeric),
+          ('rush_td',           COALESCE(f.rush_td, 0)::numeric),
+          ('rush_successes',    COALESCE(f.rush_successes, 0)::numeric),
+          ('rush_ep',           ROUND(COALESCE(f.rush_ep, 0)::numeric, 1)),
+          ('rush_epa',          ROUND(COALESCE(f.rush_epa, 0)::numeric, 1)),
+
+          ('off_snp',           COALESCE(f.off_snp, 0)::numeric),
+          ('team_plays',        COALESCE(f.team_plays, 0)::numeric),
+          ('team_pass_att',     COALESCE(f.team_pass_att, 0)::numeric),
+          ('team_pass_cmp',     COALESCE(f.team_pass_cmp, 0)::numeric),
+          ('team_pass_yd',      COALESCE(f.team_pass_yd, 0)::numeric),
+          ('team_pass_td',      COALESCE(f.team_pass_td, 0)::numeric),
+          ('team_air_yds_comp', COALESCE(f.team_air_yds_comp, 0)::numeric),
+          ('team_air_yds_tot',  COALESCE(f.team_air_yds_tot, 0)::numeric)
+      ) AS k(key, val)
+      GROUP BY f.player_id, k.key
+    ),
+    s AS (  
+      SELECT player_id, jsonb_object_agg(key, sum_val ORDER BY key) AS stats
+      FROM kv
+      GROUP BY player_id
+    )
     SELECT
-        player_id,
-        jsonb_object_agg(key, sum_val) AS stats
-    FROM (
-        SELECT
-            player_id,
-            key,
-            SUM((value)::numeric) AS sum_val
-        FROM weekly_stats,
-            jsonb_each_text(stats)
-        WHERE kickoff > $1
-          AND kickoff < $2
-          AND season_type = $3
-        GROUP BY player_id, key
-    ) t
-    GROUP BY player_id;
+      s.player_id,
+      COALESCE(g.games, 0) AS games,
+      COALESCE(g.off_snp_pct,0) AS off_snp_pct,
+      s.stats
+    FROM s
+    LEFT JOIN g USING (player_id);
   `;
 
   const values = [parseInt(start_date), parseInt(end_date)];
@@ -101,7 +173,7 @@ export async function GET(req: NextRequest) {
 
     return {
       ...ktcRow,
-      stats: statsRow?.stats ?? {},
+      ...(statsRow ?? {}),
     };
   });
 

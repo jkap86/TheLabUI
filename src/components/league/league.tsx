@@ -4,7 +4,7 @@ import TableMain from "../table-main/table-main";
 import { JSX, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
-import Avatar from "../avatar/avatar";
+import Avatar from "../common/avatar/avatar";
 import { getPlayerTotal, getSlotAbbrev } from "@/utils/getOptimalStarters";
 import { getDraftPickId } from "@/utils/getPickId";
 import { updateStandingsState } from "@/redux/standings/standingsSlice";

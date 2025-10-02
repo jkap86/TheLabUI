@@ -1,6 +1,6 @@
 "use client";
 
-import Avatar from "@/components/avatar/avatar";
+import Avatar from "@/components/common/avatar/avatar";
 import { RootState } from "@/redux/store";
 import { use, useCallback, useMemo, useState } from "react";
 import { useSelector } from "react-redux";

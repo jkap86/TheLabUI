@@ -1,7 +1,7 @@
-import path from "path";
-import pkg from "pg";
-import fs from "fs";
-import dotenv from "dotenv";
+const path = require("path");
+const pkg = require("pg");
+const fs = require("fs");
+const dotenv = require("dotenv");
 
 const { Client } = pkg;
 

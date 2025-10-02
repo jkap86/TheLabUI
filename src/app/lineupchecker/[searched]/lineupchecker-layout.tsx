@@ -3,10 +3,10 @@
 import { JSX } from "react";
 import LoadingIcon from "@/components/loading-icon/loading-icon";
 import useFetchMatchups from "@/hooks/lineupchecker/useFetchMatchups";
-import useFetchAllplayers from "@/hooks/useFetchAllplayers";
-import useFetchNflState from "@/hooks/useFetchNflState";
+import useFetchAllplayers from "@/hooks/common/useFetchAllplayers";
+import useFetchNflState from "@/hooks/common/useFetchNflState";
 import Link from "next/link";
-import Avatar from "@/components/avatar/avatar";
+import Avatar from "@/components/common/avatar/avatar";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import LeagueTypeSwitch from "@/components/leagueTypeSwitch/leagueTypeSwitch";

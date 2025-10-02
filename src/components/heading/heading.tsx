@@ -1,6 +1,6 @@
 import Link from "next/link";
 import "./heading.css";
-import Avatar from "../avatar/avatar";
+import Avatar from "../common/avatar/avatar";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import LeagueTypeSwitch from "../leagueTypeSwitch/leagueTypeSwitch";

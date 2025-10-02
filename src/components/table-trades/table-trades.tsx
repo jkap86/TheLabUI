@@ -4,7 +4,7 @@ import {
 } from "@/lib/types/userTypes";
 import "./table-trades.css";
 import { useEffect, useMemo, useState } from "react";
-import Avatar from "../avatar/avatar";
+import Avatar from "../common/avatar/avatar";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { getDraftPickId } from "@/utils/getPickId";
