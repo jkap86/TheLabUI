@@ -1,100 +1,167 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-import { League, User } from "@/lib/types/userTypes";
+import axios, { AxiosError } from "axios";
+import { League, Leaguemate, Playershare, User } from "@/lib/types/userTypes";
 import { getPlayerShares } from "@/utils/getPlayerShares";
 import { RootState } from "../store";
 import { getLeaguesObj } from "@/utils/getLeaguesObj";
+import { colObj } from "@/lib/types/commonTypes";
 
-export const fetchUser = createAsyncThunk(
-  "fetchUser",
-  async (searched: string) => {
-    const user_fetched = await axios.get("/api/manager/user", {
+type FetchUserArg = { searched: string; signal?: AbortSignal };
+
+export const fetchUser = createAsyncThunk<
+  User,
+  FetchUserArg,
+  { state: RootState; rejectValue: { message: string; status?: number } }
+>("fetchUser", async ({ searched, signal }, { rejectWithValue }) => {
+  try {
+    const res = await axios.get("/api/manager/user", {
       params: { searched },
+      signal,
     });
 
-    return user_fetched.data;
-  }
-);
-
-export const fetchLeagues = createAsyncThunk(
-  "fetchLeagues",
-  async (
-    {
-      user,
-      nflState,
-    }: {
-      user: User;
-      nflState: { [key: string]: string | number };
-    },
-    { dispatch }
-  ) => {
-    const response = await fetch(
-      `/api/manager/leagues?user_id=${user.user_id}&week=${Math.max(
-        (nflState?.leg as number) || 0,
-        1
-      )}&season=${nflState.season}`
-    );
-
-    const reader = response.body?.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
-    let text = "";
-
-    if (reader) {
-      while (!done) {
-        const { value, done: streamDone } = await reader.read();
-        done = streamDone;
-
-        if (value) {
-          text += decoder.decode(value, { stream: true });
-
-          const matches = text.match(/{"league_id":/g);
-
-          dispatch({
-            type: "manager/updateLeaguesProgress",
-            payload: matches?.length || 0,
-          });
-        }
-      }
+    return res.data as User;
+  } catch (error: unknown) {
+    const err = error as AxiosError;
+    if (err?.name === "AbortError") {
+      return rejectWithValue({ message: "__ABORTED__" });
     }
 
-    const text_array = text.split("\n");
+    const status = err?.response?.status;
+    const message = err?.message ?? "Failed to fetch user";
 
-    const parsedLeaguesArray: League[] = [];
+    return rejectWithValue({ message, status });
+  }
+});
 
-    text_array
-      .filter((chunk) => chunk.length > 0)
-      .forEach((chunk) => {
-        try {
-          parsedLeaguesArray.push(JSON.parse(chunk));
-        } catch (err: unknown) {
-          console.log({ err, chunk });
-        }
+type ErrorPayload = { message: string; status?: number };
+type FetchLeaguesArg = {
+  user: User;
+  nflState: { [key: string]: string | number } | null;
+  signal?: AbortSignal;
+};
+
+export const fetchLeagues = createAsyncThunk<
+  {
+    leaguesState: { [league_id: string]: League };
+    playershares: {
+      [player_id: string]: Playershare;
+    };
+    pickshares: {
+      [pick_id: string]: Playershare;
+    };
+    leaguemates: {
+      [lm_user_id: string]: Leaguemate;
+    };
+    leaguesValuesObj: {
+      [league_id: string]: {
+        [col_abbrev: string]: colObj;
+      };
+    };
+  },
+  FetchLeaguesArg,
+  { state: RootState; rejectValue: ErrorPayload }
+>(
+  "fetchLeagues",
+  async ({ user, nflState, signal }, { dispatch, rejectWithValue }) => {
+    try {
+      if (!user?.user_id) {
+        return rejectWithValue({ message: "Missing user_id" });
+      }
+
+      const season = nflState?.season;
+      if (!season) {
+        return rejectWithValue({ message: "Missing season" });
+      }
+
+      const url = new URL("/api/manager/leagues", window.location.origin);
+      url.searchParams.set("user_id", user.user_id);
+      url.searchParams.set("season", String(season));
+
+      const res = await fetch(url.toString(), {
+        method: "GET",
+        headers: { Accept: "application/x-ndjson, application/json" },
+        signal,
       });
 
-    const leaguesState = Object.fromEntries(
-      parsedLeaguesArray.map((league: League) => {
-        return [league["league_id"], league];
-      })
-    );
+      if (!res.ok) {
+        const status = res.status;
+        // Try to read a small error body safely
+        let message = `Failed to fetch leagues (${status})`;
+        try {
+          const t = await res.text();
+          if (t) message = t.slice(0, 500);
+        } catch {}
+        return rejectWithValue({ message, status });
+      }
 
-    const { playershares, pickshares, leaguemates } = getPlayerShares(
-      parsedLeaguesArray,
-      user
-    );
+      // Stream NDJSON from ReadableStream (browser environment)
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let text = "";
 
-    const leaguesValuesObj = getLeaguesObj(
-      Object.values(leaguesState),
-      user.user_id
-    );
+      if (reader) {
+        while (!done) {
+          const { value, done: streamDone } = await reader.read();
+          done = streamDone;
 
-    return {
-      leaguesState,
-      playershares,
-      pickshares,
-      leaguemates,
-      leaguesValuesObj,
-    };
+          if (value) {
+            text += decoder.decode(value, { stream: true });
+
+            const matches = text.match(/\{"league_id":/g);
+
+            dispatch({
+              type: "manager/updateLeaguesProgress",
+              payload: matches?.length || 0,
+            });
+          }
+        }
+      }
+
+      const text_array = text.split("\n");
+      const parsedLeaguesArray: League[] = [];
+
+      text_array
+        .filter((chunk) => chunk.length > 0)
+        .forEach((chunk) => {
+          try {
+            parsedLeaguesArray.push(JSON.parse(chunk));
+          } catch (err: unknown) {
+            console.log({ err, chunk });
+          }
+        });
+
+      const leaguesState = Object.fromEntries(
+        parsedLeaguesArray.map((league: League) => [league.league_id, league])
+      );
+
+      const { playershares, pickshares, leaguemates } = getPlayerShares(
+        parsedLeaguesArray,
+        user
+      );
+
+      const leaguesValuesObj = getLeaguesObj(
+        Object.values(leaguesState),
+        user.user_id
+      );
+
+      return {
+        leaguesState,
+        playershares,
+        pickshares,
+        leaguemates,
+        leaguesValuesObj,
+      };
+    } catch (error: unknown) {
+      const err = error as AxiosError;
+      // Normalize aborts vs other errors
+      if (err?.name === "AbortError") {
+        return rejectWithValue({ message: "Request aborted by caller" });
+      }
+      const status = err?.response?.status;
+      const message = err?.message ?? "Failed to fetch leagues";
+      return rejectWithValue({ message, status });
+    }
   }
 );
 

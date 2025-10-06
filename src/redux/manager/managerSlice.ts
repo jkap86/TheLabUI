@@ -130,11 +130,16 @@ const managerSlice = createSlice({
       .addCase(fetchUser.rejected, (state, action) => {
         state.isLoadingUser = false;
 
-        if (action.error.code === "ERR_BAD_REQUEST") {
-          state.errorUser = "Username not found";
-        } else {
-          state.errorUser = action.error.message || "";
+        if (action.payload?.message === "__ABORTED__") {
+          return;
         }
+
+        if (action.payload?.status === 404) {
+          state.errorUser = "Username not found";
+          return;
+        }
+
+        state.errorUser = action.error.message || "";
       });
 
     builder
@@ -160,6 +165,11 @@ const managerSlice = createSlice({
       })
       .addCase(fetchLeagues.rejected, (state, action) => {
         state.isLoadingLeagues = false;
+
+        if (action.payload?.message === "__ABORTED__") {
+          return;
+        }
+
         state.errorLeagues = action.error.message || "";
       });
 
