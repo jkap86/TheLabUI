@@ -9,9 +9,10 @@ export const useFetchUserAndLeagues = (searchedRaw: string) => {
   const { nflState, ktcCurrent, projections } = useSelector(
     (state: RootState) => state.common
   );
-  const { user, leagues, isLoadingLeagues, errorLeagues } = useSelector(
-    (state: RootState) => state.manager
-  );
+  const { user, leagues, isLoadingLeagues, errorLeagues, errorUser } =
+    useSelector((state: RootState) => state.manager);
+
+  console.log({ errorUser, errorLeagues, user, leagues });
 
   const commonLoaded = useMemo(
     () => Boolean(nflState && ktcCurrent && projections),
