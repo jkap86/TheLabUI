@@ -67,7 +67,11 @@ const commonSlice = createSlice({
           (x) => x !== nflStateMessage
         );
 
-        state.errorCommon.push(action.error.message || "");
+        if (action.payload?.message === "__ABORTED__") return;
+
+        state.errorCommon.push(
+          action.payload?.message || action.error.message || ""
+        );
       });
 
     builder
@@ -86,7 +90,11 @@ const commonSlice = createSlice({
           (x) => x !== allplayersMessage
         );
 
-        state.errorCommon.push(action.error.message || "");
+        if (action.payload?.message === "__ABORTED__") return;
+
+        state.errorCommon.push(
+          action.payload?.message || action.error.message || ""
+        );
       });
 
     builder
@@ -99,15 +107,18 @@ const commonSlice = createSlice({
         );
 
         state.ktcCurrent = {
-          dynasty: Object.fromEntries(action.payload.dynasty.values),
+          dynasty: action.payload,
         };
       })
       .addCase(fetchKtc.rejected, (state, action) => {
         state.isLoadingCommon = state.isLoadingCommon.filter(
           (x) => x !== ktcCurrentMessage
         );
+        if (action.payload?.message === "__ABORTED__") return;
 
-        state.errorCommon.push(action.error.message || "");
+        state.errorCommon.push(
+          action.payload?.message || action.error.message || ""
+        );
       });
 
     builder
@@ -126,7 +137,11 @@ const commonSlice = createSlice({
           (x) => x !== projectionsMessage
         );
 
-        state.errorCommon.push(action.error.message || "");
+        if (action.payload?.message === "__ABORTED__") return;
+
+        state.errorCommon.push(
+          action.payload?.message || action.error.message || ""
+        );
       });
   },
 });

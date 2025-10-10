@@ -1,7 +1,7 @@
 import { fetchAllplayers } from "@/redux/common/commonActions";
 import { allplayersMessage } from "@/redux/common/commonSlice";
 import { AppDispatch, RootState } from "@/redux/store";
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function useFetchAllplayers() {
@@ -9,13 +9,27 @@ export default function useFetchAllplayers() {
   const { allplayers, isLoadingCommon, errorCommon } = useSelector(
     (state: RootState) => state.common
   );
+  const ctrlRef = useRef<AbortController | null>(null);
+
+  const isLoadingAllplayers = useMemo(
+    () => isLoadingCommon.includes(allplayersMessage),
+    [isLoadingCommon]
+  );
+
+  const hasError = useMemo(() => errorCommon.length > 0, [errorCommon]);
 
   useEffect(() => {
-    if (
-      !allplayers &&
-      !isLoadingCommon.includes(allplayersMessage) &&
-      errorCommon.length === 0
-    )
-      dispatch(fetchAllplayers());
-  }, [dispatch, allplayers, isLoadingCommon, errorCommon]);
+    if (allplayers || isLoadingAllplayers || hasError) return;
+
+    const ctrl = new AbortController();
+    ctrlRef.current = ctrl;
+
+    dispatch(fetchAllplayers({ signal: ctrl.signal }));
+  }, [dispatch, allplayers, isLoadingAllplayers, hasError]);
+
+  useEffect(() => {
+    return () => {
+      ctrlRef.current?.abort();
+    };
+  }, []);
 }

@@ -1,6 +1,6 @@
 import { fetchNflState } from "@/redux/common/commonActions";
 import { AppDispatch, RootState } from "@/redux/store";
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { nflStateMessage } from "@/redux/common/commonSlice";
 
@@ -10,12 +10,26 @@ export default function useFetchNflState() {
     (state: RootState) => state.common
   );
 
+  const ctrlRef = useRef<AbortController | null>(null);
+
+  const isLoadingNflState = useMemo(
+    () => isLoadingCommon.includes(nflStateMessage),
+    [isLoadingCommon]
+  );
+  const hasError = useMemo(() => errorCommon.length > 0, [errorCommon]);
+
   useEffect(() => {
-    if (
-      !nflState &&
-      !isLoadingCommon.includes(nflStateMessage) &&
-      errorCommon.length === 0
-    )
-      dispatch(fetchNflState());
-  }, [dispatch, nflState, isLoadingCommon, errorCommon]);
+    if (nflState || isLoadingNflState || hasError) return;
+
+    const ctrl = new AbortController();
+    ctrlRef.current = ctrl;
+
+    dispatch(fetchNflState({ signal: ctrl.signal }));
+  }, [dispatch, nflState, isLoadingNflState, hasError]);
+
+  useEffect(() => {
+    return () => {
+      ctrlRef.current?.abort();
+    };
+  }, []);
 }

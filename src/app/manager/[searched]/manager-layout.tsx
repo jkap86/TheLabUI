@@ -1,6 +1,6 @@
 "use client";
 
-import { JSX } from "react";
+import { JSX, useMemo } from "react";
 import LoadingIcon from "@/components/loading-icon/loading-icon";
 import useFetchNflState from "@/hooks/common/useFetchNflState";
 import useFetchAllplayers from "@/hooks/common/useFetchAllplayers";
@@ -40,13 +40,19 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
   useFetchUserAndLeagues(searched);
   useFetchLmTrades();
 
-  const errors = [...errorCommon, errorUser, errorLeagues].filter((e) => e);
+  const commonLoading = isLoadingCommon.length > 0 || !allplayers || !nflState;
+  const managerLoading = isLoadingUser || isLoadingLeagues || leagues === null;
+
+  const errors = useMemo(
+    () => [...errorCommon, errorUser, errorLeagues].filter(Boolean) as string[],
+    [errorCommon, errorUser, errorLeagues]
+  );
 
   return (
-    <div className="h-[100dvh] flex flex-col justify-between">
+    <div className="min-h-dvh flex flex-col justify-between">
       <ShNavbar />
       {errors.length > 0 ? (
-        <div className="h-screen flex-1 overflow-auto flex flex-col justify-center items-center">
+        <div className="flex-1 overflow-auto flex flex-col justify-center items-center">
           {errors.map((error) => {
             return (
               <div
@@ -58,17 +64,14 @@ const ManagerLayout = ({ searched, component }: LoadCommonDataProps) => {
             );
           })}
         </div>
-      ) : !allplayers || !nflState || isLoadingCommon.length > 0 || !user ? (
+      ) : commonLoading || !user ? (
         <div className="flex-1 flex flex-col justify-center items-center">
           <LoadingIcon messages={[]} />
         </div>
       ) : (
         <div className="flex-1">
           <Heading />
-          {isLoadingCommon.length > 0 ||
-          isLoadingUser ||
-          isLoadingLeagues ||
-          leagues === null ? (
+          {managerLoading ? (
             <LoadingIcon messages={[`${leaguesProgress} Leagues Loaded`]} />
           ) : (
             component
