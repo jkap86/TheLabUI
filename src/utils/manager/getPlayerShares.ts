@@ -1,22 +1,18 @@
 import { League, Playershare, User } from "@/lib/types/userTypes";
+import { formatPickToString } from "../common/formatDraftPick";
 
 export const getPlayerShares = (leagues: League[], user: User) => {
-  const playershares: {
-    [player_id: string]: Playershare;
-  } = {};
-
-  const pickshares: {
-    [pick_id: string]: Playershare;
-  } = {};
-
-  const leaguemates: {
-    [key: string]: {
+  const playershares: Record<string, Playershare> = {};
+  const pickshares: Record<string, Playershare> = {};
+  const leaguemates: Record<
+    string,
+    {
       user_id: string;
       username: string;
       avatar: string | null;
       leagues: string[];
-    };
-  } = {
+    }
+  > = {
     [user.user_id]: {
       user_id: user.user_id,
       username: user.username,
@@ -25,8 +21,15 @@ export const getPlayerShares = (leagues: League[], user: User) => {
     },
   };
 
+  // track all players in each league to calculate availability later
+  const leaguePlayerSets: Record<string, Set<string>> = {};
+
   leagues.forEach((league) => {
-    (league.user_roster?.players || [])?.forEach((player_id) => {
+    const leaguePlayers = (leaguePlayerSets[league.league_id] =
+      new Set<string>());
+
+    // --- user roster ---
+    (league.user_roster.players || []).forEach((player_id) => {
       if (!playershares[player_id]) {
         playershares[player_id] = {
           owned: [],
@@ -36,14 +39,12 @@ export const getPlayerShares = (leagues: League[], user: User) => {
       }
 
       playershares[player_id].owned.push(league.league_id);
+
+      leaguePlayers.add(player_id);
     });
 
     (league.user_roster.draftpicks || []).forEach((draft_pick) => {
-      const pick_id = `${draft_pick.season} ${draft_pick.round}.${
-        draft_pick.order?.toLocaleString("en-US", {
-          minimumIntegerDigits: 2,
-        }) || draft_pick.order
-      }`;
+      const pick_id = formatPickToString(draft_pick);
 
       if (!pickshares[pick_id]) {
         pickshares[pick_id] = {
@@ -56,6 +57,7 @@ export const getPlayerShares = (leagues: League[], user: User) => {
       pickshares[pick_id].owned.push(league.league_id);
     });
 
+    // --- other rosters ---
     league.rosters
       .filter((roster) => roster.roster_id !== league.user_roster.roster_id)
       .forEach((roster) => {
@@ -88,14 +90,12 @@ export const getPlayerShares = (leagues: League[], user: User) => {
             },
             league_id: league.league_id,
           });
+
+          leaguePlayers.add(player_id);
         });
 
         (roster.draftpicks || []).forEach((draft_pick) => {
-          const pick_id = `${draft_pick.season} ${draft_pick.round}.${
-            draft_pick.order?.toLocaleString("en-US", {
-              minimumIntegerDigits: 2,
-            }) || draft_pick.order
-          }`;
+          const pick_id = formatPickToString(draft_pick);
 
           if (!pickshares[pick_id]) {
             pickshares[pick_id] = {
@@ -118,14 +118,14 @@ export const getPlayerShares = (leagues: League[], user: User) => {
       });
   });
 
+  // --- availability ---
   leagues.forEach((league) => {
-    const available = Object.keys(playershares).filter(
-      (player_id) =>
-        !league.rosters.some((roster) => roster.players?.includes(player_id))
-    );
+    const present = leaguePlayerSets[league.league_id] ?? new Set<string>();
 
-    available.forEach((player_id) => {
-      playershares[player_id].available.push(league.league_id);
+    Object.keys(playershares).forEach((player_id) => {
+      if (!present.has(player_id)) {
+        playershares[player_id].available.push(league.league_id);
+      }
     });
   });
 

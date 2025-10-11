@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios, { AxiosError } from "axios";
 import { League, Leaguemate, Playershare, User } from "@/lib/types/userTypes";
-import { getPlayerShares } from "@/utils/getPlayerShares";
+import { getPlayerShares } from "@/utils/manager/getPlayerShares";
 import { RootState } from "../store";
 import { getLeaguesObj } from "@/utils/getLeaguesObj";
 import { colObj } from "@/lib/types/commonTypes";
