@@ -19,6 +19,8 @@ export type League = {
   rosters: Roster[];
   user_roster: Roster;
   lm_roster_id?: number;
+  alive?: number[];
+  byes?: number[];
   updatedat?: Date;
 };
 

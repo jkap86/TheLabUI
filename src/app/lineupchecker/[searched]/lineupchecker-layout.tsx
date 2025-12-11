@@ -16,6 +16,7 @@ import "../../../components/heading/heading.css";
 import useFetchLive from "@/hooks/lineupchecker/useFetchLive";
 import { getMedian } from "@/utils/getOptimalStarters";
 import { updateLineupcheckerState } from "@/redux/lineupchecker/lineupcheckerSlice";
+import { filterMatchups } from "@/utils/filterLeagues";
 
 interface LayoutProps {
   searched: string;
@@ -48,117 +49,105 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
   useFetchMatchups({ searched });
   useFetchLive();
 
-  const orig_proj = Object.values(matchups)
-    .filter(
-      (m) =>
-        (type1 === "All" ||
-          (type1 === "Redraft" && m.league.settings.type !== 2) ||
-          (type1 === "Dynasty" && m.league.settings.type === 2)) &&
-        (type2 === "All" ||
-          (type2 === "Bestball" && m.league.settings.best_ball === 1) ||
-          (type2 === "Lineup" && m.league.settings.best_ball !== 1))
-    )
-    .reduce(
-      (acc, cur) => {
-        const key = "projection_current";
-        const user_proj = cur.user_matchup[key];
-        const opp_proj = cur.opp_matchup?.[key];
+  console.log({ matchups });
 
-        const resultOpp =
-          user_proj && opp_proj
-            ? user_proj > opp_proj
-              ? "W"
-              : user_proj < opp_proj
-              ? "L"
-              : "T"
-            : "-";
+  const orig_proj = filterMatchups(Object.values(matchups), {
+    type1,
+    type2,
+  }).reduce(
+    (acc, cur) => {
+      const key = "projection_current";
+      const user_proj = cur.user_matchup[key];
+      const opp_proj = cur.opp_matchup?.[key];
 
-        const median = cur.league.settings.league_average_match
-          ? getMedian(cur.league_matchups, key)
-          : false;
-
-        const resultMedian = median
-          ? user_proj < median
-            ? "L"
-            : user_proj > median
+      const resultOpp =
+        user_proj && opp_proj
+          ? user_proj > opp_proj
             ? "W"
-            : "T"
-          : "";
-
-        return {
-          wins_opp: acc.wins_opp + (resultOpp === "W" ? 1 : 0),
-          losses_opp: acc.losses_opp + (resultOpp === "L" ? 1 : 0),
-          ties_opp: acc.ties_opp + (resultOpp === "T" ? 1 : 0),
-          wins_med: acc.wins_med + (resultMedian === "W" ? 1 : 0),
-          losses_med: acc.losses_med + (resultMedian === "L" ? 1 : 0),
-          ties_med: acc.ties_med + (resultMedian === "T" ? 1 : 0),
-        };
-      },
-      {
-        wins_opp: 0,
-        losses_opp: 0,
-        ties_opp: 0,
-        wins_med: 0,
-        losses_med: 0,
-        ties_med: 0,
-      }
-    );
-
-  const live_proj = Object.values(matchups)
-    .filter(
-      (m) =>
-        (type1 === "All" ||
-          (type1 === "Redraft" && m.league.settings.type !== 2) ||
-          (type1 === "Dynasty" && m.league.settings.type === 2)) &&
-        (type2 === "All" ||
-          (type2 === "Bestball" && m.league.settings.best_ball === 1) ||
-          (type2 === "Lineup" && m.league.settings.best_ball !== 1))
-    )
-    .reduce(
-      (acc, cur) => {
-        const key = "live_projection_current";
-        const user_proj = cur.user_matchup[key] ?? 0;
-        const opp_proj = cur.opp_matchup?.[key];
-
-        const resultOpp =
-          user_proj && opp_proj
-            ? user_proj > opp_proj
-              ? "W"
-              : user_proj < opp_proj
-              ? "L"
-              : "T"
-            : "-";
-
-        const median = cur.league.settings.league_average_match
-          ? getMedian(cur.league_matchups, key)
-          : false;
-
-        const resultMedian = median
-          ? user_proj < median
+            : user_proj < opp_proj
             ? "L"
-            : user_proj > median
-            ? "W"
             : "T"
-          : "";
+          : "-";
 
-        return {
-          wins_opp: acc.wins_opp + (resultOpp === "W" ? 1 : 0),
-          losses_opp: acc.losses_opp + (resultOpp === "L" ? 1 : 0),
-          ties_opp: acc.ties_opp + (resultOpp === "T" ? 1 : 0),
-          wins_med: acc.wins_med + (resultMedian === "W" ? 1 : 0),
-          losses_med: acc.losses_med + (resultMedian === "L" ? 1 : 0),
-          ties_med: acc.ties_med + (resultMedian === "T" ? 1 : 0),
-        };
-      },
-      {
-        wins_opp: 0,
-        losses_opp: 0,
-        ties_opp: 0,
-        wins_med: 0,
-        losses_med: 0,
-        ties_med: 0,
-      }
-    );
+      const median = cur.league.settings.league_average_match
+        ? getMedian(cur.league_matchups, key)
+        : false;
+
+      const resultMedian = median
+        ? user_proj < median
+          ? "L"
+          : user_proj > median
+          ? "W"
+          : "T"
+        : "";
+
+      return {
+        wins_opp: acc.wins_opp + (resultOpp === "W" ? 1 : 0),
+        losses_opp: acc.losses_opp + (resultOpp === "L" ? 1 : 0),
+        ties_opp: acc.ties_opp + (resultOpp === "T" ? 1 : 0),
+        wins_med: acc.wins_med + (resultMedian === "W" ? 1 : 0),
+        losses_med: acc.losses_med + (resultMedian === "L" ? 1 : 0),
+        ties_med: acc.ties_med + (resultMedian === "T" ? 1 : 0),
+      };
+    },
+    {
+      wins_opp: 0,
+      losses_opp: 0,
+      ties_opp: 0,
+      wins_med: 0,
+      losses_med: 0,
+      ties_med: 0,
+    }
+  );
+
+  const live_proj = filterMatchups(Object.values(matchups), {
+    type1,
+    type2,
+  }).reduce(
+    (acc, cur) => {
+      const key = "live_projection_current";
+      const user_proj = cur.user_matchup[key] ?? 0;
+      const opp_proj = cur.opp_matchup?.[key];
+
+      const resultOpp =
+        user_proj && opp_proj
+          ? user_proj > opp_proj
+            ? "W"
+            : user_proj < opp_proj
+            ? "L"
+            : "T"
+          : "-";
+
+      const median = cur.league.settings.league_average_match
+        ? getMedian(cur.league_matchups, key)
+        : false;
+
+      const resultMedian = median
+        ? user_proj < median
+          ? "L"
+          : user_proj > median
+          ? "W"
+          : "T"
+        : "";
+
+      return {
+        wins_opp: acc.wins_opp + (resultOpp === "W" ? 1 : 0),
+        losses_opp: acc.losses_opp + (resultOpp === "L" ? 1 : 0),
+        ties_opp: acc.ties_opp + (resultOpp === "T" ? 1 : 0),
+        wins_med: acc.wins_med + (resultMedian === "W" ? 1 : 0),
+        losses_med: acc.losses_med + (resultMedian === "L" ? 1 : 0),
+        ties_med: acc.ties_med + (resultMedian === "T" ? 1 : 0),
+      };
+    },
+    {
+      wins_opp: 0,
+      losses_opp: 0,
+      ties_opp: 0,
+      wins_med: 0,
+      losses_med: 0,
+      ties_med: 0,
+    }
+  );
 
   const getRecordTable = (proj_record: {
     wins_opp: number;

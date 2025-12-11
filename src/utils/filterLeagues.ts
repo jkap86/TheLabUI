@@ -1,3 +1,4 @@
+import { League, Matchup } from "@/lib/types/userTypes";
 import type { RootState } from "@/redux/store";
 
 type ManagerSlice = Pick<RootState["manager"], "type1" | "type2" | "leagues">;
@@ -16,6 +17,30 @@ export const filterLeagueIds = (
       type2 === "All" ||
       (type2 === "Bestball" && leagues?.[league_id].settings.best_ball === 1) ||
       (type2 === "Lineup" && leagues?.[league_id].settings.best_ball !== 1);
+
+    return condition1 && condition2;
+  });
+};
+
+export const filterMatchups = (
+  league_matchups: {
+    user_matchup: Matchup;
+    opp_matchup?: Matchup;
+    league_matchups: Matchup[];
+    league: League;
+  }[],
+  { type1, type2 }: Pick<RootState["manager"], "type1" | "type2">
+) => {
+  return league_matchups.filter((lm) => {
+    const condition1 =
+      type1 === "All" ||
+      (type1 === "Redraft" && lm.league.settings.type !== 2) ||
+      (type1 === "Dynasty" && lm.league.settings.type === 2);
+
+    const condition2 =
+      type2 === "All" ||
+      (type2 === "Bestball" && lm.league.settings.best_ball === 1) ||
+      (type2 === "Lineup" && lm.league.settings.best_ball !== 1);
 
     return condition1 && condition2;
   });

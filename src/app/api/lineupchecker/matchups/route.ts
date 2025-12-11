@@ -13,6 +13,7 @@ import axiosInstance from "@/lib/axiosInstance";
 import { getOptimalStartersLineupCheck } from "@/utils/getOptimalStarters";
 import { upsertMatchups } from "../helpers/upsertMatchups";
 import { getMatchupsLeagueIds } from "../helpers/getMatchupsLeagueIds";
+import { parse } from "path";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -128,6 +129,18 @@ export async function GET(req: NextRequest) {
         } catch (e: unknown) {
           if (e instanceof Error) console.log(e.message);
           return e;
+        }
+
+        if (parseInt(week as string) >= league.settings.playoff_week_start) {
+          const { alive, byes } = await getAliveAndByes(
+            league,
+            parseInt(week as string)
+          );
+          league = {
+            ...league,
+            alive,
+            byes,
+          };
         }
 
         try {
@@ -261,7 +274,7 @@ export async function GET(req: NextRequest) {
 
     const matchups = [...updated_matchups];
 
-    up_to_date_matchups.forEach((mobj) => {
+    up_to_date_matchups.forEach(async (mobj) => {
       const matchup_user = mobj.matchups.find((m) => m.user_id === user_id);
       const roster_id_user = matchup_user?.roster_id;
 
@@ -270,6 +283,25 @@ export async function GET(req: NextRequest) {
           m2.roster_id !== roster_id_user &&
           m2.matchup_id === matchup_user?.matchup_id
       )?.roster_id;
+
+      let league = mobj.league;
+
+      if (parseInt(week as string) >= league.settings.playoff_week_start) {
+        const winners_bracket = await axiosInstance.get(
+          `https://api.sleeper.app/v1/league/${league.league_id}/winners_bracket`
+        );
+
+        const { alive, byes } = await getAliveAndByes(
+          league,
+          parseInt(week as string)
+        );
+
+        league = {
+          ...league,
+          alive,
+          byes,
+        };
+      }
 
       if (roster_id_user) {
         matchups.push({
@@ -397,3 +429,32 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+const getAliveAndByes = async (
+  league: League,
+  week: number
+): Promise<{ alive: number[]; byes: number[] }> => {
+  const winners_bracket = await axiosInstance.get(
+    `https://api.sleeper.app/v1/league/${league.league_id}/winners_bracket`
+  );
+
+  const round = week - league.settings.playoff_week_start + 1;
+
+  const alive: number[] = Array.from(
+    new Set(
+      (winners_bracket.data ?? [])
+        .filter((wb: { r: number; t1: number; t2: number }) => wb.r >= round)
+        .flatMap((wb: { r: number; t1: number; t2: number }) => [wb.t1, wb.t2])
+        .filter((a: number | null) => a !== null)
+    )
+  );
+
+  const byes: number[] = alive.filter((a) => {
+    return !winners_bracket.data.some(
+      (wb: { r: number; t1: number; t2: number }) =>
+        wb.r === round && (wb.t1 === a || wb.t2 === a)
+    );
+  });
+
+  return { alive, byes };
+};

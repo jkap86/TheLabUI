@@ -17,6 +17,7 @@ type entry = {
     colspan: number;
   }[];
   secondary?: JSX.Element;
+  classname?: string;
 };
 
 type TableMainProps = {
@@ -257,7 +258,10 @@ const TableMain = ({
                       <table>
                         <tbody>
                           <tr
-                            className={active === row.id ? "active" : ""}
+                            className={
+                              (active === row.id ? "active " : " ") +
+                              (row.classname || "")
+                            }
                             onClick={() =>
                               (row.secondary || half) &&
                               (active === row.id

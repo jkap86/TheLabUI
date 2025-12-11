@@ -310,3 +310,7 @@ table.three tr.active {
   top: 49rem;
   z-index: 3;
 }
+
+tr.alive > td {
+  filter: brightness(2);
+}

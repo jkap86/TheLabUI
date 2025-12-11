@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import Avatar from "../common/avatar/avatar";
 import LeagueMatchups from "../league-matchups/league-matchups";
 import TableMain from "../table-main/table-main";
+import { filterMatchups } from "@/utils/filterLeagues";
 
 const LineupcheckerMatchups = ({
   league_matchups,
@@ -64,16 +65,7 @@ const LineupcheckerMatchups = ({
     ? "starters_optimal_locked"
     : "starters_optimal";
 
-  const data = league_matchups
-    .filter(
-      (lm) =>
-        ((type1 === "All" ||
-          (type1 === "Redraft" && lm.league.settings.type !== 2) ||
-          (type1 === "Dynasty" && lm.league.settings.type === 2)) &&
-          (type2 === "All" ||
-            (type2 === "Bestball" && lm.league.settings.best_ball === 1))) ||
-        (type2 === "Lineup" && lm.league.settings.best_ball !== 1)
-    )
+  const data = filterMatchups(league_matchups, { type1, type2 })
     .sort((a, b) => a.league.index - b.league.index)
     .map((matchup) => {
       const starters_optimal = locked
@@ -145,9 +137,40 @@ const LineupcheckerMatchups = ({
           ? "T"
           : ""
         : "";
+      const alive = matchup.league.alive?.includes(
+        matchup.user_matchup.roster_id
+      );
+
+      const bye = matchup.league.byes?.includes(matchup.user_matchup.roster_id);
+
+      const projResult = (
+        <div className="flex justify-evenly">
+          <span
+            className={
+              matchupVsOpp === "W" ? "green" : matchupVsOpp === "L" ? "red" : ""
+            }
+          >
+            {matchupVsOpp}
+          </span>
+          {matchupVsMed && (
+            <span
+              className={
+                matchupVsMed === "W"
+                  ? "green"
+                  : matchupVsMed === "L"
+                  ? "red"
+                  : ""
+              }
+            >
+              {matchupVsMed}
+            </span>
+          )}
+        </div>
+      );
 
       return {
         id: matchup.league.league_id,
+        classname: (alive ? "alive " : " ") + (bye ? "bye " : " "),
         search: {
           text: matchup.league.name,
           display: (
@@ -183,35 +206,8 @@ const LineupcheckerMatchups = ({
             colspan: 1,
           },
           {
-            text: (
-              <div className="flex justify-evenly">
-                <span
-                  className={
-                    matchupVsOpp === "W"
-                      ? "green"
-                      : matchupVsOpp === "L"
-                      ? "red"
-                      : ""
-                  }
-                >
-                  {matchupVsOpp}
-                </span>
-                {matchupVsMed && (
-                  <span
-                    className={
-                      matchupVsMed === "W"
-                        ? "green"
-                        : matchupVsMed === "L"
-                        ? "red"
-                        : ""
-                    }
-                  >
-                    {matchupVsMed}
-                  </span>
-                )}
-              </div>
-            ),
-            classname: "",
+            text: bye ? "BYE" : projResult,
+            classname: bye ? "yellowb" : "",
             colspan: 1,
           },
         ],

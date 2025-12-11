@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import LeagueScores from "../league-scores/league-scores";
 import { getTrendColor_Range } from "@/utils/getTrendColor";
+import { filterMatchups } from "@/utils/filterLeagues";
 
 const LineupcheckerScores = ({
   type,
@@ -50,16 +51,7 @@ const LineupcheckerScores = ({
     },
   ];
 
-  const data = matchups
-    .filter(
-      (lm) =>
-        ((type1 === "All" ||
-          (type1 === "Redraft" && lm.league.settings.type !== 2) ||
-          (type1 === "Dynasty" && lm.league.settings.type === 2)) &&
-          (type2 === "All" ||
-            (type2 === "Bestball" && lm.league.settings.best_ball === 1))) ||
-        (type2 === "Lineup" && lm.league.settings.best_ball !== 1)
-    )
+  const data = filterMatchups(matchups, { type1, type2 })
     .sort((a, b) => a.league.index - b.league.index)
     .map((matchup) => {
       const key = "live_projection_current";
