@@ -10,7 +10,7 @@ export const fetchNflState = createAsyncThunk<
   { rejectValue: Reject }
 >("fetchNflState", async ({ signal }, { rejectWithValue }) => {
   try {
-    const nflState = await axios.get("/api/common/nflstate");
+    const nflState = await axios.get("/api/common/nflstate", { signal });
 
     return nflState.data;
   } catch (err: unknown) {
@@ -50,7 +50,7 @@ export const fetchKtc = createAsyncThunk<
   { rejectValue: Reject }
 >("fetchKtc", async ({ signal }, { rejectWithValue }) => {
   try {
-    const ktc = await axios.get("/api/common/ktc/current");
+    const ktc = await axios.get("/api/common/ktc/current", { signal });
 
     return Object.fromEntries(ktc.data.dynasty.values);
   } catch (err: unknown) {
@@ -71,7 +71,7 @@ export const fetchProjections = createAsyncThunk<
   try {
     const projections: {
       data: { player_id: string; stats: { [cat: string]: number } }[];
-    } = await axios.get("/api/common/rosprojections");
+    } = await axios.get("/api/common/rosprojections", { signal });
 
     const projections_obj = Object.fromEntries(
       projections.data.map((p) => [p.player_id, p.stats])
