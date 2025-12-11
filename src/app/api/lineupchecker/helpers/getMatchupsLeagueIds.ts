@@ -63,7 +63,7 @@ export const getMatchupsLeagueIds = async (user_id: string) => {
     if (newLeagues.length > 0) await pool.query(upsertLeaguesQuery, values);
 
     league_ids = leagues.data
-      .filter((l) => l.status === "in_season")
+      // .filter((l) => l.status === "in_season")
       .map((l) => l.league_id);
 
     return league_ids;
