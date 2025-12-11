@@ -13,7 +13,6 @@ import axiosInstance from "@/lib/axiosInstance";
 import { getOptimalStartersLineupCheck } from "@/utils/getOptimalStarters";
 import { upsertMatchups } from "../helpers/upsertMatchups";
 import { getMatchupsLeagueIds } from "../helpers/getMatchupsLeagueIds";
-import { parse } from "path";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -287,10 +286,6 @@ export async function GET(req: NextRequest) {
       let league = mobj.league;
 
       if (parseInt(week as string) >= league.settings.playoff_week_start) {
-        const winners_bracket = await axiosInstance.get(
-          `https://api.sleeper.app/v1/league/${league.league_id}/winners_bracket`
-        );
-
         const { alive, byes } = await getAliveAndByes(
           league,
           parseInt(week as string)
