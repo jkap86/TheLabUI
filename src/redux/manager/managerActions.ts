@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios, { AxiosError } from "axios";
 import { League, Leaguemate, Playershare, User } from "@/lib/types/userTypes";
-import { getPlayerShares } from "@/utils/getPlayerShares";
+import { getPlayerShares } from "@/utils/manager/getPlayerShares";
 import { RootState } from "../store";
 import { getLeaguesObj } from "@/utils/getLeaguesObj";
 import { colObj } from "@/lib/types/commonTypes";
@@ -21,8 +21,9 @@ export const fetchUser = createAsyncThunk<
 
     return res.data as User;
   } catch (error: unknown) {
+    console.log({ error });
     const err = error as AxiosError;
-    if (err?.name === "AbortError") {
+    if (["AbortError", "CanceledError"].includes(err?.name)) {
       return rejectWithValue({ message: "__ABORTED__" });
     }
 
@@ -155,7 +156,7 @@ export const fetchLeagues = createAsyncThunk<
     } catch (error: unknown) {
       const err = error as AxiosError;
       // Normalize aborts vs other errors
-      if (err?.name === "AbortError") {
+      if (["AbortError", "CanceledError"].includes(err?.name)) {
         return rejectWithValue({ message: "Request aborted by caller" });
       }
       const status = err?.response?.status;

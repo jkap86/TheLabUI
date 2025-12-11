@@ -9,9 +9,10 @@ export const useFetchUserAndLeagues = (searchedRaw: string) => {
   const { nflState, ktcCurrent, projections } = useSelector(
     (state: RootState) => state.common
   );
-  const { user, leagues, isLoadingLeagues, errorLeagues } = useSelector(
-    (state: RootState) => state.manager
-  );
+  const { user, leagues, isLoadingLeagues, errorLeagues, errorUser } =
+    useSelector((state: RootState) => state.manager);
+
+  console.log({ errorUser, errorLeagues, user, leagues });
 
   const commonLoaded = useMemo(
     () => Boolean(nflState && ktcCurrent && projections),
@@ -37,7 +38,7 @@ export const useFetchUserAndLeagues = (searchedRaw: string) => {
     if (!searched) return;
     if (lastUserRequestedRef.current === searched) return;
 
-    // Clear prior manager state for a new lookup (your existing reducer)
+    // Clear prior manager state for a new lookup
     dispatch(resetState());
 
     // abort only the previous USER request
@@ -53,7 +54,7 @@ export const useFetchUserAndLeagues = (searchedRaw: string) => {
       .catch((e) => {
         // If aborted (Strict Mode unmount or manual abort), allow retry on next mount
         if (e?.message === "__ABORTED__" || e?.name === "AbortError") {
-          lastUserRequestedRef.current = ""; // <-- critical: permit re-dispatch after remount
+          lastUserRequestedRef.current = ""; // permit re-dispatch after remount
           return;
         }
         // real error: keep lastUserRequestedRef so we don't thrash on same bad query

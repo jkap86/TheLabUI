@@ -28,7 +28,7 @@ const Homepage = ({
 
   return (
     <div id="homepage">
-      <Link href={"/tools"} className="home !p-8">
+      <Link href={"/tools"} className="home !p-8 relative z-1">
         Tools
       </Link>
       <div className="logo-container">
