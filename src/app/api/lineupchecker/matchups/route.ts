@@ -14,6 +14,10 @@ import { getOptimalStartersLineupCheck } from "@/utils/getOptimalStarters";
 import { upsertMatchups } from "../helpers/upsertMatchups";
 import { getMatchupsLeagueIds } from "../helpers/getMatchupsLeagueIds";
 
+// Force dynamic to prevent caching and ensure streaming works in production
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
 
@@ -427,7 +431,8 @@ export async function GET(req: NextRequest) {
     status: 200,
     headers: {
       "Content-Type": "application/x-ndjson",
-      "Cache-Control": "private, max-age=0, stale-while-revalidate=300",
+      "Transfer-Encoding": "chunked",
+      "Cache-Control": "no-cache, no-store, must-revalidate",
       "X-Content-Type-Options": "nosniff",
       Connection: "keep-alive",
     },
