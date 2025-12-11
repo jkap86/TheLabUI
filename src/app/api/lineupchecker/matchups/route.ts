@@ -130,7 +130,10 @@ export async function GET(req: NextRequest) {
           return e;
         }
 
-        if (parseInt(week as string) >= league.settings.playoff_week_start) {
+        if (
+          league.settings.playoff_week_start &&
+          parseInt(week as string) >= league.settings.playoff_week_start
+        ) {
           const { alive, byes } = await getAliveAndByes(
             league,
             parseInt(week as string)
@@ -285,7 +288,10 @@ export async function GET(req: NextRequest) {
 
       let league = mobj.league;
 
-      if (parseInt(week as string) >= league.settings.playoff_week_start) {
+      if (
+        league.settings.playoff_week_start &&
+        parseInt(week as string) >= league.settings.playoff_week_start
+      ) {
         const { alive, byes } = await getAliveAndByes(
           league,
           parseInt(week as string)
