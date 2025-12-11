@@ -274,6 +274,9 @@ export async function GET(req: NextRequest) {
       })
     );
 
+    console.log(
+      `UPDATED: ${updated_matchups.length} UP-TO-DATE: ${up_to_date_matchups.length}`
+    );
     const matchups = [...updated_matchups];
 
     up_to_date_matchups.forEach(async (mobj) => {
@@ -374,8 +377,6 @@ export async function GET(req: NextRequest) {
         });
       }
     });
-
-    console.log(`MATCHUPS LENGTH: ${matchups.length}`);
 
     return matchups;
   };
