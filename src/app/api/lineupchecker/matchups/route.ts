@@ -308,8 +308,8 @@ export async function GET(req: NextRequest) {
         matchups.push({
           ...mobj,
           league: {
-            ...mobj.league,
-            index: league_ids_all.indexOf(mobj.league.league_id),
+            ...league,
+            index: league_ids_all.indexOf(league.league_id),
           },
           matchups: mobj.matchups.map((m) => {
             const {
@@ -374,6 +374,8 @@ export async function GET(req: NextRequest) {
         });
       }
     });
+
+    console.log(`MATCHUPS LENGTH: ${matchups.length}`);
 
     return matchups;
   };
