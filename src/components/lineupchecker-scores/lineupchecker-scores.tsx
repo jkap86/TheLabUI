@@ -80,6 +80,12 @@ const LineupcheckerScores = ({
           : ""
         : "";
 
+      const alive = matchup.league.alive?.includes(
+        matchup.user_matchup.roster_id
+      );
+
+      const bye = matchup.league.byes?.includes(matchup.user_matchup.roster_id);
+
       const total_proj = user_proj + opp_proj;
       const a = (total_proj / matchup.league.roster_positions.length) * 2;
       const min = total_proj / 2 - a;
@@ -91,8 +97,34 @@ const LineupcheckerScores = ({
       const min_median = total_proj_median / 2 - b;
       const max_median = total_proj_median / 2 + b;
 
+      const projResult = (
+        <div className="flex justify-evenly">
+          <span
+            className={
+              matchupVsOpp === "W" ? "green" : matchupVsOpp === "L" ? "red" : ""
+            }
+          >
+            {matchupVsOpp}
+          </span>
+          {matchupVsMed && (
+            <span
+              className={
+                matchupVsMed === "W"
+                  ? "green"
+                  : matchupVsMed === "L"
+                  ? "red"
+                  : ""
+              }
+            >
+              {matchupVsMed}
+            </span>
+          )}
+        </div>
+      );
+
       return {
         id: matchup.league.league_id,
+        classname: (alive ? "alive " : " ") + (bye ? "bye " : " "),
         search: {
           text: matchup.league.name,
           display: (
@@ -151,35 +183,8 @@ const LineupcheckerScores = ({
               : {},
           },
           {
-            text: (
-              <div className="flex justify-evenly">
-                <span
-                  className={
-                    matchupVsOpp === "W"
-                      ? "green"
-                      : matchupVsOpp === "L"
-                      ? "red"
-                      : ""
-                  }
-                >
-                  {matchupVsOpp}
-                </span>
-                {matchupVsMed && (
-                  <span
-                    className={
-                      matchupVsMed === "W"
-                        ? "green"
-                        : matchupVsMed === "L"
-                        ? "red"
-                        : ""
-                    }
-                  >
-                    {matchupVsMed}
-                  </span>
-                )}
-              </div>
-            ),
-            classname: "",
+            text: bye ? "BYE" : projResult,
+            classname: bye ? "yellowb" : "",
             colspan: 1,
           },
         ],
