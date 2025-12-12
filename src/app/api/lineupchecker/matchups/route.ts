@@ -284,7 +284,7 @@ export async function GET(req: NextRequest) {
     );
     const matchups = [...updated_matchups];
 
-    up_to_date_matchups.forEach(async (mobj) => {
+    for (const mobj of up_to_date_matchups) {
       const matchup_user = mobj.matchups.find((m) => m.user_id === user_id);
       const roster_id_user = matchup_user?.roster_id;
 
@@ -382,7 +382,7 @@ export async function GET(req: NextRequest) {
           }),
         });
       }
-    });
+    }
 
     return matchups;
   };
