@@ -433,10 +433,8 @@ export async function GET(req: NextRequest) {
     status: 200,
     headers: {
       "Content-Type": "application/x-ndjson",
-      "Transfer-Encoding": "chunked",
-      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Cache-Control": "private, no-cache, no-store",
       "X-Content-Type-Options": "nosniff",
-      Connection: "keep-alive",
     },
   });
 }
