@@ -137,11 +137,16 @@ const LineupcheckerMatchups = ({
           ? "T"
           : ""
         : "";
+
       const alive = matchup.league.alive?.includes(
         matchup.user_matchup.roster_id
       );
 
       const bye = matchup.league.byes?.includes(matchup.user_matchup.roster_id);
+
+      const league_playoff =
+        matchup.league.settings.playoff_week_start >=
+        matchup.user_matchup.week!;
 
       const projResult = (
         <div className="flex justify-evenly">
@@ -152,7 +157,7 @@ const LineupcheckerMatchups = ({
           >
             {matchupVsOpp}
           </span>
-          {matchupVsMed && (
+          {matchupVsMed && !league_playoff && (
             <span
               className={
                 matchupVsMed === "W"

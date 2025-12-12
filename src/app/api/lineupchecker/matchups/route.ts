@@ -138,12 +138,13 @@ export async function GET(req: NextRequest) {
           league.settings.playoff_week_start &&
           parseInt(week as string) >= league.settings.playoff_week_start
         ) {
-          const { alive, byes } = await getAliveAndByes(
+          const { playoffs, alive, byes } = await getAliveAndByes(
             league,
             parseInt(week as string)
           );
           league = {
             ...league,
+            playoffs,
             alive,
             byes,
           };
@@ -299,13 +300,14 @@ export async function GET(req: NextRequest) {
         league.settings.playoff_week_start &&
         parseInt(week as string) >= league.settings.playoff_week_start
       ) {
-        const { alive, byes } = await getAliveAndByes(
+        const { playoffs, alive, byes } = await getAliveAndByes(
           league,
           parseInt(week as string)
         );
 
         league = {
           ...league,
+          playoffs,
           alive,
           byes,
         };
@@ -442,20 +444,28 @@ export async function GET(req: NextRequest) {
 const getAliveAndByes = async (
   league: League,
   week: number
-): Promise<{ alive: number[]; byes: number[] }> => {
+): Promise<{ playoffs: number[]; alive: number[]; byes: number[] }> => {
   const winners_bracket = await axiosInstance.get(
     `https://api.sleeper.app/v1/league/${league.league_id}/winners_bracket`
   );
 
   const round = week - league.settings.playoff_week_start + 1;
 
-  const alive: number[] = Array.from(
+  const playoffs: number[] = Array.from(
     new Set(
       (winners_bracket.data ?? [])
         .filter((wb: { r: number; t1: number; t2: number }) => wb.r >= round)
         .flatMap((wb: { r: number; t1: number; t2: number }) => [wb.t1, wb.t2])
         .filter((a: number | null) => a !== null)
     )
+  );
+
+  const alive: number[] = playoffs.filter(
+    (p) =>
+      !winners_bracket.data.some(
+        (wb: { r: number; t1: number; t2: number; l: number | null }) =>
+          wb.l === p
+      )
   );
 
   const byes: number[] = alive.filter((a) => {
@@ -465,5 +475,5 @@ const getAliveAndByes = async (
     );
   });
 
-  return { alive, byes };
+  return { playoffs, alive, byes };
 };

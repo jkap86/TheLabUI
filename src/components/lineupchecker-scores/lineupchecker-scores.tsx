@@ -86,6 +86,10 @@ const LineupcheckerScores = ({
 
       const bye = matchup.league.byes?.includes(matchup.user_matchup.roster_id);
 
+      const league_playoff =
+        matchup.league.settings.playoff_week_start >=
+        matchup.user_matchup.week!;
+
       const total_proj = user_proj + opp_proj;
       const a = (total_proj / matchup.league.roster_positions.length) * 2;
       const min = total_proj / 2 - a;
@@ -106,7 +110,7 @@ const LineupcheckerScores = ({
           >
             {matchupVsOpp}
           </span>
-          {matchupVsMed && (
+          {matchupVsMed && !league_playoff && (
             <span
               className={
                 matchupVsMed === "W"
@@ -159,22 +163,24 @@ const LineupcheckerScores = ({
             style: getTrendColor_Range(user_proj, min, max),
           },
           {
-            text:
-              opp_proj.toLocaleString("en-US", {
-                maximumFractionDigits: 1,
-                minimumFractionDigits: 1,
-              }) ?? "-",
+            text: bye
+              ? "-"
+              : opp_proj.toLocaleString("en-US", {
+                  maximumFractionDigits: 1,
+                  minimumFractionDigits: 1,
+                }) ?? "-",
             colspan: 1,
             classname: "font-score",
             sort: opp_proj,
             style: getTrendColor_Range(opp_proj, min, max),
           },
           {
-            text:
-              median?.toLocaleString("en-US", {
-                maximumFractionDigits: 1,
-                minimumFractionDigits: 1,
-              }) ?? "-",
+            text: league_playoff
+              ? "-"
+              : median?.toLocaleString("en-US", {
+                  maximumFractionDigits: 1,
+                  minimumFractionDigits: 1,
+                }) ?? "-",
             colspan: 1,
             classname: "font-score",
             sort: median ?? 0,
