@@ -39,6 +39,7 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
     isUpdatingMatchups,
     matchupsProgress,
     recordTab,
+    playoffsFilter,
   } = useSelector((state: RootState) => state.lineupchecker);
 
   const setRecordTab = (value: "Original" | "Live") => {
@@ -52,38 +53,46 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
 
   console.log({ matchups });
 
-  const orig_proj = filterMatchups(Object.values(matchups), {
-    type1,
-    type2,
-  }).reduce(
+  const orig_proj = filterMatchups(
+    Object.values(matchups),
+    {
+      type1,
+      type2,
+    },
+    playoffsFilter
+  ).reduce(
     (acc, cur) => {
+      const league_playoff =
+        (nflState?.leg as number) >= cur.league.settings.playoff_week_start &&
+        cur.league.settings.playoff_week_start != 0;
+      const bye = cur.league.byes?.includes(cur.user_matchup.roster_id);
+
       const key = "projection_current";
       const user_proj = cur.user_matchup[key];
       const opp_proj = cur.opp_matchup?.[key];
 
-      const resultOpp =
-        user_proj && opp_proj
-          ? user_proj > opp_proj
-            ? "W"
-            : user_proj < opp_proj
-            ? "L"
-            : "T"
-          : "-";
+      const resultOpp = bye
+        ? "BYE"
+        : user_proj && opp_proj
+        ? user_proj > opp_proj
+          ? "W"
+          : user_proj < opp_proj
+          ? "L"
+          : "T"
+        : "-";
 
-      const median = cur.league.settings.league_average_match
-        ? getMedian(cur.league_matchups, key)
-        : false;
+      const median =
+        cur.league.settings.league_average_match && !league_playoff
+          ? getMedian(cur.league_matchups, key)
+          : false;
 
-      const resultMedian =
-        median &&
-        ((nflState?.leg as number) < cur.league.settings.playoff_week_start ||
-          cur.league.settings.playoff_week_start === 0)
-          ? user_proj < median
-            ? "L"
-            : user_proj > median
-            ? "W"
-            : "T"
-          : "";
+      const resultMedian = median
+        ? user_proj < median
+          ? "L"
+          : user_proj > median
+          ? "W"
+          : "T"
+        : "";
 
       return {
         wins_opp: acc.wins_opp + (resultOpp === "W" ? 1 : 0),
@@ -92,37 +101,6 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
         wins_med: acc.wins_med + (resultMedian === "W" ? 1 : 0),
         losses_med: acc.losses_med + (resultMedian === "L" ? 1 : 0),
         ties_med: acc.ties_med + (resultMedian === "T" ? 1 : 0),
-        playoff_wins:
-          acc.playoff_wins +
-          (cur.league.playoffs?.includes(cur.user_matchup.roster_id) &&
-          !cur.league.byes?.includes(cur.user_matchup.roster_id) &&
-          resultOpp === "W"
-            ? 1
-            : 0),
-        playoff_losses:
-          acc.playoff_losses +
-          (cur.league.playoffs?.includes(cur.user_matchup.roster_id) &&
-          !cur.league.byes?.includes(cur.user_matchup.roster_id) &&
-          resultOpp === "L"
-            ? 1
-            : 0),
-        alive_wins:
-          acc.alive_wins +
-          (cur.league.alive?.includes(cur.user_matchup.roster_id) &&
-          !cur.league.byes?.includes(cur.user_matchup.roster_id) &&
-          resultOpp === "W"
-            ? 1
-            : 0),
-        alive_losses:
-          acc.alive_losses +
-          (cur.league.alive?.includes(cur.user_matchup.roster_id) &&
-          !cur.league.byes?.includes(cur.user_matchup.roster_id) &&
-          resultOpp === "L"
-            ? 1
-            : 0),
-        byes:
-          acc.byes +
-          (cur.league.byes?.includes(cur.user_matchup.roster_id) ? 1 : 0),
       };
     },
     {
@@ -132,46 +110,49 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
       wins_med: 0,
       losses_med: 0,
       ties_med: 0,
-      playoff_wins: 0,
-      playoff_losses: 0,
-      alive_wins: 0,
-      alive_losses: 0,
-      byes: 0,
     }
   );
 
-  const live_proj = filterMatchups(Object.values(matchups), {
-    type1,
-    type2,
-  }).reduce(
+  const live_proj = filterMatchups(
+    Object.values(matchups),
+    {
+      type1,
+      type2,
+    },
+    playoffsFilter
+  ).reduce(
     (acc, cur) => {
+      const league_playoff =
+        (nflState?.leg as number) >= cur.league.settings.playoff_week_start &&
+        cur.league.settings.playoff_week_start != 0;
+      const bye = cur.league.byes?.includes(cur.user_matchup.roster_id);
+
       const key = "live_projection_current";
       const user_proj = cur.user_matchup[key] ?? 0;
       const opp_proj = cur.opp_matchup?.[key];
 
-      const resultOpp =
-        user_proj && opp_proj
-          ? user_proj > opp_proj
-            ? "W"
-            : user_proj < opp_proj
-            ? "L"
-            : "T"
-          : "-";
+      const resultOpp = bye
+        ? "BYE"
+        : user_proj && opp_proj
+        ? user_proj > opp_proj
+          ? "W"
+          : user_proj < opp_proj
+          ? "L"
+          : "T"
+        : "-";
 
-      const median = cur.league.settings.league_average_match
-        ? getMedian(cur.league_matchups, key)
-        : false;
+      const median =
+        cur.league.settings.league_average_match && !league_playoff
+          ? getMedian(cur.league_matchups, key)
+          : false;
 
-      const resultMedian =
-        median &&
-        ((nflState?.leg as number) < cur.league.settings.playoff_week_start ||
-          cur.league.settings.playoff_week_start === 0)
-          ? user_proj < median
-            ? "L"
-            : user_proj > median
-            ? "W"
-            : "T"
-          : "";
+      const resultMedian = median
+        ? user_proj < median
+          ? "L"
+          : user_proj > median
+          ? "W"
+          : "T"
+        : "";
 
       return {
         wins_opp: acc.wins_opp + (resultOpp === "W" ? 1 : 0),
@@ -180,37 +161,6 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
         wins_med: acc.wins_med + (resultMedian === "W" ? 1 : 0),
         losses_med: acc.losses_med + (resultMedian === "L" ? 1 : 0),
         ties_med: acc.ties_med + (resultMedian === "T" ? 1 : 0),
-        playoff_wins:
-          acc.playoff_wins +
-          (cur.league.playoffs?.includes(cur.user_matchup.roster_id) &&
-          !cur.league.byes?.includes(cur.user_matchup.roster_id) &&
-          resultOpp === "W"
-            ? 1
-            : 0),
-        playoff_losses:
-          acc.playoff_losses +
-          (cur.league.playoffs?.includes(cur.user_matchup.roster_id) &&
-          !cur.league.byes?.includes(cur.user_matchup.roster_id) &&
-          resultOpp === "L"
-            ? 1
-            : 0),
-        alive_wins:
-          acc.alive_wins +
-          (cur.league.alive?.includes(cur.user_matchup.roster_id) &&
-          !cur.league.byes?.includes(cur.user_matchup.roster_id) &&
-          resultOpp === "W"
-            ? 1
-            : 0),
-        alive_losses:
-          acc.alive_losses +
-          (cur.league.alive?.includes(cur.user_matchup.roster_id) &&
-          !cur.league.byes?.includes(cur.user_matchup.roster_id) &&
-          resultOpp === "L"
-            ? 1
-            : 0),
-        byes:
-          acc.byes +
-          (cur.league.byes?.includes(cur.user_matchup.roster_id) ? 1 : 0),
       };
     },
     {
@@ -220,11 +170,6 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
       wins_med: 0,
       losses_med: 0,
       ties_med: 0,
-      playoff_wins: 0,
-      playoff_losses: 0,
-      alive_wins: 0,
-      alive_losses: 0,
-      byes: 0,
     }
   );
 
@@ -235,11 +180,6 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
     wins_med: number;
     losses_med: number;
     ties_med: number;
-    playoff_wins: number;
-    playoff_losses: number;
-    alive_wins: number;
-    alive_losses: number;
-    byes: number;
   }) => {
     return (
       <>
@@ -327,62 +267,6 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
                     proj_record.losses_med +
                     proj_record.ties_opp +
                     proj_record.ties_med)
-                ).toFixed(4)
-              )}
-            </em>
-          </td>
-        </tr>
-        <tr>
-          <td className="font-chill text-[4rem]" colSpan={3}>
-            Playoffs{" "}
-            <span className="font-metal text-[2rem]">
-              Byes: {proj_record.byes}
-            </span>
-          </td>
-        </tr>
-        <tr className="shadow-[inset_0_0_5rem_var(--color10)]">
-          <td className="font-metal px-8 py-4">Alive</td>
-          <td className="font-pulang px-8 py-4">
-            {isUpdatingMatchups ? (
-              <i className="fa-solid fa-spinner fa-spin text-[var(--color1)]"></i>
-            ) : (
-              <>
-                {proj_record.alive_wins} - {proj_record.alive_losses}
-              </>
-            )}
-          </td>
-          <td>
-            <em className="font-pulang px-8 py-4">
-              {isUpdatingMatchups ? (
-                <i className="fa-solid fa-spinner fa-spin text-[var(--color1)]"></i>
-              ) : (
-                (
-                  proj_record.alive_wins /
-                  (proj_record.alive_wins + proj_record.alive_losses)
-                ).toFixed(4)
-              )}
-            </em>
-          </td>
-        </tr>
-        <tr className="shadow-[inset_0_0_5rem_var(--color10)]">
-          <td className="font-metal px-8 py-4">All</td>
-          <td className="font-pulang px-8 py-4">
-            {isUpdatingMatchups ? (
-              <i className="fa-solid fa-spinner fa-spin text-[var(--color1)]"></i>
-            ) : (
-              <>
-                {proj_record.playoff_wins} - {proj_record.playoff_losses}
-              </>
-            )}
-          </td>
-          <td className="px-8 py-4">
-            <em className="font-pulang">
-              {isUpdatingMatchups ? (
-                <i className="fa-solid fa-spinner fa-spin text-[var(--color1)]"></i>
-              ) : (
-                (
-                  proj_record.playoff_wins /
-                  (proj_record.playoff_wins + proj_record.playoff_losses)
                 ).toFixed(4)
               )}
             </em>
@@ -487,6 +371,38 @@ const LineupcheckerLayout = ({ searched, component }: LayoutProps) => {
                 <option>scores</option>
               </select>
             </h2>
+            <div className="flex justify-center items-center">
+              {["Playoffs", "Alive", "Bye", "All"].map((filter) => (
+                <div
+                  key={filter}
+                  className={`text-[3rem] font-metal p-4 m-4 cursor-pointer ${
+                    playoffsFilter === filter
+                      ? "text-[var(--color1)] shadow-[inset_0_0_2.5rem_var(--color1)]"
+                      : "text-gray-400 shadow-[inset_0_0_2.5rem_gray-400]"
+                  }`}
+                  onClick={() =>
+                    dispatch(
+                      updateLineupcheckerState({
+                        key: "playoffsFilter",
+                        value: filter,
+                      })
+                    )
+                  }
+                >
+                  {filter}
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-center items-center text-[2.5rem]">
+              {
+                filterMatchups(
+                  Object.values(matchups),
+                  { type1, type2 },
+                  playoffsFilter
+                ).length
+              }{" "}
+              Matchups
+            </div>
             {component}
           </div>
         )}

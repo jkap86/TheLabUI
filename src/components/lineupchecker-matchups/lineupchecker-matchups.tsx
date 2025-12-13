@@ -23,7 +23,9 @@ const LineupcheckerMatchups = ({
 }) => {
   const { allplayers } = useSelector((state: RootState) => state.common);
   const { type1, type2 } = useSelector((state: RootState) => state.manager);
-  const { locked } = useSelector((state: RootState) => state.lineupchecker);
+  const { locked, playoffsFilter } = useSelector(
+    (state: RootState) => state.lineupchecker
+  );
 
   const headers = [
     {
@@ -65,7 +67,7 @@ const LineupcheckerMatchups = ({
     ? "starters_optimal_locked"
     : "starters_optimal";
 
-  const data = filterMatchups(league_matchups, { type1, type2 })
+  const data = filterMatchups(league_matchups, { type1, type2 }, playoffsFilter)
     .sort((a, b) => a.league.index - b.league.index)
     .map((matchup) => {
       const starters_optimal = locked

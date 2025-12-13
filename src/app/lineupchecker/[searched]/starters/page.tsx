@@ -20,7 +20,9 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
     (state: RootState) => state.common
   );
   const { type1, type2 } = useSelector((state: RootState) => state.manager);
-  const { matchups } = useSelector((state: RootState) => state.lineupchecker);
+  const { matchups, playoffsFilter } = useSelector(
+    (state: RootState) => state.lineupchecker
+  );
   const [sortBy, setSortBy] = useState<{
     column: 0 | 1 | 2 | 3 | 4;
     asc: boolean;
@@ -35,21 +37,40 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
 
   const filterLeagueIds = useCallback(
     (league_ids: string[]) => {
-      return league_ids.filter(
-        (league_id) =>
-          (type1 === "All" ||
-            (type1 === "Redraft" &&
-              matchups[league_id].league.settings.type !== 2) ||
-            (type1 === "Dynasty" &&
-              matchups[league_id].league.settings.type === 2)) &&
-          (type2 === "All" ||
-            (type2 === "Bestball" &&
-              matchups[league_id].league.settings.best_ball === 1) ||
-            (type2 === "Lineup" &&
-              matchups[league_id].league.settings.best_ball !== 1))
-      );
+      return league_ids.filter((league_id) => {
+        const condition1 =
+          type1 === "All" ||
+          (type1 === "Redraft" &&
+            matchups[league_id].league.settings.type !== 2) ||
+          (type1 === "Dynasty" &&
+            matchups[league_id].league.settings.type === 2);
+
+        const condition2 =
+          type2 === "All" ||
+          (type2 === "Bestball" &&
+            matchups[league_id].league.settings.best_ball === 1) ||
+          (type2 === "Lineup" &&
+            matchups[league_id].league.settings.best_ball !== 1);
+
+        const condition3 =
+          playoffsFilter === "All" ||
+          (playoffsFilter === "Playoffs" &&
+            matchups[league_id].league.playoffs?.includes(
+              matchups[league_id].user_matchup.roster_id
+            )) ||
+          (playoffsFilter === "Alive" &&
+            matchups[league_id].league.alive?.includes(
+              matchups[league_id].user_matchup.roster_id
+            )) ||
+          (playoffsFilter === "Bye" &&
+            matchups[league_id].league.byes?.includes(
+              matchups[league_id].user_matchup.roster_id
+            ));
+
+        return condition1 && condition2 && condition3;
+      });
     },
-    [type1, type2, matchups]
+    [type1, type2, playoffsFilter, matchups]
   );
 
   const starters = useMemo(() => {
@@ -374,6 +395,7 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
           setFilterPosition(e.target.value)
         }
       />
+
       <TableMain
         type={1}
         headers_sort={[1, 0, 2, 3, 4]}

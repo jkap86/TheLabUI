@@ -21,7 +21,9 @@ const LineupcheckerScores = ({
   type: number;
 }) => {
   const { type1, type2 } = useSelector((state: RootState) => state.manager);
-  const { user } = useSelector((state: RootState) => state.lineupchecker);
+  const { user, playoffsFilter } = useSelector(
+    (state: RootState) => state.lineupchecker
+  );
 
   const headers = [
     {
@@ -51,7 +53,7 @@ const LineupcheckerScores = ({
     },
   ];
 
-  const data = filterMatchups(matchups, { type1, type2 })
+  const data = filterMatchups(matchups, { type1, type2 }, playoffsFilter)
     .sort((a, b) => a.league.index - b.league.index)
     .map((matchup) => {
       const key = "live_projection_current";

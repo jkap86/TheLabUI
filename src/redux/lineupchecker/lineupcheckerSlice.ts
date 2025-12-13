@@ -39,6 +39,7 @@ export interface LineupcheckerState {
   liveStats: { [player_id: string]: StatObj };
 
   recordTab: "Original" | "Live";
+  playoffsFilter: "Playoffs" | "Alive" | "Bye" | "All";
 
   playersTab: string;
   playersTab2: string;
@@ -81,6 +82,7 @@ const initialState: LineupcheckerState = {
   liveStats: {},
 
   recordTab: "Live",
+  playoffsFilter: "Alive",
 
   playersTab: "Players",
   playersTab2: "Start Over",

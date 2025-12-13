@@ -29,7 +29,8 @@ export const filterMatchups = (
     league_matchups: Matchup[];
     league: League;
   }[],
-  { type1, type2 }: Pick<RootState["manager"], "type1" | "type2">
+  { type1, type2 }: Pick<RootState["manager"], "type1" | "type2">,
+  playoffsFilter: "Playoffs" | "Alive" | "Bye" | "All"
 ) => {
   return league_matchups.filter((lm) => {
     const condition1 =
@@ -42,6 +43,15 @@ export const filterMatchups = (
       (type2 === "Bestball" && lm.league.settings.best_ball === 1) ||
       (type2 === "Lineup" && lm.league.settings.best_ball !== 1);
 
-    return condition1 && condition2;
+    const condition3 =
+      playoffsFilter === "All" ||
+      (playoffsFilter === "Playoffs" &&
+        lm.league.playoffs?.includes(lm.user_matchup.roster_id)) ||
+      (playoffsFilter === "Alive" &&
+        lm.league.alive?.includes(lm.user_matchup.roster_id)) ||
+      (playoffsFilter === "Bye" &&
+        lm.league.byes?.includes(lm.user_matchup.roster_id));
+
+    return condition1 && condition2 && condition3;
   });
 };
