@@ -13,6 +13,10 @@ import { getSchedule } from "../helpers/getSchedule";
 import { getProjections } from "../helpers/getProjections";
 import { getAllplayers } from "../helpers/getAllplayers";
 
+// Force dynamic to prevent caching issues in production
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 export async function POST(req: NextRequest) {
   const formData = await req.json();
 
