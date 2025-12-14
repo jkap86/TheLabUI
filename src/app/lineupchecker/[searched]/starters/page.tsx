@@ -61,6 +61,9 @@ const Starters = ({ params }: { params: Promise<{ searched: string }> }) => {
           (playoffsFilter === "Alive" &&
             matchups[league_id].league.alive?.includes(
               matchups[league_id].user_matchup.roster_id
+            ) &&
+            !matchups[league_id].league.byes?.includes(
+              matchups[league_id].user_matchup.roster_id
             )) ||
           (playoffsFilter === "Bye" &&
             matchups[league_id].league.byes?.includes(

@@ -48,7 +48,8 @@ export const filterMatchups = (
       (playoffsFilter === "Playoffs" &&
         lm.league.playoffs?.includes(lm.user_matchup.roster_id)) ||
       (playoffsFilter === "Alive" &&
-        lm.league.alive?.includes(lm.user_matchup.roster_id)) ||
+        lm.league.alive?.includes(lm.user_matchup.roster_id) &&
+        !lm.league.byes?.includes(lm.user_matchup.roster_id)) ||
       (playoffsFilter === "Bye" &&
         lm.league.byes?.includes(lm.user_matchup.roster_id));
 
